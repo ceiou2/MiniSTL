@@ -1,7 +1,7 @@
 //MiniArray.h
 #pragma once
-#ifndef MiniArray_H
-#define MiniArray_H
+#ifndef _MiniArray_H
+#define _MiniArray_H
 
 #include<cstddef>//ptrdiff_t头文件
 
