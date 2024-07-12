@@ -12,6 +12,7 @@ class vector{
 	typedef T 					value_type;
 	typedef value_type* 		pointer;
 	typedef value_type*			iterator;
+	typedef const value_type*	const_iterator;
 	typedef value_type&			reference;
 	typedef const reference		const_reference;
 	typedef size_t				size_type;
@@ -125,13 +126,83 @@ class vector{
 
 	//vector(int n,const T& value)注：官方文档有这两个函数，但是size_type应该够用，暂时不知道这两个函数的定义有什么作用
 	//vector(long n,const T& value)
-	
+
+	//列表初始化
+	vector(std::initializer_list<T> init_list):start(0),finish(0),end_of_storage(0){
+		//reserve(init_list.end()-init_list.begin());
+		//std::copy(init_list.begin(),init_list.end(),start);
+		//release();
+		reserve(init_list.end()-init_list.begin());
+		for(size_type i=0;i<init_list.end()-init_list.begin();++i)
+		{
+			*(start+i)=*(init_list.begin()+i);
+			++finish;
+		}
+	}
+
+	//拷贝构造函数:深拷贝版本
+	vector(const vector& ori_vector):start(0),finish(0),end_of_storage(0){
+		reserve(ori_vector.capacity());
+		for(size_type i=0;i<ori_vector.size();++i)
+		{
+			*(start+i)=*(ori_vector.begin()+i);
+			++finish;
+		}
+		
+	}
+
+	//移动构造函数
+	vector(vector&& ori_vector){
+		start=ori_vector.begin();
+		finish=ori_vector.end();
+		end_of_storage=start+ori_vector.capacity();
+
+		ori_vector.start=nullptr;//右值中指针置空防止析构时delete掉内存
+	}
+		
+
+	//拷贝赋值函数
+	vector& operator=(const vector& ori_vector){
+		release();
+		reserve(ori_vector.capacity());
+		for(size_type i=0;i<ori_vector.size();++i)
+		{
+			*(start+i)=*(ori_vector+i);
+			++finish;
+		}
+		return *this;//返回自身的引用以支持链式赋值
+	}
+
+
+	//移动赋值函数
+	vector& operator=(vector&& ori_vector){
+		release();
+		start=ori_vector.begin();
+		finish=ori_vector.end();
+		end_of_storage=start+ori_vector.capacity();
+
+		ori_vector.start=nullptr;//右值中指针置空防止析构时delete掉内存
+
+		return *this;//返回自身的引用以支持链式赋值
+	}
+		
+
+
 	//vector(size_type n);
 	explicit vector(size_type n):start(0),finish(0),end_of_storage(0){fill_initialize(n,T());}
 
 	//~vector()
 	~vector(){
 		release();
+	}
+
+	void swap(vector& other)
+	{
+		if(this=&other) return;
+
+		this->start=other.start;
+		this->finish=other.finish;
+		this->end_of_storage=other.end_of_storage;//=====private???????????暂时先不写，和algorithm相关
 	}
 
 	//-------------操作函数模块-----------
@@ -204,6 +275,27 @@ class vector{
 	void resize(size_type new_size){resize(new_size,T());}//重载
 
 	void clear(){finish=start;}
+
+	
+
+	//assign
+	void assign(size_type count,const T& value)//以count份 value的副本替换内容
+	{
+		*this=vector<T> (count,value);
+	}
+
+	void assign(const_iterator first,const_iterator last)//将区间[fast,last)的元素赋值到当前vector容器中，原内容释放，其中有任何一个实参是指向*this中的迭代器时行为未定义
+	{
+		release();
+		reserve(last-first);
+		for(size_type i=0;i<last-first;++i)
+		{
+			*(start+i)=*(first+i);
+			++finish;
+		}
+	}
+
+
 
 
 

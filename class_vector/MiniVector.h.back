@@ -101,8 +101,20 @@ class vector{
 		while(position+1!=end())
 		{
 			*position=*(position+1);
+			++position;
 		}
 	}
+
+	//back_move():元素向后移动一位
+	void back_move(iterator position){
+		if(position==end()) return;
+		for(iterator it = finish-1;it!=position;--it)
+		{
+			if(it==begin())return;
+			*it=*(it-1);
+		}
+	}
+
 
 	//-------------构造函数模块-----------
 	//默认构造函数
@@ -133,7 +145,7 @@ class vector{
 			++finish;
 		}
 		else{
-			reserve(2*capacity());
+			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍 
 			push_back(x);
 		}
 	}
@@ -150,21 +162,48 @@ class vector{
 		--finish;
 		return position;
 	}
+
+	//iterator erase(iterator begin,iterator end)
+	//略
+
+	iterator insert(iterator position,const T& x){//在迭代器位置插入值，返回插入位置的迭代器
+		if(finish!=end_of_storage)
+		{
+			++finish;
+			back_move(position);
+			*position=x;
+		}
+		else
+		{
+			size_type tmp_size=size_type(position-start);//处理position失效
+			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍
+			return insert(start+tmp_size,x);
+		}
+		return position;
+		
+	}
+
+	//写一个move版本的insert规避迭代器失效
 	
 	void resize(size_type new_size,const T& x)//改变元素数量
 	{
-		if(new_size<size())
+		if(new_size<=size())
 		{
-			erase(begin()+new_size,end());//?
+			finish=start+new_size;
 		}
 		else{
-			insert(end(),new_size-size(),x);//?
+			reserve(new_size);
+			while(finish!=start+new_size)
+			{
+				*finish=x;
+				++finish;
+			}
 		}
 	}
 
 	void resize(size_type new_size){resize(new_size,T());}//重载
 
-	void clear(){erase(begin(),end());}
+	void clear(){finish=start;}
 
 
 

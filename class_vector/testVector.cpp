@@ -110,7 +110,19 @@ int main(){
 	printVec(vec2);//print 5
 	vec2.insert(vec2.begin(),3);
 	printVec(vec2);//print 3 5
+	
+	//test 03 start right here
+	cout<<"test 03 start right here"<<endl;
 
+	//拷贝构造+++++++++++++++++++++++++++++++++start here------assign
+	vector<int>vk1={1,2,3};
+	printVec(vk1);//print 1 2 3
+	vector<int>vk2(vk1);
+	printVec(vk2);//print 1 2 3
+
+	vk2.assign(vec2.begin(),vec2.end());
+	printVec(vk2);//3 5
+	cout<<vk2.capacity()<<endl;//2
 
 	return 0;
 }
