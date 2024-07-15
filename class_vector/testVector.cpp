@@ -124,6 +124,21 @@ int main(){
 	printVec(vk2);//3 5
 	cout<<vk2.capacity()<<endl;//2
 
+	vk2=vk1;
+	printVec(vk2);//1 2 3
+
+	vector<int>vk3(std::move(vk1));
+	printVec(vk3);//1 2 3
+
+	printVec(vk1);//print : 
+	
+	vk1=vk3;
+	printVec(vk1);//print 1 2 3
+	printVec(vk3);//print 1 2 3
+
+	vk1=std::move(vk3);
+	printVec(vk1);//print 1 2 3
+	printVec(vk3);//print : 
 	return 0;
 }
 

@@ -5,7 +5,7 @@
 
 #include<cstddef>//ptrdiff_t  头文件
 
-/*使用数组array进行内存管理*/
+/*使用动态数组new进行内存管理*/
 template <typename T>
 class vector{
 	private:
@@ -158,6 +158,8 @@ class vector{
 		end_of_storage=start+ori_vector.capacity();
 
 		ori_vector.start=nullptr;//右值中指针置空防止析构时delete掉内存
+		ori_vector.finish=nullptr;
+		ori_vector.end_of_storage=nullptr;
 	}
 		
 
@@ -167,7 +169,7 @@ class vector{
 		reserve(ori_vector.capacity());
 		for(size_type i=0;i<ori_vector.size();++i)
 		{
-			*(start+i)=*(ori_vector+i);
+			*(start+i)=*(ori_vector.begin()+i);
 			++finish;
 		}
 		return *this;//返回自身的引用以支持链式赋值
@@ -182,6 +184,8 @@ class vector{
 		end_of_storage=start+ori_vector.capacity();
 
 		ori_vector.start=nullptr;//右值中指针置空防止析构时delete掉内存
+		ori_vector.finish=nullptr;
+		ori_vector.end_of_storage=nullptr;
 
 		return *this;//返回自身的引用以支持链式赋值
 	}
