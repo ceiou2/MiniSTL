@@ -3,7 +3,9 @@
 #ifndef _Mini_Forward_List_h_
 #define _Mini_Forward_list_h_
 
-#include<cstddef>//ptrdiff_t  头文件
+#include<cstddef>//ptrdiff_t size_t 头文件
+#include<limits>//std::numeric_limits<size_t>::max()
+#include<utility>//std::move
 
 /*使用链表进行内存管理*/
 template <typename T>
@@ -12,19 +14,19 @@ class forward_list{
 	struct node{
 		T value;
 		node* next;
-	}
+	};
 	
 	//node构造函数
 	node():value(T()),next(nullptr){}
 
 	node(value_type v):value(v),next(nullptr){}
 
+	node(value_type v,node* n):value(v),next(n){}
+
 
 	typedef node				node_type;
 	typedef T 					value_type;
 	typedef node_type*	 		pointer;
-	typedef node_type*			iterator;
-	typedef const node_type*	const_iterator;
 	typedef node_type&			reference;
 	typedef const reference		const_reference;
 	typedef size_t				size_type;
@@ -42,6 +44,75 @@ class forward_list{
 		
 	public:
 	//-------------迭代器模块-----------
+	class iterator{
+		private:
+		node* current;
+
+		public:
+		//构造函数
+		iterator(node *p):current(p){}
+
+		// 解引用操作符
+        T& operator*() const { return current->value; }
+
+        // 递增操作符（前置）
+        iterator& operator++() {
+            current = current->next;
+            return *this;
+        }
+
+        // 递增操作符（后置）
+        iterator operator++(int) {
+            iterator temp = *this;
+            ++(*this);
+            return temp;
+        }
+
+		pointer operator->()const{
+			return &(current->value);
+		}
+
+        // 比较操作符
+        bool operator!=(const iterator& other) const { return current != other.current; }
+        bool operator==(const iterator& other) const { return current == other.current; }
+	};
+
+	class const_iterator{
+		private:
+		node* current;
+
+		public:
+		//构造函数
+		const_iterator(node *p):current(p){}
+
+		const_iterator(iterator it):current(it->current){}
+
+		// 解引用操作符
+        const T& operator*() const { return current->value; }
+
+		const pointer operator->()const{
+			return &(current->value);
+		}
+
+        // 递增操作符（前置）
+        const_iterator& operator++() {
+            current = current->next;
+            return *this;
+        }
+
+        // 递增操作符（后置）
+        const_iterator operator++(int) {
+            iterator temp = *this;
+            ++(*this);
+            return temp;
+        }
+
+
+        // 比较操作符
+        bool operator!=(const const_iterator& other) const { return current != other.current; }
+        bool operator==(const const_iterator& other) const { return current == other.current; }
+	};
+
 	//begin():获取第一个元素的迭代器
 	iterator begin()const{return head;}
 
@@ -50,13 +121,13 @@ class forward_list{
 
 	//-------------容量模块-----------
 	//size():获取元素数量
-	size_type size() const { return _size;}
+	size_type max_size() const { return std::numeric_limits<size_t>::max();}
 	
 	//empty():forward_list是否为空
 	bool empty()const {return _size;}
 
 
-	//-------------功能函数模块-----------
+	//-------------辅助函数模块-----------
 
 
 	//release():释放空间
@@ -168,105 +239,209 @@ class forward_list{
 		release();
 	}
 
-	void swap(forward_list& other)
+
+	//------------元素访问----------------
+	reference front(){return *begin();}//第一个元素
+
+	//------------修改器模块--------------
+	void swap(forward_list& other)//交换内容
 	{
 		if(this=&other) return;
 		swap(_size,other._size);
 		swap(head,other.head);
 	}
 
-	//-------------操作函数模块-----------
-	reference front(){return *begin();}//第一个元素
 
-	//start here----------------------------------我觉得要不先把设计文档写了先，迭代器好像不那么简单---------------------------start here 
-	void push_back(const T& x){//将元素插入尾端
-		if(finish!=end_of_storage){
-			*finish=x;
-			++finish;
-		}
-		else{
-			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍 
-			push_back(x);
-		}
+	//从容器擦除所有元素
+	void clear()
+	{release();}
+
+
+
+	//将元素插入链表头部
+	void push_front(const T& x){
+		node *tmp=new node(x);
+		tmp->next=head;
+		head=tmp;
+		++_size;
 	}
 
-	void pop_back(){//移除尾端元素
-		--finish;
-	}
-
-	iterator erase(iterator position){//清除某位置上的元素
-		if(position+1 != end())
-		{
-			fore_move(position);//后续元素向前移动
-		}
-		--finish;
-		return position;
-	}
-
-	//iterator erase(iterator begin,iterator end)
-	//略
-
-	iterator insert(iterator position,const T& x){//在迭代器位置插入值，返回插入位置的迭代器
-		if(finish!=end_of_storage)
-		{
-			++finish;
-			back_move(position);
-			*position=x;
-		}
-		else
-		{
-			size_type tmp_size=size_type(position-start);//处理position失效
-			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍
-			return insert(start+tmp_size,x);
-		}
-		return position;
-		
-	}
-
-	//写一个move版本的insert规避迭代器失效
-	
-	void resize(size_type new_size,const T& x)//改变元素数量
+	void push_front(T&& value);
 	{
-		if(new_size<=size())
-		{
-			finish=start+new_size;
+		node* newNode = new node(value);
+		newnode->next=head;
+		head=newnode;
+	}
+
+	//emplace_front
+
+	//prepend_range
+
+	//移除首端元素
+	void pop_front(){
+		if(!head) return;
+		node* tmp=head;
+		head=head->next;
+		delete tmp;
+		tmp=nullptr;
+		--_size;
+	}
+
+		//在容器中的指定位置后插入元素
+	iterator insert_after( const_iterator pos, const T& value)
+	{
+		if(pos.current==nullptr){
+			//如果pos为尾后迭代器
+			if(head) return pos;//防止链表不为空时传入end()
+			head=new node(value);
 		}
-		else{
-			reserve(new_size);
-			while(finish!=start+new_size)
+		pos->next=new node(value,pos->next);
+		return pos->next;
+	}
+
+	iterator insert_after(const_iterator pos, T&& value)
+	{
+		if(pos.current==nullptr){
+			//如果pos为尾后迭代器
+			if(head) return pos;//防止链表不为空时传入end()
+			head=new node(value);
+		}
+		pos->next=new node(value,pos->next);
+		return pos->next;
+	}
+
+	iterator insert_after(const_iterator pos,size_type count,const T& value)
+	{
+		if(pos.current==nullptr){
+			//如果pos为尾后迭代器
+			if(head) return pos;//防止链表不为空时传入end()
+			head=new node(value);
+			--count;
+			pos.current=head;
+		}
+		while(count--)
+		{
+			pos->next=new node(value,pos->next);
+		}
+		return pos->next;
+	}
+
+	template<typename InputIt>
+	iterator insert_after(const_iterator pos, InputIt first, InputIt last)
+	{
+		if(pos.current==nullptr){
+			//如果pos为尾后迭代器
+			if(head) return pos;//防止链表不为空时传入end()
+			head=new node(value);
+			pos.current=head;
+			++first;
+		}
+		node* prevNode=pos.current;//插入位置
+		node* newhead=new node();//新链表,哑节点
+		node* newnode=newhead;//新链表的尾部插入位置
+		iterator res=nullptr;
+		for(auto it=first;it!=last;++it)
+		{
+			newnode->next=new node(*it);
+			newnode=newnode->next;
+		}
+		res=iterator(newnode);//返回最后被插入元素的迭代器
+		newnode->next=prevNode->next;//新链表尾部链接原链表插入的后一个节点
+		newnode=newhead->next;
+		prevNode->next=newnode;//原链表插入节点的next链接新链表
+		delete newhead;//删除哑节点
+		return res;//返回最后被插入元素的迭代器
+	}
+
+	//iterator insert_after(const_iterator pos,std::initializer_list<T> ilist);
+
+	//template<class... Arg>
+	//iterator emplace_after(const_iterator pos, Args&&... args);
+
+	//从容器移除指定元素
+	iterator erase_after(const_iterator pos)//移除pos后的元素
+	{
+		node* curnode=pos->current;
+		if(!curnode->next) return end();
+		node* tmp=curnode->next;
+		curnode->next=curnode->next->next;
+		delete tmp;
+		return iterator(curnode->next);
+	}
+
+	iterator erase_after(const_iterator first, const_iterator last)//移除first后直至last前的元素
+	{
+		iterator it=iterator(first->current);
+		while(first!=last)
+		{
+			first=erase_after(const_iterater(first->current));
+		}
+		return last;
+	}
+	
+
+	//改变储存元素的个数
+	void resize(size_type count)
+	{
+		if(count==_size)return;
+		else if(count<_size)//减小到前count个元素
+		{
+			const_iterator first=begin();
+			const_iterator last=end();
+			size_type st=_size-count;
+			while(st--)
 			{
-				*finish=x;
-				++finish;
+				++first;
 			}
+			erase_after(first,last);
+		}
+		else if(count>_size)//追加额外的默认插入的元素
+		{
+			size_type st=count-_size;
+			size_type steps=_size;
+			auto pos=begin();
+			while(--steps)
+			{
+				++pos;
+			}
+			insert_after(pos,st,T());
 		}
 	}
 
-	void resize(size_type new_size){resize(new_size,T());}//重载
+	void resize(size_type count, const value_type& value)
+	{
+		if(count==_size)return;
+		else if(count<_size)//减小到前count个元素
+		{
+			const_iterator first=begin();
+			const_iterator last=end();
+			size_type st=_size-count;
+			while(st--)
+			{
+				++first;
+			}
+			erase_after(first,last);
+		}
+		else if(count>_size)//追加额外的默认插入的元素
+		{
+			size_type st=count-_size;
+			size_type steps=_size;
+			auto pos=begin();
+			while(--steps)
+			{
+				++pos;
+			}
+			insert_after(pos,st,value);
+		}
+	}
 
-	void clear(){finish=start;}
+	//prepend_range
 
 	
 
-	//assign
-	void assign(size_type count,const T& value)//以count份 value的副本替换内容
-	{
-		*this=vector<T> (count,value);
-	}
-
-	void assign(const_iterator first,const_iterator last)//将区间[fast,last)的元素赋值到当前vector容器中，原内容释放，其中有任何一个实参是指向*this中的迭代器时行为未定义
-	{
-		release();
-		reserve(last-first);
-		for(size_type i=0;i<last-first;++i)
-		{
-			*(start+i)=*(first+i);
-			++finish;
-		}
-	}
-
-
-
-
+	//----------------操作模块------------------
+	
+	//start here ----------------------------------------操作
 
 };
 
