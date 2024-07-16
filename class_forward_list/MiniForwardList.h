@@ -14,14 +14,14 @@ class forward_list{
 	struct node{
 		T value;
 		node* next;
-	};
-	
+
 	//node构造函数
-	node():value(T()),next(nullptr){}
+	node():value(),next(nullptr){}
 
-	node(value_type v):value(v),next(nullptr){}
+	node(T v):value(v),next(nullptr){}
 
-	node(value_type v,node* n):value(v),next(n){}
+	node(T v,node* n):value(v),next(n){}
+	};
 
 
 	typedef node				node_type;
@@ -68,9 +68,10 @@ class forward_list{
             return temp;
         }
 
-		pointer operator->()const{
-			return &(current->value);
-		}
+		// pointer operator->()const{
+		// 	//return &(current->value);
+		// 	return current;
+		// }
 
         // 比较操作符
         bool operator!=(const iterator& other) const { return current != other.current; }
@@ -90,9 +91,9 @@ class forward_list{
 		// 解引用操作符
         const T& operator*() const { return current->value; }
 
-		const pointer operator->()const{
-			return &(current->value);
-		}
+		// const pointer operator->()const{
+		// 	return &(current->value);
+		// }
 
         // 递增操作符（前置）
         const_iterator& operator++() {
@@ -120,11 +121,14 @@ class forward_list{
 	iterator end()const{return tail;}
 
 	//-------------容量模块-----------
-	//size():获取元素数量
+	//max_size():获取最大元素数量
 	size_type max_size() const { return std::numeric_limits<size_t>::max();}
 	
 	//empty():forward_list是否为空
 	bool empty()const {return _size;}
+
+	//size():获取元素数量
+	size_type size()const{return _size;}
 
 
 	//-------------辅助函数模块-----------
@@ -165,7 +169,7 @@ class forward_list{
 
 	//列表初始化
 	forward_list(std::initializer_list<T> init_list):head(0),tail(0),_size(0){
-		initializer_list<T>::iterator tmp_it=init_list.begin();
+		auto tmp_it=init_list.begin();
 		pointer tmp_p=head;
 		while(tmp_it!=init_list.end())
 		{
@@ -232,7 +236,7 @@ class forward_list{
 
 
 	//forward_list(size_type n);
-	explicit forward_list(size_type n):start(0),finish(0),end_of_storage(0){fill_initialize(n,T());}
+	explicit forward_list(size_type n):head(0),tail(0),_size(0){fill_initialize(n,T());}
 
 	//~forward_list()
 	~forward_list(){
@@ -266,11 +270,11 @@ class forward_list{
 		++_size;
 	}
 
-	void push_front(T&& value);
+	void push_front(T&& value)
 	{
 		node* newNode = new node(value);
-		newnode->next=head;
-		head=newnode;
+		newNode->next=head;
+		head=newNode;
 	}
 
 	//emplace_front
@@ -287,7 +291,7 @@ class forward_list{
 		--_size;
 	}
 
-		//在容器中的指定位置后插入元素
+	//在容器中的指定位置后插入元素
 	iterator insert_after( const_iterator pos, const T& value)
 	{
 		if(pos.current==nullptr){
@@ -332,7 +336,7 @@ class forward_list{
 		if(pos.current==nullptr){
 			//如果pos为尾后迭代器
 			if(head) return pos;//防止链表不为空时传入end()
-			head=new node(value);
+			head=new node(*first);//?
 			pos.current=head;
 			++first;
 		}
@@ -359,7 +363,7 @@ class forward_list{
 	//iterator emplace_after(const_iterator pos, Args&&... args);
 
 	//从容器移除指定元素
-	iterator erase_after(const_iterator pos)//移除pos后的元素
+	iterator erase_after(const_iterator pos)//移除pos后的元素,返回被移除的元素的下一个元素迭代器
 	{
 		node* curnode=pos->current;
 		if(!curnode->next) return end();
@@ -371,11 +375,16 @@ class forward_list{
 
 	iterator erase_after(const_iterator first, const_iterator last)//移除first后直至last前的元素
 	{
-		iterator it=iterator(first->current);
-		while(first!=last)
+		if(first==last)return last;
+
+		auto it=first;
+		++it;//node will be deleted,it == (first==>next)
+
+		while(it!=last)
 		{
-			first=erase_after(const_iterater(first->current));
+			it=erase_after(first);//delete node, return it==(first==>next)
 		}
+
 		return last;
 	}
 	
@@ -441,10 +450,56 @@ class forward_list{
 
 	//----------------操作模块------------------
 	
-	//start here ----------------------------------------操作
+	// 合并两个有序列表
+	void merge(forward_list& other)
+	{
+
+	}
+
+	//删除连续的重复元素
+	void unique(){
+		for(auto it=begin();it!=end();++it)
+		{
+			auto it2=it;
+			++it2;//后一个元素的迭代器,erase(first==it,last==it2)
+			if(it2==end())
+			{
+				return;
+			}
+			while(*it==*it2)//let it2 to be last;
+			{
+				++it2;
+			}
+			erase_after(it,it2);//erase
+		}
+		return;
+	}
+
+	//size_type unique();
+
 
 };
-
+//-------非成员函数--------
+template<typename T>
+bool operator==(const forward_list<T>&lhs,const forward_list<T>&rhs)
+{
+	auto it1=lhs.begin();
+	auto it2=rhs.begin();
+	if(lhs.size()!=rhs.size())
+	{
+		return false;
+	}
+	while(it1!=it1.end() && it2!=it2.end())
+	{
+		if(*it1!=*it2)
+		{
+			return false;
+		}
+		++it1;
+		++it2;
+	}
+	return true;
+}
 
 
 
