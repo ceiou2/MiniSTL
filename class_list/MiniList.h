@@ -114,12 +114,25 @@ public:
         }
 
         //后置递增
+        Iterator operator++(int){
+            iterator temp=*this;
+            ++*this;
+            return temp;
+        }
 
         //迭代器递减操作
         //前置递减
+        Iterator& operator--(){
+            current=current->prev;
+            return *this;
+        }
 
         //后置递减
-
+        Iterator operator--(int){
+            iterator temp=*this;
+            --*this;
+            return temp;
+        }
 
         //迭代器比较操作
         bool operator==(const iterator& other)const{
@@ -135,8 +148,90 @@ public:
 
 
     //const_iterator
+    class const_iterator{
+    private:
+        node* current;
+
+    public:
+        //构造函数
+        const_iterator(node* p):current(p){}
+
+        //解引用操作
+        const T& operator*(){
+            return current->value;
+        }
+
+        //迭代器递增操作
+        //前置递增
+        const_Iterator& operator++(){
+            current=current->next;
+            return *this;
+        }
+
+        //后置递增
+        const_Iterator operator++(int){
+            iterator temp=*this;
+            ++*this;
+            return temp;
+        }
+
+        //迭代器递减操作
+        //前置递减
+        const_Iterator& operator--(){
+            current=current->prev;
+            return *this;
+        }
+
+        //后置递减
+        const_Iterator operator--(int){
+            iterator temp=*this;
+            --*this;
+            return temp;
+        }
+
+        //迭代器比较操作
+        bool operator==(const iterator& other)const{
+            return current==other.current;
+        }
+
+        bool operator!=(const iterator& other)const{
+            return current!=other.current;
+        }
 
 
+    }
+
+
+    //逆向迭代器+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    //返回指向起始的迭代器
+    iterator front(){
+        return iterator(head);
+    }
+
+    const_iterator begin()const{
+        return const_iterator(head);
+    }
+
+    const_iterator cbegin()const{
+        return const_iterator(head);
+    }
+
+    //返回指向末尾的迭代器
+    iterator end(){
+        return iterator(nullptr);
+    }
+
+    const_iterator end()const {
+        return const_iterator(nullptr);
+    }
+
+    const_iterator cend()const{
+        return const_iterator(nullptr);
+    }
+
+    //逆向迭代器
+    //++++++++++++
 
     //构造函数-------------------------------------------------------------------
     //从各种数据源构造新容器
@@ -293,9 +388,120 @@ public:
     }
 
     //擦除元素
-    //-------------------start here and iterator ++
+    //从容器擦除指定的元素,返回end()或删除元素的下一个位置
+    iterator erase(iterator pos){
+        pointer cur=pos.current;
+        if(!cur) return iterator(nullptr);//防止传入end()
+
+        pointer del_p=cur;//用于释放内存
+        //头部情况
+        if(cur==head){
+            head=head->next;
+            if(!head){delete del_p;return iterator(nullptr)}//防止单节点情况
+
+            head->prev=nullptr;
+            delete del_p;
+            return iterator(head);
+        }
+        else if(cur==tail){
+            tail=tail->prev;
+            //if(!tail){delete del_p;return iterator(nullptr)}//防止单节点情况
+
+            tail->next=nullptr;
+            delete del_p;
+            return iterator(tail);
+        }
+        else{
+            if(cur->prev){
+                cur->prev->next=cur->next;
+            }
+
+            if(cur->next){
+                cur->next->prev=cur->prev;
+            }
+            cur=cur->next;
+            delete del_p;
+            return iterator(cur);
+        }
+
+    }
+
+    iterator erase(cosnt_iterator pos){
+        pointer cur=pos.current;
+        if(!cur) return iterator(nullptr);//防止传入end()
+
+        pointer del_p=cur;//用于释放内存
+        //头部情况
+        if(cur==head){
+            head=head->next;
+            if(!head){
+            delete del_p;
+            tail=nullptr;
+            return iterator(nullptr);}//防止单节点情况
+
+            head->prev=nullptr;
+            delete del_p;
+            return iterator(head);
+        }
+        else if(cur==tail){
+            tail=tail->prev;
+            //if(!tail){delete del_p;return iterator(nullptr);}//防止单节点情况
+
+            tail->next=nullptr;
+            delete del_p;
+            return iterator(tail);
+        }
+        else{
+            if(cur->prev){
+                cur->prev->next=cur->next;
+            }
+
+            if(cur->next){
+                cur->next->prev=cur->prev;
+            }
+            cur=cur->next;
+            delete del_p;
+            return iterator(cur);
+        }
+    }
+
+    //删除[first,last)区间的元素
+    iterator erase(iterator first,iterator last){
+        if(first==last){return end();}
+
+        while(first!=last)
+        {
+            erase(first);
+            ++first;
+        }
+
+        return last;
+    }
+
+    iterator erase(const_iterator first,const_iterator last){
+        if(first==last){return end();}
+
+        while(first!=last)
+        {
+            erase(first);
+            ++first;
+        }
+
+        return last;
+    }
 
     //将元素添加到容器末尾
+    //push_back:definition is at line:74
+
+    //emplace_back
+
+
+    //移除末尾元素
+    void pop_back(){
+        erase(iterator(tail));
+    }
+
+//+++++++++++++++++++++++++++++++++++++++start here++++end() sentinel节点
 
 
 
