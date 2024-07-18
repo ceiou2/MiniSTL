@@ -94,10 +94,9 @@ public:
     //迭代器---------------------------------------------------------------------
     //iterator
     class iterator{
-    private:
+    public:
         node* current;
 
-    public:
         //构造函数
         iterator(node* p):current(p){}
 
@@ -149,10 +148,9 @@ public:
 
     //const_iterator
     class const_iterator{
-    private:
+    public:
         node* current;
 
-    public:
         //构造函数
         const_iterator(node* p):current(p){}
 
@@ -190,11 +188,11 @@ public:
         }
 
         //迭代器比较操作
-        bool operator==(const iterator& other)const{
+        bool operator==(const const_iterator& other)const{
             return current==other.current;
         }
 
-        bool operator!=(const iterator& other)const{
+        bool operator!=(const const_iterator& other)const{
             return current!=other.current;
         }
 
@@ -202,7 +200,108 @@ public:
     }
 
 
-    //逆向迭代器+++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    //reverse_iterator
+    class reverse_iterator{
+    public:
+        node_type* current;
+
+        //构造函数
+        reverse_iterator(node_type* p):current(p){};
+
+        T& operator*(){
+            return current->value;
+        }
+
+        //迭代器移动
+        reverse_iterator& operator++(){
+            if(current==nullptr) return *this;
+            current=current->prev;
+            return *this;
+        }
+
+        reverse_iterator operator++(int){
+            reverse_iterator temp=*this;
+            ++*this;
+            return temp;
+        }
+
+        reverse_iterator& operator--{
+            if(current==nullptr) return *this;
+            current=current->next;
+            return *this;
+        }
+
+        reverse_iterator operator--(int){
+            reverse_iterator temp=*this;
+            --*this;
+            return temp;
+        }
+
+        //比较操作重载
+        bool operator==(const reverse_iterator& other){
+            if(current==other.current)return true;
+            return false;
+        }
+
+        bool operator!=(const reverse_iterator& other){
+            if(current==other.current)return false;
+            return true;
+        }
+
+
+    };
+
+
+    //cosnt_reverse_iterator
+    class const_reverse_iterator{
+    public:
+        node_type* current;
+
+        //构造函数
+        const_reverse_iterator(node_type* p):current(p){};
+
+        const T& operator*(){
+            return current->value;
+        }
+
+        //迭代器移动
+        const_reverse_iterator& operator++(){
+            if(current==nullptr) return *this;
+            current=current->prev;
+            return *this;
+        }
+
+        const_reverse_iterator operator++(int){
+            reverse_iterator temp=*this;
+            ++*this;
+            return temp;
+        }
+
+        const_reverse_iterator& operator--{
+            if(current==nullptr) return *this;
+            current=current->next;
+            return *this;
+        }
+
+        const_reverse_iterator operator--(int){
+            reverse_iterator temp=*this;
+            --*this;
+            return temp;
+        }
+
+        //比较操作重载
+        bool operator==(const const_reverse_iterator& other){
+            if(current==other.current)return true;
+            return false;
+        }
+
+        bool operator!=(const const_reverse_iterator& other){
+            if(current==other.current)return false;
+            return true;
+        }
+
+
+    };
 
     //返回指向起始的迭代器
     iterator front(){
@@ -215,6 +314,14 @@ public:
 
     const_iterator cbegin()const{
         return const_iterator(head);
+    }
+
+    reverse_iterator rbegin(){
+        return reverse_iterator(tail);
+    }
+
+    const_reverse_iterator rbegin(){
+        return const_reverse_iterator(tail);
     }
 
     //返回指向末尾的迭代器
@@ -230,8 +337,13 @@ public:
         return const_iterator(nullptr);
     }
 
-    //逆向迭代器
-    //++++++++++++
+    reverse_iterator rend(){
+        return reverse_iterator(nullptr);
+    }
+
+    const_reverse_iterator rend(){
+        return const_reverse_iterator(nullptr);
+    }
 
     //构造函数-------------------------------------------------------------------
     //从各种数据源构造新容器
@@ -501,11 +613,292 @@ public:
         erase(iterator(tail));
     }
 
-//+++++++++++++++++++++++++++++++++++++++start here++++end() sentinel节点
+    
+    //插入元素到容器起始
+    void push_front(const T& value){
+        pointer newNode=new node(value,nullptr,head);
+
+        if(head)head->prev=newNode;//防止空链表的情况
+
+        head=newNode;
+
+        if(!tail)tail=head;//防止空链表的情况
+        
+    }
+
+    void push_front(T&& value){
+        pointer newNode=new node(std::move(value),nullptr,head);
+
+        if(head)head->prev=newNode;//防止空链表的情况
+
+        head=newNode;
+
+        if(!tail)tail=head;//防止空链表的情况
+    }
+    
+
+    //emplace_front
+
+
+    //移除首元素
+    pop_front(){
+        pointer del_p=head;
+        if(tail==head)tail=head->next;
+        head=head->next;
+
+        delete del_p;
+        del_p=nullptr;
+
+    }
+
+
+    //改变储存元素的个数
+    void resize(size_type count){
+        size_type st=size();
+        if(st==count)return;
+        else if(st>count){
+            size_type dist=st-count;
+            while(dist--)
+            {
+                pop_back();
+            }
+            return;
+        }
+        else{
+            size_type dist=count-st;
+            while(dist--)
+            {
+                pop_back(T());
+            }
+            return;
+        }
+    }
+
+    void resize(size_type count,const value_type& value){
+        size_type st=size();
+        if(st==count)return;
+        else if(st>count){
+            size_type dist=st-count;
+            while(dist--)
+            {
+                pop_back();
+            }
+            return;
+        }
+        else{
+            size_type dist=count-st;
+            while(dist--)
+            {
+                pop_back(value);
+            }
+            return;
+        }
+    }
+
+
+    //交换内容
+    void swap(list&other)
+    {
+        swap(head,other.head);
+        swap(tail,other.tail);
+    }
+
 
 
 
     //操作模块-------------------------------------------------------------------
+    //合并两个有序列表
+    void merge(list&other){
+        if(other==*this)return;
+
+        pointer t_p=head;
+        pointer o_p=other.head;
+
+        size_type t_sz=size();
+        size_type o_sz=other.size();
+        size_type a_sz=t_sz+o_sz;//新链表大小
+
+        pointer* sp=new pointer*[a_sz];//pointer*数组储存新链表顺序节点指针
+
+        for(size_type i=0;i<a_sz;++i){//构造新列表节点指针数组
+            if(((t_p && !o_p) || t_p->value<=o_p->value)&&t_p){
+                sp[i]=t_p;
+                t_p=t_p->next;
+            }
+            else{
+                sp[i]=o_p;
+                o_p=o_p->next;
+            }
+        }
+
+        for(size_type i=0;i<a_sz;++i){//新列表导入*this
+            head=nullptr;
+            tail=nullptr;
+            
+            if(i==0){//首节点
+                head=sp[i];
+                tail=head;
+                head->prev=nullptr;
+            }
+            else{//中间节点
+                tail->next=sp[i];
+                tail->next->prev=tail;
+                tail=tail->next;
+            }
+        }
+        tail->next=nullptr;//尾节点
+
+
+        other.head=nullptr;//置空other
+        other.tail=nullptr;
+
+    }
+
+    void merge(list&&other){
+        if(other==*this)return;
+
+        pointer t_p=head;
+        pointer o_p=other.head;
+
+        size_type t_sz=size();
+        size_type o_sz=other.size();
+        size_type a_sz=t_sz+o_sz;//新链表大小
+
+        pointer* sp=new pointer*[a_sz];//pointer*数组储存新链表顺序节点指针
+
+        for(size_type i=0;i<a_sz;++i){//构造新列表节点指针数组
+            if(((t_p && !o_p) || t_p->value<=o_p->value)&&t_p){
+                sp[i]=t_p;
+                t_p=t_p->next;
+            }
+            else{
+                sp[i]=o_p;
+                o_p=o_p->next;
+            }
+        }
+
+        for(size_type i=0;i<a_sz;++i){//新列表导入*this
+            head=nullptr;
+            tail=nullptr;
+            
+            if(i==0){//首节点
+                head=sp[i];
+                tail=head;
+                head->prev=nullptr;
+            }
+            else{//中间节点
+                tail->next=sp[i];
+                tail->next->prev=tail;
+                tail=tail->next;
+            }
+        }
+        tail->next=nullptr;//尾节点
+
+
+        other.head=nullptr;//置空other
+        other.tail=nullptr;
+
+    }
+
+
+    //从另一个list中移动元素
+    void splice(const_iterator pos. list& other){
+        if(!other.head) return;//other为空链表
+
+        if(pos==begin()){//pos=begin
+            other.tail->next=head;
+            head->prev=other.tail;
+
+            head=other.head;
+        }
+        else
+        {
+        pointer p=pos->current;//pos
+        pointer prevNode=p->prev;//pos->prev
+        //前处链接点
+        prevNode->next=other.head;
+        prevNode->next->prev=prevNode;
+        //后处链接点
+        other.tail->next=p;
+        p->prev=other.tail;
+        }
+
+        other.head=nullptr;//置空other
+        other.tail=nullptr;
+    }
+
+    void splice(const_iterator pos. list&& other){
+        if(!other.head) return;//other为空链表
+
+        if(pos==begin()){//pos=begin
+            other.tail->next=head;
+            head->prev=other.tail;
+
+            head=other.head;
+        }
+        else
+        {
+        pointer p=pos->current;//pos
+        pointer prevNode=p->prev;//pos->prev
+        //前处链接点
+        prevNode->next=other.head;
+        prevNode->next->prev=prevNode;
+        //后处链接点
+        other.tail->next=p;
+        p->prev=other.tail;
+        }
+
+        other.head=nullptr;//置空other
+        other.tail=nullptr;
+    }
+
+    //void splice(const_iterator pos,list& other,const_iterator it);...
+
+
+    //移除满足特定标准的元素;ps:c++20标准返回size_type 删除的元素数量
+    void remove(const T& value){
+        for(auto it=begin();it!=end();++it){
+            if(*it==value){
+                it=erase(it);
+                if(it==end())break;
+            }
+        }
+    }
+
+    //template<typename UnaryPredicate>
+    //void remove_if(UnaryPredicate p);...
+
+
+    //反转元素的顺序
+    void reverse(){
+        for(auto it=begin();it!=end();--it){//这里是--因为next和prev交换后--it才是指向下一个节点
+            swap(it->next,it->prev);
+        }
+        swap(head,tail);
+    }
+
+
+    //删除连续的重复元素;ps:c++20标准返回size_type 删除的元素数量
+    void unique(){
+        for(auto it=begin();it!=end();++it){
+            auto it2=++it;
+
+            while(it2!=end() && *it==*it2){
+                it2=erase(*it2);
+            }
+        }
+    }
+    
+    //template<typename BinaryPredicate>
+    //void unique(BinaryPredicate p);...
+
+
+    //对元素进行排序==========================================start here
+    void sort(){
+
+    }
+
+
 
 
 
@@ -514,6 +907,10 @@ public:
 
 
 //非成员函数模块----------------------------------------------
+//按照字典顺序比较两个list的值
+
+
+//特化swap算法？？？
 
 
 
