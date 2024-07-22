@@ -107,13 +107,13 @@ public:
 
         //迭代器递增操作
         //前置递增
-        Iterator& operator++(){
+        iterator& operator++(){
             current=current->next;
             return *this;
         }
 
         //后置递增
-        Iterator operator++(int){
+        iterator operator++(int){
             iterator temp=*this;
             ++*this;
             return temp;
@@ -121,13 +121,13 @@ public:
 
         //迭代器递减操作
         //前置递减
-        Iterator& operator--(){
+        iterator& operator--(){
             current=current->prev;
             return *this;
         }
 
         //后置递减
-        Iterator operator--(int){
+        iterator operator--(int){
             iterator temp=*this;
             --*this;
             return temp;
@@ -143,7 +143,7 @@ public:
         }
 
 
-    }
+    };
 
 
     //const_iterator
@@ -161,13 +161,13 @@ public:
 
         //迭代器递增操作
         //前置递增
-        const_Iterator& operator++(){
+        const_iterator& operator++(){
             current=current->next;
             return *this;
         }
 
         //后置递增
-        const_Iterator operator++(int){
+        const_iterator operator++(int){
             iterator temp=*this;
             ++*this;
             return temp;
@@ -175,13 +175,13 @@ public:
 
         //迭代器递减操作
         //前置递减
-        const_Iterator& operator--(){
+        const_iterator& operator--(){
             current=current->prev;
             return *this;
         }
 
         //后置递减
-        const_Iterator operator--(int){
+        const_iterator operator--(int){
             iterator temp=*this;
             --*this;
             return temp;
@@ -197,7 +197,7 @@ public:
         }
 
 
-    }
+    };
 
 
     //reverse_iterator
@@ -225,7 +225,7 @@ public:
             return temp;
         }
 
-        reverse_iterator& operator--{
+        reverse_iterator& operator--(){
             if(current==nullptr) return *this;
             current=current->next;
             return *this;
@@ -277,7 +277,7 @@ public:
             return temp;
         }
 
-        const_reverse_iterator& operator--{
+        const_reverse_iterator& operator--(){
             if(current==nullptr) return *this;
             current=current->next;
             return *this;
@@ -320,7 +320,7 @@ public:
         return reverse_iterator(tail);
     }
 
-    const_reverse_iterator rbegin(){
+    const_reverse_iterator rbegin()const{
         return const_reverse_iterator(tail);
     }
 
@@ -341,7 +341,7 @@ public:
         return reverse_iterator(nullptr);
     }
 
-    const_reverse_iterator rend(){
+    const_reverse_iterator rend()const{
         return const_reverse_iterator(nullptr);
     }
 
@@ -420,7 +420,7 @@ public:
 
 
     //容量模块-------------------------------------------------------------------
-    bool empty()const{return head}
+    bool empty()const{return head;}
 
     size_type size()const{
         size_type s=0;
@@ -509,7 +509,7 @@ public:
         //头部情况
         if(cur==head){
             head=head->next;
-            if(!head){delete del_p;return iterator(nullptr)}//防止单节点情况
+            if(!head){delete del_p;return iterator(nullptr);}//防止单节点情况
 
             head->prev=nullptr;
             delete del_p;
@@ -538,7 +538,7 @@ public:
 
     }
 
-    iterator erase(cosnt_iterator pos){
+    iterator erase(const_iterator pos){
         pointer cur=pos.current;
         if(!cur) return iterator(nullptr);//防止传入end()
 
@@ -641,7 +641,7 @@ public:
 
 
     //移除首元素
-    pop_front(){
+    void pop_front(){
         pointer del_p=head;
         if(tail==head)tail=head->next;
         head=head->next;
@@ -802,7 +802,7 @@ public:
 
 
     //从另一个list中移动元素
-    void splice(const_iterator pos. list& other){
+    void splice(const_iterator pos, list& other){
         if(!other.head) return;//other为空链表
 
         if(pos==begin()){//pos=begin
@@ -827,7 +827,7 @@ public:
         other.tail=nullptr;
     }
 
-    void splice(const_iterator pos. list&& other){
+    void splice(const_iterator pos, list&& other){
         if(!other.head) return;//other为空链表
 
         if(pos==begin()){//pos=begin
@@ -920,9 +920,9 @@ public:
 template<typename T>
 bool operator==(const list<T>& lhs,const list<T>& rhs){
     auto lit=lhs.begin();
-    auto rit-rhs.begin();
-    while(lit!=end() && rit!=end()){
-        if(*lit!=*rlt){
+    auto rit=rhs.begin();
+    while(lit!=lhs.end() && rit!=rhs.end()){
+        if(*lit!=*rit){
             return false;
         }
         else{
@@ -939,14 +939,14 @@ bool operator==(const list<T>& lhs,const list<T>& rhs){
 template<typename T>
 bool operator!=(const list<T>& lhs,const list<T>& rhs){
     if(lhs==rhs) return false;
-    return ture;
+    return true;
 }
 
 template<typename T>//小于或者长度小于
 bool operator<(const list<T>& lhs,const list<T>& rhs){
     auto lit=lhs.begin();
-    auto rit-rhs.begin();
-    while(lit!=end() && rit!=end()){
+    auto rit=rhs.begin();
+    while(lit!=lhs.end() && rit!=rhs.end()){
         if(*lit<*rit){
             return true;
         }
