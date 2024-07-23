@@ -204,9 +204,9 @@ class vector{
 	{
 		if(this=&other) return;
 
-		this->start=other.start;
-		this->finish=other.finish;
-		this->end_of_storage=other.end_of_storage;//=====private???????????暂时先不写，和algorithm相关
+		swap(this->start,other.start);
+		swap(this->finish,other.finish);
+		swap(this->end_of_storage,other.end_of_storage);
 	}
 
 	//-------------操作函数模块-----------
