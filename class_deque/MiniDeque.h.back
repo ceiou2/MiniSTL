@@ -1,7 +1,7 @@
-//MiniDeque.h
+//MiniDeque
 #pragma once
-#ifndef MINI_DEQUE_H
-#define MINI_DEQUE_H
+#ifndef _Mini_Deque_
+#define _Mini_Deque_
 
 #define buffer_size 128
 
@@ -11,17 +11,19 @@
 template<typename T>
 class deque{
 private:
-    typedef T   value_type;
-    typedef value_type* pointer;
-    typedef pointer*    map_pointer;//指向map元素的二级指针
-    typedef value_type& reference;
-    typedef const reference const_reference;
-    typedef size_t  size_type;
-    typedef ptrdiff_t   difference_type;
-    typedef T*  buffer;
+    typedef T 					value_type;
+	typedef value_type* 		pointer;
+    typedef pointer*            map_pointer;//指向map元素的二级指针
+	typedef value_type&			reference;
+	typedef const reference		const_reference;
+	typedef size_t				size_type;
+	typedef ptrdiff_t			difference_type;
+    typedef T*                  buffer;
 
 
 public:
+
+
 //==============================迭代器模块=======================
 class iterator{
 public:
@@ -109,9 +111,9 @@ public:
 
 class const_iterator{
 public:
-    const T* cur;
-    const T* first;
-    const T* last;
+    T* cur;
+    T* first;
+    T* last;
     map_pointer node;
 
 
@@ -210,7 +212,7 @@ public:
 
     reverse_iterator(T* c,T* f,T* l,map_pointer n):cur(c),first(f),last(l),node(n){};
 
-    reverse_iterator(const iterator& it){
+    reverse_iterator(const iterator it){
         cur=it->cur;
         first=it->first;
         last=it->last;
@@ -285,9 +287,9 @@ public:
 
 class const_reverse_iterator{
 public:
-    const T* cur;
-    const T* first;
-    const T* last;
+    T* cur;
+    T* first;
+    T* last;
     map_pointer node;
 
 
