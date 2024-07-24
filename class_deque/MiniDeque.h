@@ -1,7 +1,7 @@
-//MiniDeque
+//MiniDeque.h
 #pragma once
-#ifndef _Mini_Deque_
-#define _Mini_Deque_
+#ifndef MINI_DEQUE_H
+#define MINI_DEQUE_H
 
 #define buffer_size 128
 
@@ -12,18 +12,16 @@ template<typename T>
 class deque{
 private:
     typedef T 					value_type;
-	typedef value_type* 		pointer;
+    typedef value_type* 		pointer;
     typedef pointer*            map_pointer;//指向map元素的二级指针
-	typedef value_type&			reference;
-	typedef const reference		const_reference;
-	typedef size_t				size_type;
-	typedef ptrdiff_t			difference_type;
+    typedef value_type&			reference;
+    typedef const reference		const_reference;
+    typedef size_t				size_type;
+    typedef ptrdiff_t			difference_type;
     typedef T*                  buffer;
 
 
 public:
-
-
 //==============================迭代器模块=======================
 class iterator{
 public:
