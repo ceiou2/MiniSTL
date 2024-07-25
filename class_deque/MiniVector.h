@@ -34,7 +34,7 @@ class vector{
 	//-------------容量模块-----------
 	//size():获取元素数量
 	size_type size() const { return size_type(end()-begin());}
-	
+
 	//capacity():获取容器容量
 	size_type capacity()const{return size_type(end_of_storage-begin());}
 
@@ -51,7 +51,7 @@ class vector{
 	void reserve(size_type new_cap){
 		//开辟空间
 		pointer tmp_pointer = new value_type[new_cap];
-		
+
 		size_type _size=size();// 因为size()通过finish-start计算，但届时将改变该两指针的指向
 
 		//转移数据
@@ -68,7 +68,7 @@ class vector{
 		start=tmp_pointer;
 		finish=start+_size;
 		end_of_storage=start+new_cap;
-		
+
 	}
 
 
@@ -148,7 +148,7 @@ class vector{
 			*(start+i)=*(ori_vector.begin()+i);
 			++finish;
 		}
-		
+
 	}
 
 	//移动构造函数
@@ -161,7 +161,7 @@ class vector{
 		ori_vector.finish=nullptr;
 		ori_vector.end_of_storage=nullptr;
 	}
-		
+
 
 	//拷贝赋值函数
 	vector& operator=(const vector& ori_vector){
@@ -189,7 +189,7 @@ class vector{
 
 		return *this;//返回自身的引用以支持链式赋值
 	}
-		
+
 
 
 	//vector(size_type n);
@@ -220,7 +220,7 @@ class vector{
 			++finish;
 		}
 		else{
-			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍 
+			reserve((capacity() == 0)?1:2*capacity());//空间分配，1或原空间翻倍
 			push_back(x);
 		}
 	}
@@ -255,11 +255,11 @@ class vector{
 			return insert(start+tmp_size,x);
 		}
 		return position;
-		
+
 	}
 
 	//写一个move版本的insert规避迭代器失效
-	
+
 	void resize(size_type new_size,const T& x)//改变元素数量
 	{
 		if(new_size<=size())
@@ -280,7 +280,7 @@ class vector{
 
 	void clear(){finish=start;}
 
-	
+
 
 	//assign
 	void assign(size_type count,const T& value)//以count份 value的副本替换内容
@@ -305,8 +305,15 @@ class vector{
 
 };
 
+template<typename T>
+void swap(vector<T>& lhs, vector<T>& rhs)
+{
+    if (lhs = rhs)
+        return;
 
-
-
+    swap(lhs.start, rhs.start);
+    swap(lhs.finish, rhs.finish);
+    swap(lhs.end_of_storage, rhs.end_of_storage);
+}
 
 #endif
