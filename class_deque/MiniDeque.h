@@ -6,6 +6,7 @@
 #define buffer_size 128
 
 #include <cstddef>
+#include<type_traits>
 #include "MiniVector.h"
 
 template<typename T>
@@ -15,7 +16,7 @@ private:
     typedef T value_type;
     typedef value_type* pointer;
     typedef pointer* map_pointer; //指向map元素的二级指针
-    typedef value_type& reference;
+    typedef T& reference;
     typedef const T& const_reference;//为什么typedef const reference const_reference不行？
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
@@ -40,11 +41,12 @@ public:
             node = nullptr;
         }
 
-        iterator(T* c, T* f, T* l, map_pointer n)
-            : cur(c),
-              first(f),
-              last(l),
-              node(n){};
+        iterator(const T* c,const T* f,const T* l, map_pointer n){
+            cur = const_cast<T*>(c);//确保安全的情况下移除const限定符
+            first = const_cast<T*>(f);
+            last = const_cast<T*>(l);
+            node = n;
+        };
 
         iterator(const iterator& other){
             cur = other.cur;
@@ -52,6 +54,7 @@ public:
             last = other.last;
             node = other.node;
         }
+
 
         //重载*运算符
         T& operator*() const
@@ -147,14 +150,14 @@ public:
         }
 
         //重载等于运算符
-        bool operator==(const iterator& other)
+        bool operator==(const iterator& other) const
         {
             return (cur == other.cur && first == other.first &&
                     last == other.last && node == other.node);
         }
 
         //重载不等运算符
-        bool operator!=(const iterator& other){
+        bool operator!=(const iterator& other) const{
             return !(*this == other);
         }
 
@@ -169,6 +172,7 @@ public:
 
         //移动赋值运算符
         //iterator& operator=(iterator&& other);
+
     };
 
     class const_iterator
@@ -271,14 +275,14 @@ public:
         }
 
         //重载等于运算符
-        bool operator==(const const_iterator& other)
+        bool operator==(const const_iterator& other) const
         {
             return (cur == other.cur && cur == other.cur &&
                     last == other.last && node == other.node);
         }
 
         //重载不等运算符
-        bool operator!=(const const_iterator& other)
+        bool operator!=(const const_iterator& other) const
         {
             return !(*this == other);
         }
@@ -520,14 +524,14 @@ public:
         }
 
         //重载等于运算符
-        bool operator==(const const_reverse_iterator& other)
+        bool operator==(const const_reverse_iterator& other) const
         {
             return (cur == other.cur && cur == other.cur &&
                     last == other.last && node == other.node);
         }
 
         //重载不等运算符
-        bool operator!=(const const_reverse_iterator& other)
+        bool operator!=(const const_reverse_iterator& other) const
         {
             return !(*this == other);
         }
@@ -611,6 +615,7 @@ public:
     iterator	start; //指向第一个map节点
     iterator	finish; //指向最后一个map节点,finish.cur指向最后一个元素的下一个位置
 
+    private:
     //===============================辅助函数模块=====================
     void add_buffer_back()
     { //尾部添加一个buffer，finish.cur指向新buffer末尾，空但将分配value,cur后移(因为最后元素的下一个位置)
@@ -712,6 +717,9 @@ public:
             delete map[i];
             map[i] = nullptr;
         }
+        map.clear();
+        start.cur = nullptr;
+        finish.cur = nullptr;
     }
 
     // map移动后start和finish的node要重新初始化
@@ -728,12 +736,14 @@ public:
 
     //swap iterator
     void swap(iterator& lhs,iterator& rhs){
-        swap(lhs.cur, rhs.cur);
-        swap(lhs.first, rhs.first);
-        swap(lhs.last, rhs.last);
-        swap(lhs.node, rhs.node);
+        std::swap(lhs.cur, rhs.cur);
+        std::swap(lhs.first, rhs.first);
+        std::swap(lhs.last, rhs.last);
+        std::swap(lhs.node, rhs.node);
     }
 
+
+public:
     //***************************************************************
     //==============================成员函数模块=======================
 
@@ -748,6 +758,16 @@ public:
 
     deque(size_type count, const T& value = T())
     {
+        while (count--) {
+            _push_back(value);
+        }
+    }
+
+    //here
+    deque(int count, int value)
+    {
+        if (count <= 0)
+            return;
         while (count--) {
             _push_back(value);
         }
@@ -820,6 +840,14 @@ public:
         while (count--) {
             _push_back(value);
         }
+    }
+
+//here
+    void assign(int count, int value)
+    {
+        if(count<=0)
+        return;
+        assign(size_type(count), value);
     }
 
     //以范围 [first, last) 中元素的副本替换内容。
@@ -926,7 +954,7 @@ public:
     //检查容器是否无元素
     bool empty() const
     {
-        if (begin() == end())
+        if (! size())
             return true;
         return false;
     }
@@ -967,13 +995,17 @@ public:
     //插入元素
     iterator insert(const_iterator pos, const T& value)
     {
-        iterator res(pos.cur, pos.first, pos.last, pos.node);
-        value_type tmp = *pos;
-        *pos = value;
-        ++pos;
-        while (pos != end()) {
-            swap(*pos, tmp);
-            ++pos;
+        iterator it(pos.cur, pos.first, pos.last, pos.node);
+        iterator res(it);
+        T tmp = *it;
+        *it = value;
+        ++it;
+        while (it != end()) {
+            std::swap(*it, tmp);
+            // T t = *it;
+            // *it = tmp;
+            // tmp = t;
+            ++it;
         }
         _push_back(tmp);
         return res;
@@ -981,13 +1013,14 @@ public:
 
     iterator insert(const_iterator pos, T&& value)
     {
-        iterator res(pos.cur, pos.first, pos.last, pos.node);
-        value_type tmp = *pos;
-        *pos = value;
-        ++pos;
-        while (pos != end()) {
-            swap(*pos, tmp);
-            ++pos;
+        iterator it(pos.cur, pos.first, pos.last, pos.node);
+        iterator res(it);
+        value_type tmp = *it;
+        *it = value;
+        ++it;
+        while (it != end()) {
+            std::swap(*it, tmp);
+            ++it;
         }
         _push_back(tmp);
         return res;
@@ -995,31 +1028,41 @@ public:
 
     iterator insert(const_iterator pos, size_type count, const T& value)
     {
-        iterator res(pos.cur, pos.first, pos.last, pos.node);
+        iterator it(pos.cur, pos.first, pos.last, pos.node);
+        iterator res(it);
         while (count--) {
-            pos = insert(pos, value);
-            ++pos;
+            it = insert(pos, value);
+            ++it;
         }
         return res;
     }
 
     iterator insert(const_iterator pos, size_type count, T&& value)
     {
-        iterator res(pos.cur, pos.first, pos.last, pos.node);
+        iterator it(pos.cur, pos.first, pos.last, pos.node);
+        iterator res(it);
         while (count--) {
-            pos = insert(pos, value);
-            ++pos;
+            it = insert(pos, value);
+            ++it;
         }
         return res;
+    }
+
+    iterator insert(const_iterator pos, int count, T&& value)
+    {
+        if(count<=0)
+            return iterator(pos.cur, pos.first, pos.last, pos.node);
+        return insert(pos, size_type(count), value);
     }
 
     template<typename InputIt>
     iterator insert(const_iterator pos, InputIt first, InputIt last)
     {
         iterator res(pos.cur, pos.first, pos.last, pos.node);
+        iterator it(res);
         while (first != last) {
-            pos = insert(pos, *first);
-            ++pos;
+            it = insert(it, *first);
+            ++it;
             ++first;
         }
         return res;
@@ -1028,9 +1071,10 @@ public:
     iterator insert(const_iterator pos, std::initializer_list<T> ilist)
     {
         iterator res(pos.cur, pos.first, pos.last, pos.node);
+        iterator i(res);
         for (auto it = ilist.begin(); it != ilist.end(); ++it) {
-            pos = insert(pos, *it);
-            ++pos;
+            i = insert(i, *it);
+            ++i;
         }
         return res;
     }
@@ -1060,7 +1104,7 @@ public:
     //前附给定元素 value 到容器起始。
     void push_front(const T& value)
     {
-        _push_front();
+        _push_front(value);
     }
 
     //移除容器首元素。
@@ -1077,12 +1121,12 @@ public:
                                     // start和finish的node成员
             // resetNode_start_finish();
             if (!map.size()) { //最后一个元素情况
-                start = nullptr;
-                finish = nullptr;
+                start.cur=nullptr;
+                finish.cur=nullptr;
                 return;
             }
-            start.node = map; // reset start.node
-            finish.node = map[map.size() - 1];
+            start.node = &map[0]; // reset start.node
+            finish.node = &map[map.size() - 1];
         } else {
             ++start;
         }
@@ -1091,7 +1135,7 @@ public:
     //删除元素
     iterator erase(iterator pos)
     {
-        if (!pos)
+        if (!pos.cur)
             return pos; //空pos的情况
         for (auto it = pos; it != end(); ++it) {
             if (it + 1 == end()) {
@@ -1122,6 +1166,7 @@ public:
         while (first != last) {
             first = erase(first);
         }
+        return first;
     }
 
     iterator erase(const_iterator first, const_iterator last)
@@ -1174,7 +1219,7 @@ public:
         if (*this == other)
             return;
 
-        swap(map, other.map);
+        map.swap(other.map);
         swap(start, other.start);
         swap(finish, other.finish);
     }
@@ -1195,7 +1240,7 @@ bool operator==(const deque<T>& lhs, const deque<T>& rhs)
             ++itr;
         }
         return true;
-    } else { // size不想等情况
+    } else { // size不相等情况
         return false;
     }
 }

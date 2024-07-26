@@ -11,7 +11,7 @@ TEST(TestConstructor,TestInt)
     int count=10;
 	int value=2;
 	deque<int>arg1(10);
-	deque<int>arg2(10);
+	deque<int>arg2(10,2);
 	EXPECT_EQ(arg1.size(),10);
 	EXPECT_EQ(arg2.size(),10);
 	for(int i=0;i<arg1.size();++i){
@@ -29,11 +29,12 @@ TEST(TestConstructor,TestInt)
 
 
 	//移动构造函数
-	deque<int>mvcs(arg2);
+	deque<int>mvcs(std::move(arg2));
 	EXPECT_EQ(cpcs.size(),10);
-	EXPECT_TRUE(arg2.empty());
+    EXPECT_EQ(arg2.size(), 0);
+    EXPECT_TRUE(arg2.empty());
 
-	//列表初始化构造
+    //列表初始化构造
 	deque<int>listcs{1,2,3,4,5};
 	EXPECT_EQ(listcs.size(),5);
 	EXPECT_EQ(listcs[0],1);
@@ -49,10 +50,11 @@ TEST(TestIterator,Iterator){
     int temp_i=1;
     for (auto i = d1.begin(); i != d1.end(); ++i) {
         EXPECT_EQ(*i,temp_i );
-        ++i;
+        ++temp_i;
     }
 
-	//iterator--,operator +
+    temp_i = 5;
+    // iterator--,operator +
     for (auto i = d1.begin() + 4; i != d1.begin(); --i) {
         EXPECT_EQ(*i, temp_i);
         --temp_i;
@@ -97,9 +99,10 @@ TEST(TestOperator,Operator){
 	//operator =
     d3 = d2;
     EXPECT_TRUE(d3 == d2);
+    EXPECT_EQ(d3.size(), 2);
     EXPECT_TRUE(d3 != d1);
 
-	//operator >=
+    //operator >=
     deque<int> d4{1, 2};
     EXPECT_TRUE(d1 >= d4);
     EXPECT_TRUE(d2 >= d3);
@@ -174,6 +177,9 @@ TEST(TestFunction,function){
     deque<int> d7;
     d7.insert(d7.begin(),d6.begin(), d6.end());
     EXPECT_EQ(d6, d7);
+
+
+
     // EXPECT_TRUE(d6==d7);
 	//initializer_list
 
