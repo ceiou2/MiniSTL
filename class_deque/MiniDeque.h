@@ -15,7 +15,7 @@ class deque
 private:
     typedef T value_type;
     typedef value_type* pointer;
-    typedef pointer* map_pointer; //指向map元素的二级指针
+    typedef T** map_pointer; //指向map元素的二级指针
     typedef T& reference;
     typedef const T& const_reference;//为什么typedef const reference const_reference不行？
     typedef size_t size_type;
@@ -132,21 +132,23 @@ public:
         }
 
         //重载随机访问+
-        iterator& operator+(int n)
+        iterator operator+(int n)
         {
+            iterator res = *this;
             while (n--) {
-                ++*this;
+                ++res;
             }
-            return *this;
+            return res;
         }
 
         //重载随机访问-
-        iterator& operator-(int n)
+        iterator operator-(int n)
         {
+            iterator res = *this;
             while (n--) {
-                --*this;
+                --res;
             }
-            return *this;
+            return res;
         }
 
         //重载等于运算符
@@ -261,17 +263,21 @@ public:
         //重载随机访问+
         const_iterator operator+(int n)
         {
+            const_iterator res = *this;
             while (n--) {
-                ++*this;
+                ++res;
             }
+            return res;
         }
 
         //重载随机访问-
         const_iterator operator-(int n)
         {
+            const_iterator res = *this;
             while (n--) {
-                --*this;
+                --res;
             }
+            return res;
         }
 
         //重载等于运算符
@@ -386,17 +392,21 @@ public:
         //重载随机访问+
         reverse_iterator operator+(int n)
         {
+            reverse_iterator res = *this;
             while (n--) {
-                --*this;
+                --res;
             }
+            return res;
         }
 
         //重载随机访问-
         reverse_iterator operator-(int n)
         {
+            reverse_iterator res = *this;
             while (n--) {
-                ++*this;
+                ++res;
             }
+            return res;
         }
 
         //重载等于运算符
@@ -510,17 +520,21 @@ public:
         //重载随机访问+
         const_reverse_iterator operator+(int n)
         {
+            const_reverse_iterator res = *this;
             while (n--) {
-                --*this;
+                --res;
             }
+            return res;
         }
 
         //重载随机访问-
         const_reverse_iterator operator-(int n)
         {
+            reverse_iterator res = *this;
             while (n--) {
-                ++*this;
+                ++res;
             }
+            return res;
         }
 
         //重载等于运算符
@@ -625,7 +639,17 @@ public:
         finish.cur = buff;   //最后一个元素的下一个位置
         finish.first = buff; // buffer第一个位置
         finish.last = buff + buffer_size; // buffer尾部的下一个位置
-        ++(finish.node);
+        //bug here ++(finish.node);
+
+        finish.node = &map[map.size() - 1];
+
+        //!!!!!!!!!只要存在map的增减，就要重新定义start和finish，防止map改变使得iterator失效
+        //init start
+        size_type diff = start.cur - start.first;
+        start.node = &map[0];
+        start.first = map[0];
+        start.last = map[0] + buffer_size;
+        start.cur = start.first + diff;
     }
 
     void add_buffer_front()
@@ -638,6 +662,13 @@ public:
         start.first = buff;
         start.last = buff + buffer_size;
         start.cur = (start.last) - 1;
+
+        //init finish :debugged 这里可能会导致map重新分配空间，start和finish的地址都要更新
+        size_type diff = finish.last - finish.cur;
+        finish.node = &map[map.size() - 1];
+        finish.first = map[map.size() - 1];
+        finish.last = map[map.size() - 1] + buffer_size;
+        finish.cur = finish.last - diff;
     }
 
     void _push_back(const T& value)
@@ -943,12 +974,13 @@ public:
     //访问最后一个元素
     reference back()
     {
-        return *((finish.cur) - 1);
+        //return *((finish.cur) - 1);
+        return *(finish - 1);
     }
 
     const_reference back() const
     {
-        return *((finish.cur) - 1);
+        return *(finish - 1);
     }
 
     //检查容器是否无元素
@@ -1088,7 +1120,7 @@ public:
     //移除末元素,
     void pop_back()
     {
-        if (finish.cur =
+        if (finish.cur ==
                     finish.first) //最后一个buffer的第一个元素删除后释放buffer
         {
             pointer del_p = finish.first;
@@ -1110,7 +1142,7 @@ public:
     //移除容器首元素。
     void pop_front()
     {
-        if (start.cur =
+        if (start.cur ==
                     (start.last) -
                     1) { //首元素是第一个buffer的最后一个元素，删除后释放buffer
             pointer del_p = start.first;
@@ -1125,7 +1157,7 @@ public:
                 finish.cur=nullptr;
                 return;
             }
-            start.node = &map[0]; // reset start.node
+            start.node =&map[0]; // reset start.node
             finish.node = &map[map.size() - 1];
         } else {
             ++start;
@@ -1165,6 +1197,7 @@ public:
     {
         while (first != last) {
             first = erase(first);
+            --last;
         }
         return first;
     }

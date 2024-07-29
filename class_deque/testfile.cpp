@@ -114,107 +114,91 @@ TEST(TestOperator,Operator){
     EXPECT_TRUE(d1 <= d2);
 }
 
-TEST(TestFunction,function){
+TEST(TestFunction,assign){
     deque<int> dq1{6, 7, 8, 9, 10};
-	//assign
+    // assign
     dq1.assign(3, 9);
-    for (auto i = dq1.begin(); i != dq1.end();++i){
+    for (auto i = dq1.begin(); i != dq1.end(); ++i) {
         EXPECT_EQ(*i, 9);
     }
 
     deque<int> dq2 = {6, 7, 8, 9, 10};
-    dq1.assign(dq2.begin(), dq2.end());//inputIt == dequeIt
+    dq1.assign(dq2.begin(), dq2.end()); // inputIt == dequeIt
     EXPECT_EQ(dq1, dq2);
     vector<int> v{1, 2, 3, 4, 5};
     int k = 1;
     dq1.assign(v.begin(), v.end());
-    for (auto i = dq1.begin(); i != dq1.end();i++){//operator++(int)
+    for (auto i = dq1.begin(); i != dq1.end(); i++) { // operator++(int)
         EXPECT_EQ(*i, k);
         ++k;
     }
+}
 
-	//at
+TEST(TestFunction, oper) {
+    // at
     deque<int> d3{1, 2, 3, 4, 5};
     EXPECT_EQ(d3.at(2), 3);
     EXPECT_EQ(d3.at(0), 1);
     EXPECT_EQ(d3.at(4), 5);
-    EXPECT_THROW(d3.at(5),std::out_of_range);
+    EXPECT_THROW(d3.at(5), std::out_of_range);
     EXPECT_THROW(d3.at(-1), std::out_of_range);
 
-	//operator[]
+    // operator[]
     EXPECT_EQ(d3[2], 3);
     EXPECT_EQ(d3[0], 1);
     EXPECT_EQ(d3[4], 5);
 
-	//front()
+    // front()
     EXPECT_EQ(d3.front(), 1);
 
-	//back()
+    // back()
     EXPECT_EQ(d3.back(), 5);
 
-	//empty(),clear()
+    // empty(),clear()
     EXPECT_FALSE(d3.empty());
     d3.clear();
     EXPECT_TRUE(d3.empty());
+}
 
-	//size
+TEST(TestFunction, size) {
+    // size
     deque<int> d4{1, 2, 3, 4, 5};
     EXPECT_EQ(d4.size(), 5);
+}
 
-	//insert
-    deque<int> d5{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    d5.insert(d5.begin(), -2);
-    EXPECT_EQ(d5.front(), -2);
-    d5.insert(d5.begin()+10, -1);
-    EXPECT_EQ(d5[10], -1);
-    d5.insert(d5.end(), 99);//?
-    EXPECT_EQ(d5.back(), 99);
-    deque<int> d6{1, 2, 3, 4, 5};
-    d6.insert(d6.begin() + 1, 5, 7);
-    for (int i = 1; i <= 5;++i){
-        EXPECT_EQ(d6[i], 7);
-    }
-    deque<int> d7;
-    d7.insert(d7.begin(),d6.begin(), d6.end());
-    EXPECT_EQ(d6, d7);
-
-
-
-    // EXPECT_TRUE(d6==d7);
-	//initializer_list
-
-    //push_back()
+TEST(TestFunction, pop_push) {
+    // push_back()
     deque<int> d10{1, 2, 3, 4, 5};
     d10.push_back(6);
     EXPECT_EQ(d10.back(), 6);
     EXPECT_EQ(d10.size(), 6);
 
-	//pop_back()
+    // pop_back()
     d10.pop_back();
     EXPECT_EQ(d10.back(), 5);
     EXPECT_EQ(d10.size(), 5);
 
-	//push_front()
+    // push_front()
     d10.push_front(10);
     EXPECT_EQ(d10.front(), 10);
     EXPECT_EQ(d10.size(), 6);
 
-	//pop_front()
+    // pop_front()
     d10.pop_front();
     EXPECT_EQ(d10.front(), 1);
     EXPECT_EQ(d10.size(), 5);
 
-	//erase
+    // erase
     d10.erase(d10.begin());
     EXPECT_EQ(d10.front(), 2);
 
     d10.erase(d10.begin() + 1);
     EXPECT_EQ(d10[1], 4);
 
-    d10.erase(d10.begin()+1, d10.end());
+    d10.erase(d10.begin() + 1, d10.end());
     EXPECT_EQ(d10.size(), 1);
 
-	//resize
+    // resize
     d10.resize(10);
     EXPECT_EQ(d10.size(), 10);
 
@@ -228,11 +212,34 @@ TEST(TestFunction,function){
     d10.resize(10);
     EXPECT_EQ(d10.size(), 10);
 
-	//swap
+    // swap
     deque<int> dOther{1, 2, 3};
     d10.swap(dOther);
     EXPECT_EQ(d10.size(), 3);
     EXPECT_EQ(dOther.size(), 10);
+}
+
+TEST(TestFunction, insert)
+{
+    // insert
+    deque<int> d5{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    d5.insert(d5.begin(), -2);
+    EXPECT_EQ(d5.front(), -2);
+    d5.insert(d5.begin() + 10, -1);
+    EXPECT_EQ(d5[10], -1);
+    d5.insert(d5.end(), 99); //?
+    EXPECT_EQ(d5.back(), 99);
+    deque<int> d6{1, 2, 3, 4, 5};
+    d6.insert(d6.begin() + 1, 5, 7);
+    for (int i = 1; i <= 5; ++i) {
+        EXPECT_EQ(d6[i], 7);
+    }
+    deque<int> d7;
+    d7.insert(d7.begin(), d6.begin(), d6.end());
+    EXPECT_EQ(d6, d7);
+
+    // EXPECT_TRUE(d6==d7);
+    // initializer_list
 }
 
 int main(int argc, char **argv){
