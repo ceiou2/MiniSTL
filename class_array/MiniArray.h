@@ -17,8 +17,10 @@ private:
     typedef const pointer const_pointer;
     typedef size_t size_type;
     typedef ptrdiff_t difference;
-    typedef value_type* iterator; //
-    typedef const value_type* const_iterator;
+    typedef value_type* iterator;
+    typedef const T* const_iterator;
+    typedef value_type* reverse_iterator;
+    typedef const T* const_reverse_iterator;
 
     value_type array_container[Num ? Num : 1]; //可以处理0空间情况
 
@@ -82,12 +84,12 @@ public:
     // operator[]:访问指定元素
     reference operator[](const size_type& ind)
     {
-        return at(ind);
+        return data()[ind];
     }
     // const version
     const_reference operator[](const size_type& ind) const
     {
-        return at(ind);
+        return data()[ind];
     }
 
     // front:访问第一个元素
@@ -160,12 +162,74 @@ public:
         }
     }
 
-    //---------非成员函数模块----------
-    //略
-    //
+
 
     //--------辅助模块----------
     //略
 };
+
+//---------非成员函数模块----------
+template<typename T,size_t N>
+bool operator==(const array<T,N>&lhs,const array<T,N>&rhs){
+    if(lhs.size()!=rhs.size())
+        return false;
+    for (size_t i = 0; i < lhs.size;++i){
+        if(lhs[i]!=rhs[i])
+            return false;
+    }
+    return true;
+}
+
+template<typename T, size_t N>
+bool operator!=(const array<T, N>& lhs, const array<T, N>& rhs)
+{
+    if(lhs==rhs)
+        return false;
+    return true;
+}
+
+template<typename T, size_t N>
+bool operator<(const array<T, N>& lhs, const array<T, N>& rhs)
+{
+    size_type i = 0;
+    while(i<lhs.size() && i<rhs.size()){
+        if(lhs[i]<rhs[i]){
+            return true;
+        }
+        else if(lhs[i]>rhs[i]){
+            return false;
+        }
+        ++i;
+    }
+    if(lhs.size()<rhs.size()){
+        return true;
+    }
+    return false;
+}
+
+template<typename T, size_t N>
+bool operator<=(const array<T, N>& lhs, const array<T, N>& rhs)
+{
+    if(lhs<rhs || lhs==rhs)
+        return true;
+    return false;
+}
+
+template<typename T, size_t N>
+bool operator>(const array<T, N>& lhs, const array<T, N>& rhs)
+{
+    if (lhs < rhs || lhs == rhs)
+        return false;
+    return true;
+}
+
+template<typename T, size_t N>
+bool operator>=(const array<T, N>& lhs, const array<T, N>& rhs)
+{
+    if (!(lhs < rhs))
+    return true;
+    return false;
+}
+
 
 #endif

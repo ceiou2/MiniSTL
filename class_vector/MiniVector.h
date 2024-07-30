@@ -229,13 +229,12 @@ public:
 
     void swap(vector& other)
     {
-        if (this = &other)
+        if (*this == other)
             return;
 
-        this->start = other.start;
-        this->finish = other.finish;
-        this->end_of_storage =
-                other.end_of_storage; //=====private???????????暂时先不写，和algorithm相关
+        std::swap(this->start, other.start);
+        std::swap(this->finish, other.finish);
+        std::swap(this->end_of_storage, other.end_of_storage);
     }
 
     //-------------操作函数模块-----------
@@ -339,5 +338,82 @@ public:
         }
     }
 };
+
+template<typename T>
+void swap(vector<T>& lhs, vector<T>& rhs)
+{
+    if (lhs == rhs)
+        return;
+
+    std::swap(lhs.start, rhs.start);
+    std::swap(lhs.finish, rhs.finish);
+    std::swap(lhs.end_of_storage, rhs.end_of_storage);
+}
+
+template<typename T>
+bool operator==(const vector<T>& lhs, const vector<T>& rhs)
+{
+    if (lhs.size() != rhs.size())
+        return false;
+    for (auto i = 0; i <= lhs.size(); ++i) {
+        if (lhs[i] != rhs[i])
+            return false;
+    }
+    return true;
+}
+
+template<typename T>
+bool operator!=(const vector<T>& lhs, const vector<T>& rhs)
+{
+    if (lhs.size() == rhs.size())
+        return false;
+    return true;
+}
+
+template<typename T>
+bool operator<(const vector<T>& lhs, const vector<T>& rhs)
+{
+    auto lit = lhs.begin();
+    auto rit = rhs.begin();
+    while (lit != lhs.end() || rit != rhs.end()) {
+        if (lit == lhs.end()) {
+            return true;
+        } else if (rit == rhs.end()) {
+            return false;
+        }
+        if (*lit < *rit) {
+            return true;
+        } else if (*lit > *rit) {
+            return false;
+        }
+        ++lit;
+        ++rit;
+    }
+    return false;
+}
+
+template<typename T>
+bool operator<=(const vector<T>& lhs, const vector<T>& rhs)
+{
+    if (lhs.size() == rhs.size() || lhs.size() < rhs.size())
+        return true;
+    return false;
+}
+
+template<typename T>
+bool operator>(const vector<T>& lhs, const vector<T>& rhs)
+{
+    if (lhs.size() == rhs.size() || lhs.size() < rhs.size())
+        return false;
+    return true;
+}
+
+template<typename T>
+bool operator>=(const vector<T>& lhs, const vector<T>& rhs)
+{
+    if (lhs.size() == rhs.size() || lhs.size() > rhs.size())
+        return true;
+    return false;
+}
 
 #endif

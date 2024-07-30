@@ -6,7 +6,7 @@
 #define buffer_size 128
 
 #include <cstddef>
-#include<type_traits>
+#include <type_traits>
 #include "MiniVector.h"
 
 template<typename T>
@@ -17,7 +17,8 @@ private:
     typedef value_type* pointer;
     typedef T** map_pointer; //指向map元素的二级指针
     typedef T& reference;
-    typedef const T& const_reference;//为什么typedef const reference const_reference不行？
+    typedef const T& const_reference; //为什么typedef const reference
+                                      // const_reference不行？
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
     typedef T* buffer;
@@ -41,20 +42,21 @@ public:
             node = nullptr;
         }
 
-        iterator(const T* c,const T* f,const T* l, map_pointer n){
-            cur = const_cast<T*>(c);//确保安全的情况下移除const限定符
+        iterator(const T* c, const T* f, const T* l, map_pointer n)
+        {
+            cur = const_cast<T*>(c); //确保安全的情况下移除const限定符
             first = const_cast<T*>(f);
             last = const_cast<T*>(l);
             node = n;
         };
 
-        iterator(const iterator& other){
+        iterator(const iterator& other)
+        {
             cur = other.cur;
             first = other.first;
             last = other.last;
             node = other.node;
         }
-
 
         //重载*运算符
         T& operator*() const
@@ -110,23 +112,24 @@ public:
             return temp;
         }
 
-        //override operator+=
-        iterator& operator+=(long int m){
-            if(m>0){
-                while(m--){
+        // override operator+=
+        iterator& operator+=(long int m)
+        {
+            if (m > 0) {
+                while (m--) {
                     ++*this;
                 }
-            }
-            else if(m<0){
-                while(m++){
+            } else if (m < 0) {
+                while (m++) {
                     --*this;
                 }
             }
             return *this;
         }
 
-        //override operator-=
-        iterator& operator-=(long int m){
+        // override operator-=
+        iterator& operator-=(long int m)
+        {
             *this += -m;
             return *this;
         }
@@ -159,12 +162,14 @@ public:
         }
 
         //重载不等运算符
-        bool operator!=(const iterator& other) const{
+        bool operator!=(const iterator& other) const
+        {
             return !(*this == other);
         }
 
         //重载赋值运算符
-        iterator& operator=(const iterator& other){
+        iterator& operator=(const iterator& other)
+        {
             cur = other.cur;
             first = other.first;
             last = other.last;
@@ -173,8 +178,7 @@ public:
         }
 
         //移动赋值运算符
-        //iterator& operator=(iterator&& other);
-
+        // iterator& operator=(iterator&& other);
     };
 
     class const_iterator
@@ -200,7 +204,8 @@ public:
               last(l),
               node(n){};
 
-        const_iterator(iterator i){
+        const_iterator(iterator i)
+        {
             cur = i.cur;
             first = i.first;
             last = i.last;
@@ -622,29 +627,29 @@ public:
         return start - 1;
     }
 
-
     //=============================成员变量模块=======================
 
-    vector<T*>	map;
-    iterator	start; //指向第一个map节点
-    iterator	finish; //指向最后一个map节点,finish.cur指向最后一个元素的下一个位置
+    vector<T*> map;
+    iterator start; //指向第一个map节点
+    iterator
+            finish; //指向最后一个map节点,finish.cur指向最后一个元素的下一个位置
 
-    private:
+private:
     //===============================辅助函数模块=====================
     void add_buffer_back()
     { //尾部添加一个buffer，finish.cur指向新buffer末尾，空但将分配value,cur后移(因为最后元素的下一个位置)
         buffer buff = new T[buffer_size];
         map.push_back(buff);
         // init finish
-        finish.cur = buff;   //最后一个元素的下一个位置
-        finish.first = buff; // buffer第一个位置
+        finish.cur = buff;                //最后一个元素的下一个位置
+        finish.first = buff;              // buffer第一个位置
         finish.last = buff + buffer_size; // buffer尾部的下一个位置
-        //bug here ++(finish.node);
+        // bug here ++(finish.node);
 
         finish.node = &map[map.size() - 1];
 
         //!!!!!!!!!只要存在map的增减，就要重新定义start和finish，防止map改变使得iterator失效
-        //init start
+        // init start
         size_type diff = start.cur - start.first;
         start.node = &map[0];
         start.first = map[0];
@@ -663,7 +668,8 @@ public:
         start.last = buff + buffer_size;
         start.cur = (start.last) - 1;
 
-        //init finish :debugged 这里可能会导致map重新分配空间，start和finish的地址都要更新
+        // init finish :debugged
+        // 这里可能会导致map重新分配空间，start和finish的地址都要更新
         size_type diff = finish.last - finish.cur;
         finish.node = &map[map.size() - 1];
         finish.first = map[map.size() - 1];
@@ -696,9 +702,9 @@ public:
         } else if (
                 finish.cur ==
                 finish.last) { //尾部满了需要在尾部新添加一个buffer的情况
-            add_buffer_back();   //添加尾部一个buffer
-            *finish = value; //赋值
-            ++(finish.cur);     //++末尾
+            add_buffer_back(); //添加尾部一个buffer
+            *finish = value;   //赋值
+            ++(finish.cur);    //++末尾
             return;
         } else {
             *finish = value;
@@ -733,7 +739,7 @@ public:
                 start.cur ==
                 start.first) { //头部满了需要在头部新添加一个buffer的情况
             add_buffer_front(); //添加头部一个buffer
-            *start = value; //赋值
+            *start = value;     //赋值
             return;
         } else {
             *start = value;
@@ -765,14 +771,14 @@ public:
         finish.node = map[map.size() - 1];
     }
 
-    //swap iterator
-    void swap(iterator& lhs,iterator& rhs){
+    // swap iterator
+    void swap(iterator& lhs, iterator& rhs)
+    {
         std::swap(lhs.cur, rhs.cur);
         std::swap(lhs.first, rhs.first);
         std::swap(lhs.last, rhs.last);
         std::swap(lhs.node, rhs.node);
     }
-
 
 public:
     //***************************************************************
@@ -794,7 +800,7 @@ public:
         }
     }
 
-    //here
+    // here
     deque(int count, int value)
     {
         if (count <= 0)
@@ -873,11 +879,11 @@ public:
         }
     }
 
-//here
+    // here
     void assign(int count, int value)
     {
-        if(count<=0)
-        return;
+        if (count <= 0)
+            return;
         assign(size_type(count), value);
     }
 
@@ -905,59 +911,29 @@ public:
     //若 pos 不在容器范围内，则抛出 std::out_of_range 类型的异常。
     reference at(size_type pos)
     {
-        size_type map_offset =
-                pos / buffer_size; // map偏移量（也是buffer组偏移量）
-        size_type buffer_offset = pos % buffer_size; // buffer元素偏移量
-
-        size_type last_elem_offset =
-                0; //最后一个元素的下一个位置在最后一个buffer的偏移量
-        for (pointer p = finish.first; p != finish.cur; ++p) {
-            ++last_elem_offset;
-        }
-
-        if (map.size() == 0 || map_offset > map.size() ||
-            buffer_offset >= last_elem_offset) {
+        if (pos >= size()) {
             throw std::out_of_range("Index out of range");
         }
-        return map[map_offset][buffer_offset];
+        return *(begin() + pos);
     }
 
     const_reference at(size_type pos) const
     {
-        size_type map_offset =
-                pos / buffer_size; // map偏移量（也是buffer组偏移量）
-        size_type buffer_offset = pos % buffer_size; // buffer元素偏移量
-
-        size_type last_elem_offset =
-                0; //最后一个元素的下一个位置在最后一个buffer的偏移量
-        for (pointer p = finish.first; p != finish.cur; ++p) {
-            ++last_elem_offset;
-        }
-
-        if (map.size() == 0 || map_offset > map.size() ||
-            buffer_offset >= last_elem_offset) {
+        if (pos >= size()) {
             throw std::out_of_range("Index out of range");
         }
-        return map[map_offset][buffer_offset];
+        return *(begin() + pos);
     }
 
     //返回位于指定位置 pos 的元素的引用。不进行边界检查。
     reference operator[](size_type pos)
     {
-        size_type map_offset =
-                pos / buffer_size; // map偏移量（也是buffer组偏移量）
-        size_type buffer_offset = pos % buffer_size; // buffer元素偏移量
-
-        return map[map_offset][buffer_offset];
+        return *(begin() + pos);
     }
 
     const_reference operator[](size_type pos) const
     {
-        size_type map_offset =
-                pos / buffer_size; // map偏移量（也是buffer组偏移量）
-        size_type buffer_offset = pos % buffer_size; // buffer元素偏移量
-
-        return map[map_offset][buffer_offset];
+        return *(begin() + pos);
     }
 
     //访问第一个元素
@@ -974,7 +950,7 @@ public:
     //访问最后一个元素
     reference back()
     {
-        //return *((finish.cur) - 1);
+        // return *((finish.cur) - 1);
         return *(finish - 1);
     }
 
@@ -986,7 +962,7 @@ public:
     //检查容器是否无元素
     bool empty() const
     {
-        if (! size())
+        if (!size())
             return true;
         return false;
     }
@@ -1027,6 +1003,13 @@ public:
     //插入元素
     iterator insert(const_iterator pos, const T& value)
     {
+        if (pos == end()) { //考虑头尾插入
+            _push_back(value);
+            return end() - 1;
+        } else if (pos == begin()) {
+            _push_front(value);
+            return begin();
+        }
         iterator it(pos.cur, pos.first, pos.last, pos.node);
         iterator res(it);
         T tmp = *it;
@@ -1045,6 +1028,13 @@ public:
 
     iterator insert(const_iterator pos, T&& value)
     {
+        if (pos == end()) { //考虑头尾插入
+            _push_back(value);
+            return end() - 1;
+        } else if (pos == begin()) {
+            _push_front(value);
+            return begin();
+        }
         iterator it(pos.cur, pos.first, pos.last, pos.node);
         iterator res(it);
         value_type tmp = *it;
@@ -1082,7 +1072,7 @@ public:
 
     iterator insert(const_iterator pos, int count, T&& value)
     {
-        if(count<=0)
+        if (count <= 0)
             return iterator(pos.cur, pos.first, pos.last, pos.node);
         return insert(pos, size_type(count), value);
     }
@@ -1121,7 +1111,7 @@ public:
     void pop_back()
     {
         if (finish.cur ==
-                    finish.first) //最后一个buffer的第一个元素删除后释放buffer
+            finish.first) //最后一个buffer的第一个元素删除后释放buffer
         {
             pointer del_p = finish.first;
             --finish;
@@ -1143,21 +1133,22 @@ public:
     void pop_front()
     {
         if (start.cur ==
-                    (start.last) -
+            (start.last) -
                     1) { //首元素是第一个buffer的最后一个元素，删除后释放buffer
             pointer del_p = start.first;
             ++start;
             delete del_p;
             del_p = nullptr;
-            map.erase(map.begin()); // erase改变map与buffer的映射关系了，要重新init
-                                    // start和finish的node成员
+            map.erase(
+                    map.begin()); // erase改变map与buffer的映射关系了，要重新init
+                                  // start和finish的node成员
             // resetNode_start_finish();
             if (!map.size()) { //最后一个元素情况
-                start.cur=nullptr;
-                finish.cur=nullptr;
+                start.cur = nullptr;
+                finish.cur = nullptr;
                 return;
             }
-            start.node =&map[0]; // reset start.node
+            start.node = &map[0]; // reset start.node
             finish.node = &map[map.size() - 1];
         } else {
             ++start;
