@@ -99,7 +99,7 @@ protected:
 
     }
 
-    //获得节点的兄弟节点
+    //获得节点的叔叔节点
     Node* uncle(Node* cur){//应该没有空cur和空cur->parent和空cur->parent->parent的情况，暂时不考虑边界
         if(cur->parent==cur->parent->parent->left_child)//cur->parent是祖父的左孩子
         {
@@ -107,6 +107,20 @@ protected:
         }
         else{//cur->parent是祖父的右孩子
             return cur->parent->parent->left_child;//返回祖父的左孩子
+        }
+    }
+
+    //获得节点的兄弟节点
+    Node* brother(Node* cur){
+        if(cur->parent==head){//根节点没有兄弟节点
+            return nullptr;
+        }
+        if(cur==cur->parent->left_child)//cur是父亲节点的左孩子
+        {
+            return cur->parent->right_child;
+        }
+        else{//cur是父亲的右孩子
+            return cur->parent->left_child;
         }
     }
 
@@ -250,6 +264,68 @@ protected:
         }
     }
 
+    //删除某一个节点
+    bool deleteFunc(Node* cur){
+        if(cur->left_child!=nullptr || cur->right_child!=nullptr){//有子代则不删除防止内存泄漏
+            return false;
+        }
+        //cur是根节点
+        if(cur->parent==head){
+            head->parent = nullptr;
+            head->left_child = nullptr;
+            head->right_child = nullptr;
+            delete cur;
+            return true;
+        }
+        //cur是父亲左节点
+        if(cur==cur->parent->left_child){
+            cur->parent->left_child = nullptr;
+            delete cur;
+        }
+        else{//cur是父亲右节点
+            cur->parent->right_child = nullptr;
+            delete cur;
+        }
+        return true;
+    }
+
+    //_erase_case2_3_
+    void _erase_case2_3_(Node* bro,Node* cur){//bro是原兄弟节点，cur是原父亲节点
+        // case2.3.1:兄弟节点至少有一个红色子节点
+        //兄弟节点存在左子节点（两个或者单左子节点）
+        if (bro->left_child != nullptr) {
+            R_Rotation(cur);   //右旋
+            //染色
+            cur->_col = cur->right_child->_col; // cur继承原父亲节点颜色
+            cur->right_child->_col = BLACK;
+            cur->left_child->_col = BLACK;
+        }
+        //兄弟节点只有一个右子节点
+        else if (bro->right_child != nullptr) {
+            L_Rotation(bro);   //对兄弟节点进行左单旋
+            R_Rotation(cur);   //对原父亲节点进行右单旋
+            //染色
+            cur->parent->_col = cur->_col;
+            cur->_col = BLACK;
+            bro->_col = BLACK;
+        }
+        // case2.3.2:兄弟节点没有子节点
+        //父亲节点为红色
+        if (cur->parent == RED) {
+            cur->_col = BLACK;
+            bro->_col = RED;
+        }
+        //父亲节点为黑色
+        else {
+            bro->_col = RED;
+            if(cur->parent==head)//父亲节点为根节点情况
+            {
+                return;
+            }
+            _erase_case2_3_(brother(cur), cur->parent);
+        }
+    }
+
 public:
     //构造函数
     RBTree(){
@@ -277,6 +353,23 @@ public:
     //获得根节点的指针
     Node* get_root(){
         return head->parent;
+    }
+
+    //寻找key对应节点
+    Node* find(const K& key){
+        Node* root = get_root();
+        while(root!=nullptr){
+            if(root->get_key()==key){
+                return root;
+            }
+            else if(root->get_key()>key){
+                root=root->left_child;
+            }
+            else{
+                root = root->right_child;
+            }
+        }
+        return nullptr;
     }
 
     //insert
@@ -311,6 +404,87 @@ public:
         return true;
     }
 
+    //erase
+    bool erase(Node* cur){
+        if(cur==nullptr)
+            return false;
+        // 找到被删除的节点
+        if (cur->left_child == nullptr ||
+            cur->right_child == nullptr) { // 要被删除节点是自身
+        } else { // 找替代删除节点（这里是右子树的最小节点
+            Node* ori_cur = cur;
+            cur = cur->right_child;
+            while(cur->left_child!=nullptr){
+                cur = cur->left_child;
+            }
+            std::swap(ori_cur->data, cur->data);//被删除数据和替代删除数据交换
+        }
+        //删除被删除节点
+        //case1:被删除节点是红色:直接删除
+        if(cur->_col==RED){
+            deleteFunc(cur);
+        }
+        // case2:删除黑色节点
+        // case2.1:删除黑色节点存在一个红色替代节点
+        else if (cur->left_child != nullptr || cur->right_child != nullptr) {
+            Node* child;//红色替代节点
+            if(cur->left_child!=nullptr){
+                child = cur->left_child;
+                cur->left_child = nullptr;//断开被删除节点的子节点
+            } else {
+                child = cur->right_child;
+                cur->right_child = nullptr;//断开被删除节点的子节点
+            }
+
+            //替代节点代替被删除节点
+            if(cur==cur->parent->left_child){
+                cur->parent->left_child = child;
+            }
+            else{
+                cur->parent->right_child = child;
+            }
+            child->_col = BLACK;
+            child->parent = cur->parent;
+
+            //删除被删除节点
+            deleteFunc(cur);
+        }
+        //case2.2:删除黑色叶子节点-被删除节点为根节点
+        else if(cur->parent==head){
+            deleteFunc(cur);
+        }
+        // case2.3:删除黑色叶子节点-被删除节点的兄弟节点为黑色(不可能没有兄弟节点，不然就不符合路径黑节点数相同了)
+        else if (brother(cur)->_col == BLACK) {
+            //删除节点
+            Node* bro = brother(cur); //临时存放兄弟节点
+            deleteFunc(cur);
+            cur = bro->parent; // cur成为原父亲节点
+            //修复平衡
+            _erase_case2_3_(bro, cur); //封装起来用于递归修复
+        }
+        // case2.4:删除黑色叶子节点-被删除节点的兄弟节点为红色
+        else {
+            //转换为case2.3
+            //染色
+            cur->parent->_col == RED;
+            brother(cur)->_col = BLACK;
+            //对父亲节点右旋
+            R_Rotation(cur->parent);
+            // case2.3
+            //删除节点
+            Node* bro = brother(cur); //临时存放兄弟节点
+            deleteFunc(cur);
+            cur = bro->parent; // cur成为原父亲节点
+            //修复平衡
+            _erase_case2_3_(bro, cur); //封装起来用于递归修复
+        }
+        return true;
+    }
+
+    //erase根据key删除
+    bool erase(const K& key){
+        return erase(find(key));
+    }
 
 };
 
