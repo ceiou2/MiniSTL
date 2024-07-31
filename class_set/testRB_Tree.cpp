@@ -10,7 +10,24 @@ int main()
 	{
 		a.insert(std::make_pair(e, e));
 	}
-	a.InOrder_Traversal(a.get_root());
+    a.InOrder_Traversal();
+
+    a.erase(3);
+
+    a.InOrder_Traversal();
+
+    a.erase(2);
+
+    a.InOrder_Traversal();
+    a.erase(3);
+
+    a.InOrder_Traversal();
+    a.erase(4);
+
+    a.InOrder_Traversal();
+    a.erase(5);
+
+    a.InOrder_Traversal();
     return 0;
 }
 

@@ -311,7 +311,7 @@ protected:
         }
         // case2.3.2:兄弟节点没有子节点
         //父亲节点为红色
-        if (cur->parent == RED) {
+        if (cur->parent->_col == RED) {
             cur->_col = BLACK;
             bro->_col = RED;
         }
@@ -324,6 +324,16 @@ protected:
             }
             _erase_case2_3_(brother(cur), cur->parent);
         }
+    }
+
+    //中序遍历递归子函数
+    void _InOrder_Traversal(Node* root)
+    {
+        if (root == nullptr)
+            return;
+        _InOrder_Traversal(root->left_child);
+        std::cout << root->get_key() << " ";
+        _InOrder_Traversal(root->right_child);
     }
 
 public:
@@ -341,13 +351,9 @@ public:
     }
 
     //中序遍历
-    void InOrder_Traversal(Node* root)
-    {
-        if (root == nullptr)
-            return;
-        InOrder_Traversal(root->left_child);
-        std::cout << root->get_key() << " ";
-        InOrder_Traversal(root->right_child);
+    void InOrder_Traversal(){
+        _InOrder_Traversal(get_root());
+        std::cout << std::endl;
     }
 
     //获得根节点的指针
