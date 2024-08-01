@@ -265,6 +265,28 @@ public:
             return temp;
         }
 
+        // override operator+=
+        const_iterator& operator+=(long int m)
+        {
+            if (m > 0) {
+                while (m--) {
+                    ++*this;
+                }
+            } else if (m < 0) {
+                while (m++) {
+                    --*this;
+                }
+            }
+            return *this;
+        }
+
+        // override operator-=
+        const_iterator& operator-=(long int m)
+        {
+            *this += -m;
+            return *this;
+        }
+
         //重载随机访问+
         const_iterator operator+(int n)
         {
@@ -394,6 +416,28 @@ public:
             return temp;
         }
 
+        // override operator+=
+        reverse_iterator& operator+=(long int m)
+        {
+            if (m > 0) {
+                while (m--) {
+                    ++*this;
+                }
+            } else if (m < 0) {
+                while (m++) {
+                    --*this;
+                }
+            }
+            return *this;
+        }
+
+        // override operator-=
+        reverse_iterator& operator-=(long int m)
+        {
+            *this += -m;
+            return *this;
+        }
+
         //重载随机访问+
         reverse_iterator operator+(int n)
         {
@@ -520,6 +564,28 @@ public:
             reverse_iterator temp = *this;
             ++*this;
             return temp;
+        }
+
+        // override operator+=
+        const_reverse_iterator& operator+=(long int m)
+        {
+            if (m > 0) {
+                while (m--) {
+                    ++*this;
+                }
+            } else if (m < 0) {
+                while (m++) {
+                    --*this;
+                }
+            }
+            return *this;
+        }
+
+        // override operator-=
+        const_reverse_iterator& operator-=(long int m)
+        {
+            *this += -m;
+            return *this;
         }
 
         //重载随机访问+

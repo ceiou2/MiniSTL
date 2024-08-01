@@ -242,6 +242,41 @@ TEST(TestFunction, insert)
     // initializer_list
 }
 
+TEST(TestReverseIterator,ReverseIterator)
+{
+    deque<int> d1{1, 2, 3, 4, 5};
+    // begin(),operator*
+    EXPECT_EQ(*(d1.rbegin()), 5);
+    // iterator++,end()
+    int temp_i = 1;
+    for (auto i = d1.begin(); i != d1.end(); ++i) {
+        EXPECT_EQ(*i, temp_i);
+        ++temp_i;
+    }
+
+    temp_i = 5;
+    // iterator--,operator +
+    for (auto i = d1.begin() + 4; i != d1.begin(); --i) {
+        EXPECT_EQ(*i, temp_i);
+        --temp_i;
+    }
+
+    // operator -
+    auto i = d1.begin() + 4;
+    i = i - 4;
+    EXPECT_EQ(*i, 1);
+
+    // operator +=
+    i = d1.begin();
+    i += 2;
+    EXPECT_EQ(*i, 3);
+
+    // operator -=
+    i = d1.begin() + 4;
+    i -= 2;
+    EXPECT_EQ(*i, 3);
+}
+
 int main(int argc, char **argv){
 	testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
