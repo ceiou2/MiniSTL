@@ -1,4 +1,4 @@
-// RB_tree.h
+// RB_Tree.h
 #pragma once
 #ifndef RB_TREE_H
 #define RB_TREE_H
@@ -14,16 +14,16 @@ enum color
 
 // RB_Tree节点类,Key,Value
 template<typename K, typename V>
-class RBTreeNode
+class RB_TreeNode
 {
 public:
     std::pair<K, V> data;
-    RBTreeNode<K, V>* left_child;
-    RBTreeNode<K, V>* right_child;
-    RBTreeNode<K, V>* parent;
+    RB_TreeNode<K, V>* left_child;
+    RB_TreeNode<K, V>* right_child;
+    RB_TreeNode<K, V>* parent;
     color _col;
     //构造函数
-    RBTreeNode(const std::pair<K, V>& _kv)
+    RB_TreeNode(const std::pair<K, V>& _kv)
         : data(_kv),
           left_child(nullptr),
           right_child(nullptr),
@@ -46,9 +46,9 @@ public:
 };
 
 template<typename K, typename V>
-class RBTree
+class RB_Tree
 {
-    typedef RBTreeNode<K, V> Node;
+    typedef RB_TreeNode<K, V> Node;
 
 protected:
     Node* head; //首节点，head->parent指向root
@@ -60,6 +60,10 @@ protected:
         if (head == nullptr)
             return;
         _release(head->parent);
+        //set head null
+        head->parent = nullptr;
+        head->left_child = nullptr;
+        head->right_child = nullptr;
     }
 
     void _release(Node* cur)
@@ -362,9 +366,11 @@ protected:
         _InOrder_Traversal(root->right_child);
     }
 
+    // 辅助功能函数：主要为set和map中的一些操作实现，对应RB_Tree::public:功能函数模块
+
 public:
     //构造函数
-    RBTree()
+    RB_Tree()
     {
         head = new Node(std::make_pair(
                 K(),
@@ -373,7 +379,7 @@ public:
     }
 
     //析构函数
-    ~RBTree()
+    ~RB_Tree()
     {
         release();   //删除首部节点以外的所有节点并释放内存
         delete head; //释放首部节点
@@ -531,6 +537,15 @@ public:
     bool erase(const K& key)
     {
         return erase(find(key));
+    }
+
+
+    //==============功能函数模块===================
+    //置空head 小心使用
+    void set_head_null(){
+        head->parent = nullptr;
+        head->left_child = nullptr;
+        head->right_child = nullptr;
     }
 };
 
