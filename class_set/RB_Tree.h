@@ -49,9 +49,12 @@ template<typename K, typename V>
 class RB_Tree
 {
     typedef RB_TreeNode<K, V> Node;
+    typedef size_t size_type;
+
+public:
+    Node* head; //首节点，head->parent指向root
 
 protected:
-    Node* head; //首节点，head->parent指向root
 
     //===========================================辅助函数模块=================================
     //删除首部节点以外的所有节点并释放内存,注意，还剩下一个首部节点，相比于析构函数，该函数执行后清除红黑树可再次使用。（析构函数额外再实现首部节点内存释放）
@@ -368,6 +371,50 @@ protected:
 
     // 辅助功能函数：主要为set和map中的一些操作实现，对应RB_Tree::public:功能函数模块
 
+    //深拷贝子函数
+    void recursion_cp(Node* _root,Node* new_root) {
+        if(_root==head){//首结点情况
+            if (head->parent){//存在根节点情况
+                new_root->parent = new Node(head->parent->data);
+                new_root->parent->parent = new_root;
+                recursion_cp(_root->parent, new_root->parent);
+            }
+            return;//只有首结点情况
+        }
+        //DFS构造新树
+        if(_root->left_child){
+            new_root->left_child = new Node(_root->left_child->data);
+            new_root->left_child->parent = new_root;
+            recursion_cp(_root->left_child, new_root->left_child);
+        }
+        if(_root->right_child){
+            new_root->right_child = new Node(_root->right_child->data);
+            new_root->right_child->parent = new_root;
+            recursion_cp(_root->right_child, new_root->right_child);
+        }
+    }
+
+    //_size递归子函数
+    size_type _size(Node* _root){
+        if(!_root)
+            return 0;
+        return _size(_root->left_child) + _size(_root->right_child) + 1;
+    }
+
+    //节点增减后更新head中的最大最小指针
+    void head_child_update(){
+        if(!head->parent)//空树
+            return;
+        head->left_child = head->parent;
+        head->right_child = head->parent;
+        while (head->left_child->left_child){
+            head->left_child = head->left_child->left_child;
+        }
+        while(head->right_child->right_child){
+            head->right_child = head->right_child->right_child;
+        }
+    }
+
 public:
     //构造函数
     RB_Tree()
@@ -438,13 +485,9 @@ public:
 
         // 如果不是插入根节点或者无法插入的话，普通插入成功，接下来进行平衡红黑树
         BalanceFunc(cur); //判断并处理平衡
-        //更新head+++不确定这里是要从根节点重新走还是从上一个节点开始走就行以及这里写成if会怎样（应该没关系，毕竟只插入一个）
-        while (head->left_child->left_child != nullptr) {
-            head->left_child = head->left_child->left_child;
-        }
-        while (head->right_child->right_child != nullptr) {
-            head->right_child = head->right_child->right_child;
-        }
+        //更新head
+        head_child_update()
+
         return true;
     }
 
@@ -530,6 +573,9 @@ public:
             //修复平衡
             _erase_case2_3_(bro, cur); //封装起来用于递归修复
         }
+        //更新head->left/right
+        head_child_update();
+
         return true;
     }
 
@@ -541,11 +587,81 @@ public:
 
 
     //==============功能函数模块===================
-    //置空head 小心使用
+    //置空head首节点 小心使用
     void set_head_null(){
         head->parent = nullptr;
         head->left_child = nullptr;
         head->right_child = nullptr;
+    }
+
+    //深拷贝一整棵树，返回new_head
+    Node* _cp(){
+        Node* new_head = new Node(std::make_pair(
+                K(),
+                V())); //首部节点，parent指向root根节点，left_chile指向RB树最小节点，right_child指向RB树最大节点。
+        new_head->_col = BLACK;
+
+        recursion_cp(head,new_head);//开始拷贝
+
+        //new_head左右节点移动到最小最大叶子节点
+        new_head->left_child = new_head->parent;
+        new_head->right_child = new_head->parent;
+        if(new_head->parent){//存在根节点情况
+            while (new_head->left_child->left_child) {
+                new_head->left_child = new_head->left_child->left_child;
+            }
+            while (new_head->right_child->right_child) {
+                new_head->right_child = new_head->right_child->right_child;
+            }
+        }
+
+        return new_head;
+    }
+
+    //得到树的节点数量
+    size_type size(){
+        return _size(head->parent);
+    }
+
+    //找到比当前节点大的下一个节点
+    Node* get_next(Node* cur){
+        if(cur->right_child){//存在右子树情况
+            cur = cur->right_child;
+            while(cur->left_child){
+                cur = cur->left_child;
+            }
+        }
+        else{//不存在右子树情况,向上找第一个比cur大的
+            while(cur->parent!=head){
+                if(cur==cur->parent->left_child){
+                    return cur;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    //找到比当前节点小的下一个节点
+    Node* get_prev(Node* cur){
+        if (cur->left_child) { //存在左子树情况
+            cur = cur->left_child;
+            while (cur->right_child) {
+                cur = cur->right_child;
+            }
+        } else { //不存在左子树情况,向上找第一个比cur小的
+            while (cur->parent != head) {
+                if (cur == cur->parent->right_child) {
+                    return cur;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
     }
 };
 
