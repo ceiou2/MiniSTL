@@ -486,7 +486,7 @@ public:
         // 如果不是插入根节点或者无法插入的话，普通插入成功，接下来进行平衡红黑树
         BalanceFunc(cur); //判断并处理平衡
         //更新head
-        head_child_update()
+        head_child_update();
 
         return true;
     }

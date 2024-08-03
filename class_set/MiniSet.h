@@ -6,7 +6,8 @@
 #include <cstddef>
 #include "RB_Tree.h"
 
-template<typename Key>
+// 迭代器未实现end(),rend(),只是简单地将他们定义为nullptr;后期可以改进
+template <typename Key>
 class set
 {
 private:
@@ -24,20 +25,407 @@ private:
     //========================辅助函数模块=============
 
 public:
+//=======================迭代器模块=========================
     class iterator
     {
     private:
         Node* _root;
+
+    public:
+        //默认构造函数
+        iterator(){
+            _root = nullptr;
+        }
+
+        iterator(Node* root):_root(root){}
+
+        iterator(const iterator& other){
+            _root = other._root;
+        }
+
+        //重载*运算符
+        key_type& operator*(){
+            return _root->get_key();
+        }
+
+        //重载赋值=运算符
+        iterator& operator=(const iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        //重载前置++运算符
+        iterator& operator++(){
+            _root = rb.get_next(_root);
+            return *this;
+        }
+
+        //重载后置++运算符
+        iterator& operator++(int){
+            iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        //重载前置--运算符
+        iterator& operator--(){
+            _root = rb.get_prev(_root);
+            return *this;
+        }
+
+        //重载后置--运算符
+        iterator& operator--(int){
+            iterator temp(*this);
+            --*this;
+            return temp;
+        }
+
+        //重载等于==运算符
+        bool operator==(const iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const iterator& other){
+            return !(*this == other);
+        }
     };
+
     class const_iterator
     {
+    private:
+        const Node* _root;
+
+    public:
+        //默认构造函数
+        const_iterator(){
+            _root = nullptr;
+        }
+
+        const_iterator(Node* root):_root(root){}
+
+        const_iterator(const iterator& other){
+            _root = other._root;
+        }
+
+        const_iterator(const const_iterator& other){
+            _root = other._root;
+        }
+
+        //重载*运算符
+        key_type& operator*(){
+            return _root->get_key();
+        }
+
+        //重载赋值=运算符
+        const_iterator& operator=(const const_iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        const_iterator& operator=(const iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        //重载前置++运算符
+        const_iterator& operator++(){
+            _root = rb.get_next(_root);
+            return *this;
+        }
+
+        //重载后置++运算符
+        const_iterator& operator++(int){
+            const_iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        //重载前置--运算符
+        const_iterator& operator--(){
+            _root = rb.get_prev(_root);
+            return *this;
+        }
+
+        //重载后置--运算符
+        const_iterator& operator--(int){
+            const_iterator temp(*this);
+            --*this;
+            return temp;
+        }
+
+        //重载等于==运算符
+        bool operator==(const const_iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const const_iterator& other){
+            return !(*this == other);
+        }
     };
+
     class reverse_iterator
     {
+    private:
+        Node* _root;
+    public:
+        //默认构造函数
+        reverse_iterator(){
+            _root = nullptr;
+        }
+
+        reverse_iterator(Node* root):_root(root){}
+
+        reverse_iterator(const reverse_iterator& other){
+            _root = other._root;
+        }
+
+        //重载*运算符
+        key_type& operator*(){
+            return _root->get_key();
+        }
+
+        //重载赋值=运算符
+        reverse_iterator& operator=(const reverse_iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        //重载前置++运算符
+        reverse_iterator& operator++(){
+            _root = rb.get_prev(_root);
+            return *this;
+        }
+
+        //重载后置++运算符
+        reverse_iterator& operator++(int){
+            reverse_iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        //重载前置--运算符
+        reverse_iterator& operator--(){
+            _root = rb.get_next(_root);
+            return *this;
+        }
+
+        //重载后置--运算符
+        reverse_iterator& operator--(int){
+            reverse_iterator temp(*this);
+            --*this;
+            return temp;
+        }
+
+        //重载等于==运算符
+        bool operator==(const reverse_iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const reverse_iterator& other){
+            return !(*this == other);
+        }
     };
+
     class const_reverse_iterator
     {
+    private:
+        const Node* _root;
+    public:
+        //默认构造函数
+        const_reverse_iterator(){
+            _root = nullptr;
+        }
+
+        const_reverse_iterator(Node* root):_root(root){}
+
+        const_reverse_iterator(const const_reverse_iterator& other){
+            _root = other._root;
+        }
+
+        const_reverse_iterator(const reverse_iterator& other){
+            _root = other._root;
+        }
+
+        //重载*运算符
+        key_type& operator*(){
+            return _root->get_key();
+        }
+
+        //重载赋值=运算符
+        const_reverse_iterator& operator=(const const_reverse_iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        const_reverse_iterator& operator=(const reverse_iterator& other){
+            _root = other._root;
+            return *this;
+        }
+
+        //重载前置++运算符
+        const_reverse_iterator& operator++(){
+            _root = rb.get_prev(_root);
+            return *this;
+        }
+
+        //重载后置++运算符
+        const_reverse_iterator& operator++(int){
+            const_reverse_iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        //重载前置--运算符
+        const_reverse_iterator& operator--(){
+            _root = rb.get_next(_root);
+            return *this;
+        }
+
+        //重载后置--运算符
+        const_reverse_iterator& operator--(int){
+            const_reverse_iterator temp(*this);
+            --*this;
+            return temp;
+        }
+
+        //重载等于==运算符
+        bool operator==(const const_reverse_iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const const_reverse_iterator& other){
+            return !(*this == other);
+        }
     };
+
+    //返回指向 set 首元素的迭代器。
+    //如果 set 为空，那么返回的迭代器等于 end()。
+    iterator begin() {
+        return iterator(rb.head->left_child);
+    }
+
+    const_iterator begin() const {
+        return const_iterator(rb.head->left_child);
+    }
+
+    const_iterator cbegin() const noexcept {
+        return const_iterator(rb.head->left_child);
+    }
+
+    //返回指向 set
+    //末元素后一元素的迭代器。此元素表现为占位符；试图访问它导致未定义行为。
+    iterator end(){
+        return iterator();
+    }
+
+    const_iterator end() const {
+        return const_iterator();
+    }
+
+    const_iterator cend() const noexcept {
+        return const_iterator();
+    }
+
+    //返回指向逆向的 set 的首元素的逆向迭代器。
+    //它对应非逆向 set 的末元素。如果set 为空，那么返回的迭代器等于 rend()。
+    reverse_iterator rbegin() {
+        return reverse_iterator(rb.head->right_child);
+    }
+
+    const_reverse_iterator rbegin() const {
+        return const_reverse_iterator(rb.head->right_child);
+    }
+
+    const_reverse_iterator crbegin() const noexcept {
+        return const_reverse_iterator(rb.head->right_child);
+    }
+
+    //返回指向逆向的 set 末元素后一元素的逆向迭代器。它对应非逆向 set
+    //首元素的前一元素。此元素表现为占位符，试图访问它导致未定义行为。
+    reverse_iterator rend() {
+        return reverse_iterator();
+    }
+
+    const_reverse_iterator rend() const {
+        return const_reverse_iterator();
+    }
+
+    const_reverse_iterator crend() const noexcept {
+        return const_reverse_iterator();
+    }
+
+    //override oper==
+    bool operator==(const iterator& rhs,const const_iterator& lhs){
+        if(rhs._root==lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator==(const const_iterator& rhs,const iterator& lhs){
+        if(rhs._root==lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator!=(const iterator& rhs,const const_iterator& lhs){
+        if(rhs._root!=lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator!=(const const_iterator& rhs,const iterator& lhs){
+        if(rhs._root!=lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator==(const reverse_iterator& rhs,const const_reverse_iterator& lhs){
+        if(rhs._root==lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator==(const const_reverse_iterator& rhs,const reverse_iterator& lhs){
+        if(rhs._root==lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator!=(const reverse_iterator& rhs,const const_reverse_iterator& lhs){
+        if(rhs._root!=lhs._root){
+            return true;
+        }
+        return false;
+    }
+
+    bool operator!=(const const_reverse_iterator& rhs,const reverse_iterator& lhs){
+        if(rhs._root!=lhs._root){
+            return true;
+        }
+        return false;
+    }
 
     //======================构造函数模块=============
     //默认构造函数
@@ -122,38 +510,6 @@ public:
         return *this;
     }
 
-    //=======================迭代器模块=========================
-    //返回指向 set 首元素的迭代器。
-    //如果 set 为空，那么返回的迭代器等于 end()。
-    iterator begin() {}
-
-    const_iterator begin() const {}
-
-    const_iterator cbegin() const noexcept {}
-
-    //返回指向 set
-    //末元素后一元素的迭代器。此元素表现为占位符；试图访问它导致未定义行为。
-    iterator end(){};
-
-    const_iterator end() const {}
-
-    const_iterator cend() const noexcept {}
-
-    //返回指向逆向的 set 的首元素的逆向迭代器。
-    //它对应非逆向 set 的末元素。如果set 为空，那么返回的迭代器等于 rend()。
-    reverse_iterator rbegin() {}
-
-    const_reverse_iterator rbegin() const {}
-
-    const_reverse_iterator crbegin() const noexcept {}
-
-    //返回指向逆向的 set 末元素后一元素的逆向迭代器。它对应非逆向 set
-    //首元素的前一元素。此元素表现为占位符，试图访问它导致未定义行为。
-    reverse_iterator rend() {}
-
-    const_reverse_iterator rend() const {}
-
-    const_reverse_iterator crend() const noexcept {}
 
     //==============================容量模块=======================
     bool empty()

@@ -75,8 +75,192 @@ TEST(TestCapacity,empty){
 
 //迭代器模块
 //iterator部分
+TEST(testIterator,iteratorConstructor){
+    set<int> s{1, 2, 3, 4, 5};
+    set<int>::iterator it1;
+    set<int>::iterator it2 = s.begin();
+    set<int>::iterator it3(it2);
+    EXPECT_EQ(it2, it3);
+    EXPECT_EQ(*it2, 1);
+}
 
+TEST(testIterator,iteratorOperator){
+    set<int> s{2, 4, 6, 8, 10};
+    set<int>::iterator it1 = s.begin();
+    //*
+    EXPECT_EQ(*it1, 2);
+    //=
+    set<int>::iterator it2;
+    it2 = it1;
+    EXPECT_EQ(*it2, 2);
+    //++
+    EXPECT_EQ(*(++it2), 4);
+    EXPECT_EQ(*it2, 4);
+    //++(int)
+    EXPECT_EQ(*(it2++), 4);
+    EXPECT_EQ(*it2, 6);
+    //--
+    EXPECT_EQ(*(--it2), 4);
+    EXPECT_EQ(*it2,4);
+    //--(int)
+    EXPECT_EQ(*(it2--), 4);
+    EXPECT_EQ(*it2, 2);
+    //==
+    EXPECT_TRUE(it2==it1);
+    ++it2;
+    EXPECT_FALSE(it2 == it1);
+    //!=
+    EXPECT_TRUE(it2 != it1);
+    --it2;
+    EXPECT_FALSE(it2 != it1);
+}
 
+//const_iterator部分
+TEST(testConstIterator,ConstiteratorConstructor){
+    set<int> s{1, 2, 3, 4, 5};
+    set<int>::const_iterator it1;
+    set<int>::const_iterator it2 = s.begin();
+    set<int>::const_iterator it3(it2);
+    set<int>::iterator it4=s.begin();
+    it1 = it4;
+    EXPECT_EQ(it2, it3);
+    EXPECT_EQ(*it2, 1);
+    EXPECT_EQ(*it1, 1);
+    EXPECT_EQ(it1, it2);
+    EXPECT_THROW(it4 = it2, std::exception);
+    //oper== between const_iterator & iterator
+    EXPECT_TRUE(it1 == it4);
+    EXPECT_TRUE(it4 == it1);
+    EXPECT_FALSE(it1 != it4);
+    EXPECT_FALSE(it4 != it1);
+}
+
+TEST(testConstIterator,ConstiteratorOperator){
+    set<int> s{2, 4, 6, 8, 10};
+    set<int>::const_iterator it1 = s.begin();
+    //*
+    EXPECT_EQ(*it1, 2);
+    //=
+    set<int>::const_iterator it2;
+    it2 = it1;
+    EXPECT_EQ(*it2, 2);
+    //++
+    EXPECT_EQ(*(++it2), 4);
+    EXPECT_EQ(*it2, 4);
+    //++(int)
+    EXPECT_EQ(*(it2++), 4);
+    EXPECT_EQ(*it2, 6);
+    //--
+    EXPECT_EQ(*(--it2), 4);
+    EXPECT_EQ(*it2,4);
+    //--(int)
+    EXPECT_EQ(*(it2--), 4);
+    EXPECT_EQ(*it2, 2);
+    //==
+    EXPECT_TRUE(it2==it1);
+    ++it2;
+    EXPECT_FALSE(it2 == it1);
+    //!=
+    EXPECT_TRUE(it2 != it1);
+    --it2;
+    EXPECT_FALSE(it2 != it1);
+    //const修改
+    EXPECT_THROW(*it2 = 5, std::exception);
+}
+
+//reverse_iterator部分
+TEST(testReverseIterator,ReverseiteratorConstructor){
+    set<int> s{1, 2, 3, 4, 5};
+    set<int>::reverse_iterator it1;
+    set<int>::reverse_iterator it2 = s.rbegin();
+    set<int>::reverse_iterator it3(it2);
+    EXPECT_EQ(it2, it3);
+    EXPECT_EQ(*it2, 5);
+}
+
+TEST(testReverseIterator,ReverseiteratorOperator){
+    set<int> s{2, 4, 6, 8, 10};
+    set<int>::reverse_iterator it1 = s.rbegin();
+    //*
+    EXPECT_EQ(*it1, 10);
+    //=
+    set<int>::reverse_iterator it2;
+    it2 = it1;
+    EXPECT_EQ(*it2, 10);
+    //++
+    EXPECT_EQ(*(++it2), 8);
+    EXPECT_EQ(*it2, 8);
+    //++(int)
+    EXPECT_EQ(*(it2++), 8);
+    EXPECT_EQ(*it2, 6);
+    //--
+    EXPECT_EQ(*(--it2), 8);
+    EXPECT_EQ(*it2,8);
+    //--(int)
+    EXPECT_EQ(*(it2--), 8);
+    EXPECT_EQ(*it2, 10);
+    //==
+    EXPECT_TRUE(it2==it1);
+    ++it2;
+    EXPECT_FALSE(it2 == it1);
+    //!=
+    EXPECT_TRUE(it2 != it1);
+    --it2;
+    EXPECT_FALSE(it2 != it1);
+}
+
+//const_reverse_iterator部分
+TEST(testConstReverseIterator,ConstReverseiteratorConstructor){
+    set<int> s{1, 2, 3, 4, 5};
+    set<int>::const_reverse_iterator it1;
+    set<int>::const_reverse_iterator it2 = s.rbegin();
+    set<int>::const_reverse_iterator it3(it2);
+    set<int>::reverse_iterator it4=s.rbegin();
+    it1 = it4;
+    EXPECT_EQ(it2, it3);
+    EXPECT_EQ(*it2, 5);
+    EXPECT_EQ(*it1, 5);
+    EXPECT_EQ(it1, it2);
+    EXPECT_THROW(it4 = it2, std::exception);
+    //oper== between const_reverse_iterator & reverse_iterator
+    EXPECT_TRUE(it1 == it4);
+    EXPECT_TRUE(it4 == it1);
+    EXPECT_FALSE(it1 != it4);
+    EXPECT_FALSE(it4 != it1);
+}
+
+TEST(testConstReverseIterator,ConstReverseiteratorOperator){
+    set<int> s{2, 4, 6, 8, 10};
+    set<int>::const_reverse_iterator it1 = s.rbegin();
+    //*
+    EXPECT_EQ(*it1, 10);
+    //=
+    set<int>::const_reverse_iterator it2;
+    it2 = it1;
+    EXPECT_EQ(*it2, 10);
+    //++
+    EXPECT_EQ(*(++it2), 8);
+    EXPECT_EQ(*it2, 8);
+    //++(int)
+    EXPECT_EQ(*(it2++), 8);
+    EXPECT_EQ(*it2, 6);
+    //--
+    EXPECT_EQ(*(--it2), 8);
+    EXPECT_EQ(*it2,8);
+    //--(int)
+    EXPECT_EQ(*(it2--), 8);
+    EXPECT_EQ(*it2, 10);
+    //==
+    EXPECT_TRUE(it2==it1);
+    ++it2;
+    EXPECT_FALSE(it2 == it1);
+    //!=
+    EXPECT_TRUE(it2 != it1);
+    --it2;
+    EXPECT_FALSE(it2 != it1);
+    //const修改
+    EXPECT_THROW(*it2 = 5, std::exception);
+}
 
 int main(int argc,char **argv){
     testing::InitGoogleTest(&argc, argv);
