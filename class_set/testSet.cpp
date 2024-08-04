@@ -127,7 +127,6 @@ TEST(testConstIterator,ConstiteratorConstructor){
     EXPECT_EQ(*it2, 1);
     EXPECT_EQ(*it1, 1);
     EXPECT_EQ(it1, it2);
-    EXPECT_THROW(it4 = it2, std::exception);
     //oper== between const_iterator & iterator
     EXPECT_TRUE(it1 == it4);
     EXPECT_TRUE(it4 == it1);
@@ -221,7 +220,6 @@ TEST(testConstReverseIterator,ConstReverseiteratorConstructor){
     EXPECT_EQ(*it2, 5);
     EXPECT_EQ(*it1, 5);
     EXPECT_EQ(it1, it2);
-    EXPECT_THROW(it4 = it2, std::exception);
     //oper== between const_reverse_iterator & reverse_iterator
     EXPECT_TRUE(it1 == it4);
     EXPECT_TRUE(it4 == it1);

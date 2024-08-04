@@ -25,7 +25,13 @@ private:
     //========================辅助函数模块=============
 
 public:
-//=======================迭代器模块=========================
+    //前向声明
+    class iterator;
+    class const_iterator;
+    class reverse_iterator;
+    class const_reverse_iterator;
+
+    //=======================迭代器模块=========================
     class iterator
     {
     private:
@@ -92,6 +98,25 @@ public:
         bool operator!=(const iterator& other){
             return !(*this == other);
         }
+
+        //override oper==
+        bool operator==(const const_iterator& other){
+        if(_root==other._root){
+            return true;
+        }
+        return false;
+        }
+
+        //override oper!=
+        bool operator!=(const const_iterator& other){
+        if(_root!=other._root){
+            return true;
+        }
+        return false;
+        }
+
+        //声明友元类
+        friend class const_iterator;
     };
 
     class const_iterator
@@ -116,7 +141,7 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*(){
+        key_type operator*(){
             return _root->get_key();
         }
 
@@ -169,6 +194,22 @@ public:
         bool operator!=(const const_iterator& other){
             return !(*this == other);
         }
+
+        //重载等于==运算符
+        bool operator==(const iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const iterator& other){
+            return !(*this == other);
+        }
+
+        //声明友元类
+        friend class iterator;
     };
 
     class reverse_iterator
@@ -236,6 +277,23 @@ public:
         bool operator!=(const reverse_iterator& other){
             return !(*this == other);
         }
+
+
+        //重载等于==运算符
+        bool operator==(const const_reverse_iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const const_reverse_iterator& other){
+            return !(*this == other);
+        }
+
+        //声明友元类
+        friend class const_reverse_iterator;
     };
 
     class const_reverse_iterator
@@ -312,6 +370,22 @@ public:
         bool operator!=(const const_reverse_iterator& other){
             return !(*this == other);
         }
+
+        //重载等于==运算符
+        bool operator==(const reverse_iterator& other){
+            if(other._root==_root){
+                return true;
+            }
+            return false;
+        }
+
+        //重载不等于!=运算符
+        bool operator!=(const reverse_iterator& other){
+            return !(*this == other);
+        }
+
+        //声明友元类
+        friend class reverse_iterator;
     };
 
     //返回指向 set 首元素的迭代器。
@@ -370,62 +444,6 @@ public:
         return const_reverse_iterator();
     }
 
-    //override oper==
-    bool operator==(const iterator& rhs,const const_iterator& lhs){
-        if(rhs._root==lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator==(const const_iterator& rhs,const iterator& lhs){
-        if(rhs._root==lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator!=(const iterator& rhs,const const_iterator& lhs){
-        if(rhs._root!=lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator!=(const const_iterator& rhs,const iterator& lhs){
-        if(rhs._root!=lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator==(const reverse_iterator& rhs,const const_reverse_iterator& lhs){
-        if(rhs._root==lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator==(const const_reverse_iterator& rhs,const reverse_iterator& lhs){
-        if(rhs._root==lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator!=(const reverse_iterator& rhs,const const_reverse_iterator& lhs){
-        if(rhs._root!=lhs._root){
-            return true;
-        }
-        return false;
-    }
-
-    bool operator!=(const const_reverse_iterator& rhs,const reverse_iterator& lhs){
-        if(rhs._root!=lhs._root){
-            return true;
-        }
-        return false;
-    }
 
     //======================构造函数模块=============
     //默认构造函数
@@ -532,6 +550,81 @@ public:
     void clear()
     {
         rb.release();
+    }
+
+    //insert:插入元素到容器，如果容器未含拥有等价关键的元素。
+    std::pair<iterator,bool>insert(const value_type& value){
+        bool res_bool = rb.insert(value);
+        return std::make_pair(iterator(rb.find(value)), res_bool);
+    }
+
+    std::pair<iterator,bool>insert(value_type&& value){
+        bool res_bool = rb.inser(value);
+        return std::make_pair(iterator(rb.find(value)), res_bool);
+    }
+
+    //插入来自范围 [first, last) 的元素。
+    template<class InputIt>
+    void insert(InputIt first, InputIt last){
+        while(first!=last){
+            insert(*first);
+            ++first;
+        }
+    }
+
+    //插入来自 initializer_list ilist 的元素。
+    void insert(std::initializer_list<value_type> ilist){
+        for (auto it = ilist.begin(); it != ilist.end();++it){
+            insert(*it);
+        }
+    }
+
+
+    //从容器移除指定的元素。
+    iterator erase(iterator pos){
+        iterator res = pos;
+        ++res;
+        rb.erase(pos._root);//调用rbtree的erase
+        return res;
+    }
+
+    // 移除范围 [first, last) 中的元素，它必须是 *this 中的合法范围。
+    iterator erase(iterator first,iterator last){
+        while(first!=last){
+            first = erase(first);
+        }
+        return last;
+    }
+
+    //移除键等价于 key 的元素（如果存在一个）。
+    size_type erase(const Key& key){
+        if(rb.erase(key))
+            return 1;
+        return 0;
+    }
+
+
+    //swap
+    //将内容与 other 的交换。不在单独的元素上调用任何移动、复制或交换操作。
+    //所有迭代器和引用仍然有效。end() 迭代器失效。
+
+
+    //============查找模块=============
+    //返回拥有与指定实参比较等价的键的元素数。
+    //返回拥有键 key 的元素数。，因为此容器不允许重复，故只能为 1 或 0。
+    size_type count(const Key& key)const{
+        if(rb.find(key))
+            return 1;
+        return 0;
+    }
+
+    //寻找键等于 key 的的元素。
+    iterator find(const Key& key){
+        return iterator(rb.find(key));
+    }
+
+    const_iterator find(const Key& key)const{
+        return const_iterator(rb.find(key));
     }
 };
 
