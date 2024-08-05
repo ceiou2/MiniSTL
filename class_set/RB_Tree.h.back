@@ -38,8 +38,18 @@ public:
         return data.first;
     }
 
+    const K& get_key()const
+    {
+        return data.first;
+    }
+
     //获取value值
     V& get_value()
+    {
+        return data.second;
+    }
+
+    const V& get_value()const
     {
         return data.second;
     }
@@ -325,26 +335,50 @@ protected:
     void _erase_case2_3_(Node* bro, Node* cur)
     { // bro是原兄弟节点，cur是原父亲节点
         // case2.3.1:兄弟节点至少有一个红色子节点
-        //兄弟节点存在左子节点（两个或者单左子节点）
-        if (bro->left_child != nullptr) {
-            R_Rotation(cur); //右旋
-            //染色
-            cur->_col = cur->right_child->_col; // cur继承原父亲节点颜色
-            cur->right_child->_col = BLACK;
-            cur->left_child->_col = BLACK;
-        }
-        //兄弟节点只有一个右子节点
-        else if (bro->right_child != nullptr) {
-            L_Rotation(bro); //对兄弟节点进行左单旋
-            R_Rotation(cur); //对原父亲节点进行右单旋
-            //染色
-            cur->parent->_col = cur->_col;
-            cur->_col = BLACK;
-            bro->_col = BLACK;
+        if (bro == cur->left_child) {//兄弟节点是父亲的左孩子
+            //兄弟节点存在左子节点（两个或者单左子节点）
+            if (bro->left_child != nullptr) {
+                R_Rotation(cur); //右旋
+                //染色
+                bro->_col = cur->_col; // bro继承原父亲节点颜色
+                bro->right_child->_col = BLACK;
+                bro->left_child->_col = BLACK;
+                return;
+            }
+            // 兄弟节点只有一个右子节点
+            else if (bro->right_child != nullptr) {
+                L_Rotation(bro); //对兄弟节点进行左单旋
+                R_Rotation(cur); //对原父亲节点进行右单旋
+                //染色
+                cur->parent->_col = cur->_col;
+                cur->_col = BLACK;
+                bro->_col = BLACK;
+                return;
+            }
+        } else { // 兄弟节点是父亲的右孩子
+            // 兄弟节点存在右子节点（两个或者单右子节点）
+            if (bro->right_child != nullptr) {
+                L_Rotation(cur); //左旋
+                //染色
+                bro->_col = cur->_col; // bro继承原父亲节点颜色
+                bro->right_child->_col = BLACK;
+                bro->left_child->_col = BLACK;
+                return;
+            }
+            // 兄弟节点只有一个左子节点
+            else if (bro->right_child != nullptr) {
+                L_Rotation(bro); //对兄弟节点进行右单旋
+                R_Rotation(cur); //对原父亲节点进行左单旋
+                //染色
+                cur->parent->_col = cur->_col;//新父亲节点(bro->right_child)继承原父亲节点颜色
+                cur->_col = BLACK;
+                bro->_col = BLACK;
+                return;
+            }
         }
         // case2.3.2:兄弟节点没有子节点
         //父亲节点为红色
-        else if (cur->_col == RED) {
+        if (cur->_col == RED) {
             cur->_col = BLACK;
             bro->_col = RED;
         }
@@ -395,10 +429,24 @@ protected:
     }
 
     //_size递归子函数
-    size_type _size(Node* _root){
+    size_type _size(const Node* _root)const{
         if(!_root)
             return 0;
         return _size(_root->left_child) + _size(_root->right_child) + 1;
+    }
+
+    //节点增减后更新head中的最大最小指针
+    void head_child_update(){
+        if(!head->parent)//空树
+            return;
+        head->left_child = head->parent;
+        head->right_child = head->parent;
+        while (head->left_child->left_child){
+            head->left_child = head->left_child->left_child;
+        }
+        while(head->right_child->right_child){
+            head->right_child = head->right_child->right_child;
+        }
     }
 
 public:
@@ -432,10 +480,29 @@ public:
         return head->parent;
     }
 
+    const Node* get_root()const{
+        return head->parent;
+    }
+
     //寻找key对应节点
     Node* find(const K& key)
     {
         Node* root = get_root();
+        while (root != nullptr) {
+            if (root->get_key() == key) {
+                return root;
+            } else if (root->get_key() > key) {
+                root = root->left_child;
+            } else {
+                root = root->right_child;
+            }
+        }
+        return nullptr;
+    }
+
+    const Node* find(const K& key)const
+    {
+        const Node* root = get_root();
         while (root != nullptr) {
             if (root->get_key() == key) {
                 return root;
@@ -471,13 +538,37 @@ public:
 
         // 如果不是插入根节点或者无法插入的话，普通插入成功，接下来进行平衡红黑树
         BalanceFunc(cur); //判断并处理平衡
-        //更新head+++不确定这里是要从根节点重新走还是从上一个节点开始走就行以及这里写成if会怎样（应该没关系，毕竟只插入一个）
-        while (head->left_child->left_child != nullptr) {
-            head->left_child = head->left_child->left_child;
+        //更新head
+        head_child_update();
+
+        return true;
+    }
+
+    bool insert(std::pair<K, V>&& value)
+    {
+        Node* cur = new Node(value); //构造新节点
+        //空树的情况
+        if (head->parent == nullptr) { //插入结点为根节点
+            // init head
+            head->parent = cur;
+            head->left_child = cur;
+            head->right_child = cur;
+            // init rootNode
+            cur->parent = head;
+            cur->_col = BLACK;
+
+            return true;
+        } else if (!_insert(head->parent, cur)) { // 先插入:二叉树的插入方式
+            //存在节点key，无法插入
+            delete cur;
+            return false;
         }
-        while (head->right_child->right_child != nullptr) {
-            head->right_child = head->right_child->right_child;
-        }
+
+        // 如果不是插入根节点或者无法插入的话，普通插入成功，接下来进行平衡红黑树
+        BalanceFunc(cur); //判断并处理平衡
+        //更新head
+        head_child_update();
+
         return true;
     }
 
@@ -563,6 +654,9 @@ public:
             //修复平衡
             _erase_case2_3_(bro, cur); //封装起来用于递归修复
         }
+        //更新head->left/right
+        head_child_update();
+
         return true;
     }
 
@@ -606,8 +700,94 @@ public:
     }
 
     //得到树的节点数量
-    size_type size(){
+    size_type size()const{
         return _size(head->parent);
+    }
+
+    //找到比当前节点大的下一个节点
+    static Node* get_next(Node* cur){
+        if(cur->right_child){//存在右子树情况
+            cur = cur->right_child;
+            while(cur->left_child){
+                cur = cur->left_child;
+            }
+        }
+        else{//不存在右子树情况,向上找第一个比cur大的
+            while (cur->parent->parent != cur) { // cur->parent!=head
+                if(cur==cur->parent->left_child){
+                    return cur->parent;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    static const Node* get_next(const Node* cur)
+    {
+        if (cur->right_child) { //存在右子树情况
+            cur = cur->right_child;
+            while (cur->left_child) {
+                cur = cur->left_child;
+            }
+        } else { //不存在右子树情况,向上找第一个比cur大的
+            while (cur->parent->parent != cur) { // cur->parent!=head
+                if (cur == cur->parent->left_child) {
+                    return cur->parent;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    //找到比当前节点小的下一个节点
+    static Node* get_prev(Node* cur){
+        if (cur->left_child) { //存在左子树情况
+            cur = cur->left_child;
+            while (cur->right_child) {
+                cur = cur->right_child;
+            }
+        } else { //不存在左子树情况,向上找第一个比cur小的
+            while (cur->parent->parent != cur) {
+                if (cur == cur->parent->right_child) {
+                    return cur->parent;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    static const Node* get_prev(const Node* cur)
+    {
+        if (cur->left_child) { //存在左子树情况
+            cur = cur->left_child;
+            while (cur->right_child) {
+                cur = cur->right_child;
+            }
+        } else { //不存在左子树情况,向上找第一个比cur小的
+            while (cur->parent->parent != cur) {
+                if (cur == cur->parent->right_child) {
+                    return cur->parent;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    //删除首部节点以外的所有节点并释放内存,注意，还剩下一个首部节点，相比于析构函数，该函数执行后清除红黑树可再次使用。
+    void clear(){
+        release();
     }
 };
 

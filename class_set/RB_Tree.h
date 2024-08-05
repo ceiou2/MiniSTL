@@ -38,7 +38,7 @@ public:
         return data.first;
     }
 
-    const K& get_key()const
+    const K& get_key() const
     {
         return data.first;
     }
@@ -49,7 +49,7 @@ public:
         return data.second;
     }
 
-    const V& get_value()const
+    const V& get_value() const
     {
         return data.second;
     }
@@ -65,7 +65,6 @@ public:
     Node* head; //首节点，head->parent指向root
 
 protected:
-
     //===========================================辅助函数模块=================================
     //删除首部节点以外的所有节点并释放内存,注意，还剩下一个首部节点，相比于析构函数，该函数执行后清除红黑树可再次使用。（析构函数额外再实现首部节点内存释放）
     void release()
@@ -73,7 +72,7 @@ protected:
         if (head == nullptr)
             return;
         _release(head->parent);
-        //set head null
+        // set head null
         head->parent = nullptr;
         head->left_child = nullptr;
         head->right_child = nullptr;
@@ -335,26 +334,51 @@ protected:
     void _erase_case2_3_(Node* bro, Node* cur)
     { // bro是原兄弟节点，cur是原父亲节点
         // case2.3.1:兄弟节点至少有一个红色子节点
-        //兄弟节点存在左子节点（两个或者单左子节点）
-        if (bro->left_child != nullptr) {
-            R_Rotation(cur); //右旋
-            //染色
-            cur->_col = cur->right_child->_col; // cur继承原父亲节点颜色
-            cur->right_child->_col = BLACK;
-            cur->left_child->_col = BLACK;
-        }
-        //兄弟节点只有一个右子节点
-        else if (bro->right_child != nullptr) {
-            L_Rotation(bro); //对兄弟节点进行左单旋
-            R_Rotation(cur); //对原父亲节点进行右单旋
-            //染色
-            cur->parent->_col = cur->_col;
-            cur->_col = BLACK;
-            bro->_col = BLACK;
+        if (bro == cur->left_child) { //兄弟节点是父亲的左孩子
+            //兄弟节点存在左子节点（两个或者单左子节点）
+            if (bro->left_child != nullptr) {
+                R_Rotation(cur); //右旋
+                //染色
+                bro->_col = cur->_col; // bro继承原父亲节点颜色
+                bro->right_child->_col = BLACK;
+                bro->left_child->_col = BLACK;
+                return;
+            }
+            // 兄弟节点只有一个右子节点
+            else if (bro->right_child != nullptr) {
+                L_Rotation(bro); //对兄弟节点进行左单旋
+                R_Rotation(cur); //对原父亲节点进行右单旋
+                //染色
+                cur->parent->_col = cur->_col;
+                cur->_col = BLACK;
+                bro->_col = BLACK;
+                return;
+            }
+        } else { // 兄弟节点是父亲的右孩子
+            // 兄弟节点存在右子节点（两个或者单右子节点）
+            if (bro->right_child != nullptr) {
+                L_Rotation(cur); //左旋
+                //染色
+                bro->_col = cur->_col; // bro继承原父亲节点颜色
+                bro->right_child->_col = BLACK;
+                bro->left_child->_col = BLACK;
+                return;
+            }
+            // 兄弟节点只有一个左子节点
+            else if (bro->right_child != nullptr) {
+                L_Rotation(bro); //对兄弟节点进行右单旋
+                R_Rotation(cur); //对原父亲节点进行左单旋
+                //染色
+                cur->parent->_col =
+                        cur->_col; //新父亲节点(bro->right_child)继承原父亲节点颜色
+                cur->_col = BLACK;
+                bro->_col = BLACK;
+                return;
+            }
         }
         // case2.3.2:兄弟节点没有子节点
         //父亲节点为红色
-        else if (cur->_col == RED) {
+        if (cur->_col == RED) {
             cur->_col = BLACK;
             bro->_col = RED;
         }
@@ -382,22 +406,23 @@ protected:
     // 辅助功能函数：主要为set和map中的一些操作实现，对应RB_Tree::public:功能函数模块
 
     //深拷贝子函数
-    void recursion_cp(Node* _root,Node* new_root) {
-        if(_root==head){//首结点情况
-            if (head->parent){//存在根节点情况
+    void recursion_cp(Node* _root, Node* new_root)
+    {
+        if (_root == head) {    //首结点情况
+            if (head->parent) { //存在根节点情况
                 new_root->parent = new Node(head->parent->data);
                 new_root->parent->parent = new_root;
                 recursion_cp(_root->parent, new_root->parent);
             }
-            return;//只有首结点情况
+            return; //只有首结点情况
         }
-        //DFS构造新树
-        if(_root->left_child){
+        // DFS构造新树
+        if (_root->left_child) {
             new_root->left_child = new Node(_root->left_child->data);
             new_root->left_child->parent = new_root;
             recursion_cp(_root->left_child, new_root->left_child);
         }
-        if(_root->right_child){
+        if (_root->right_child) {
             new_root->right_child = new Node(_root->right_child->data);
             new_root->right_child->parent = new_root;
             recursion_cp(_root->right_child, new_root->right_child);
@@ -405,22 +430,24 @@ protected:
     }
 
     //_size递归子函数
-    size_type _size(Node* _root){
-        if(!_root)
+    size_type _size(const Node* _root) const
+    {
+        if (!_root)
             return 0;
         return _size(_root->left_child) + _size(_root->right_child) + 1;
     }
 
     //节点增减后更新head中的最大最小指针
-    void head_child_update(){
-        if(!head->parent)//空树
+    void head_child_update()
+    {
+        if (!head->parent) //空树
             return;
         head->left_child = head->parent;
         head->right_child = head->parent;
-        while (head->left_child->left_child){
+        while (head->left_child->left_child) {
             head->left_child = head->left_child->left_child;
         }
-        while(head->right_child->right_child){
+        while (head->right_child->right_child) {
             head->right_child = head->right_child->right_child;
         }
     }
@@ -456,6 +483,11 @@ public:
         return head->parent;
     }
 
+    const Node* get_root() const
+    {
+        return head->parent;
+    }
+
     //寻找key对应节点
     Node* find(const K& key)
     {
@@ -472,8 +504,51 @@ public:
         return nullptr;
     }
 
+    const Node* find(const K& key) const
+    {
+        const Node* root = get_root();
+        while (root != nullptr) {
+            if (root->get_key() == key) {
+                return root;
+            } else if (root->get_key() > key) {
+                root = root->left_child;
+            } else {
+                root = root->right_child;
+            }
+        }
+        return nullptr;
+    }
+
     // insert
     bool insert(const std::pair<K, V>& value)
+    {
+        Node* cur = new Node(value); //构造新节点
+        //空树的情况
+        if (head->parent == nullptr) { //插入结点为根节点
+            // init head
+            head->parent = cur;
+            head->left_child = cur;
+            head->right_child = cur;
+            // init rootNode
+            cur->parent = head;
+            cur->_col = BLACK;
+
+            return true;
+        } else if (!_insert(head->parent, cur)) { // 先插入:二叉树的插入方式
+            //存在节点key，无法插入
+            delete cur;
+            return false;
+        }
+
+        // 如果不是插入根节点或者无法插入的话，普通插入成功，接下来进行平衡红黑树
+        BalanceFunc(cur); //判断并处理平衡
+        //更新head
+        head_child_update();
+
+        return true;
+    }
+
+    bool insert(std::pair<K, V>&& value)
     {
         Node* cur = new Node(value); //构造新节点
         //空树的情况
@@ -595,28 +670,29 @@ public:
         return erase(find(key));
     }
 
-
     //==============功能函数模块===================
     //置空head首节点 小心使用
-    void set_head_null(){
+    void set_head_null()
+    {
         head->parent = nullptr;
         head->left_child = nullptr;
         head->right_child = nullptr;
     }
 
     //深拷贝一整棵树，返回new_head
-    Node* _cp(){
+    Node* _cp()
+    {
         Node* new_head = new Node(std::make_pair(
                 K(),
                 V())); //首部节点，parent指向root根节点，left_chile指向RB树最小节点，right_child指向RB树最大节点。
         new_head->_col = BLACK;
 
-        recursion_cp(head,new_head);//开始拷贝
+        recursion_cp(head, new_head); //开始拷贝
 
-        //new_head左右节点移动到最小最大叶子节点
+        // new_head左右节点移动到最小最大叶子节点
         new_head->left_child = new_head->parent;
         new_head->right_child = new_head->parent;
-        if(new_head->parent){//存在根节点情况
+        if (new_head->parent) { //存在根节点情况
             while (new_head->left_child->left_child) {
                 new_head->left_child = new_head->left_child->left_child;
             }
@@ -629,21 +705,22 @@ public:
     }
 
     //得到树的节点数量
-    size_type size(){
+    size_type size() const
+    {
         return _size(head->parent);
     }
 
     //找到比当前节点大的下一个节点
-    static Node* get_next(Node* cur){
-        if(cur->right_child){//存在右子树情况
+    static Node* get_next(Node* cur)
+    {
+        if (cur->right_child) { //存在右子树情况
             cur = cur->right_child;
-            while(cur->left_child){
+            while (cur->left_child) {
                 cur = cur->left_child;
             }
-        }
-        else{//不存在右子树情况,向上找第一个比cur大的
+        } else { //不存在右子树情况,向上找第一个比cur大的
             while (cur->parent->parent != cur) { // cur->parent!=head
-                if(cur==cur->parent->left_child){
+                if (cur == cur->parent->left_child) {
                     return cur->parent;
                 }
                 cur = cur->parent;
@@ -675,7 +752,8 @@ public:
     }
 
     //找到比当前节点小的下一个节点
-    static Node* get_prev(Node* cur){
+    static Node* get_prev(Node* cur)
+    {
         if (cur->left_child) { //存在左子树情况
             cur = cur->left_child;
             while (cur->right_child) {
@@ -712,6 +790,12 @@ public:
             return nullptr;
         }
         return cur;
+    }
+
+    //删除首部节点以外的所有节点并释放内存,注意，还剩下一个首部节点，相比于析构函数，该函数执行后清除红黑树可再次使用。
+    void clear()
+    {
+        release();
     }
 };
 

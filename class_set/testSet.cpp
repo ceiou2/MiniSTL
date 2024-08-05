@@ -260,6 +260,102 @@ TEST(testConstReverseIterator,ConstReverseiteratorOperator){
     //EXPECT_THROW(*it2 = 5, std::exception);
 }
 
+//查找模块测试
+TEST(testLookup,count){
+    set<int> s{1, 2, 3, 4, 5};
+    EXPECT_EQ(s.count(1), 1);
+    EXPECT_EQ(s.count(6), 0);
+}
+
+TEST(testLookup,find){
+    set<int> s{1, 2, 3, 4, 5, 6};
+    set<int>::iterator i = s.find(6);
+    auto i2 = s.find(7);
+    EXPECT_EQ(*i, 6);
+    EXPECT_EQ(i2, s.end());
+}
+
+//修改器模块
+TEST(testModifiers,clear){
+    set<int> s{1, 2, 3, 4, 5};
+    EXPECT_EQ(s.size(), 5);
+    s.clear();
+    EXPECT_EQ(s.size(), 0);
+    s.insert(1);
+    EXPECT_EQ(s.size(), 1);
+}
+
+TEST(testModifiers,insert){
+    set<int> s{1, 2, 3};
+    s.insert(4);
+    EXPECT_EQ(s.count(4), 1);
+    int k = 5;
+    s.insert(std::move(5));
+    EXPECT_EQ(s.count(5), 1);
+    set<int> s2{7, 8, 9};
+    s.insert(s2.begin(), s2.end());
+    EXPECT_EQ(s.size(), 8);
+    s.insert({11, 12, 13, 14, 15});
+    EXPECT_EQ(s.size(), 13);
+    s.insert(1);
+    EXPECT_EQ(s.size(), 13);
+}
+
+TEST(testModifiers,erase){
+    set<int> s{1, 2, 3, 4, 5};
+    auto it = s.erase(s.begin());
+    EXPECT_EQ(s.size(), 4);
+    EXPECT_EQ(*it, 2);
+    s.erase(s.begin(), s.end());
+    EXPECT_TRUE(s.empty());
+    s.insert(1);
+    EXPECT_EQ(s.erase(2), 0);
+    EXPECT_EQ(s.erase(1), 1);
+}
+
+TEST(testModifiers,swap){
+    set<int> s1{1, 2, 3, 4, 5};
+    set<int> s2{6, 7, 8};
+    s1.swap(s2);
+    EXPECT_EQ(s1.size(), 3);
+    EXPECT_EQ(s2.size(), 5);
+    EXPECT_EQ(*s1.begin(), 6);
+}
+
+TEST(testNon_memberFunc,operator){
+    set<int> s1{1, 2, 3};
+    set<int> s2{1, 2, 3};
+    set<int> s3{1, 3};
+    set<int> s4{2};
+    EXPECT_TRUE(s1 == s2);
+    EXPECT_FALSE(s1 == s3);
+
+    EXPECT_TRUE(s1 < s3);
+    EXPECT_FALSE(s3 < s2);
+    EXPECT_FALSE(s1 < s2);
+
+    EXPECT_TRUE(s1 <= s2);
+    EXPECT_TRUE(s1 <= s3);
+    EXPECT_FALSE(s4 <= s1);
+
+    EXPECT_TRUE(s4 > s1);
+    EXPECT_FALSE(s1 > s2);
+    EXPECT_FALSE(s3 > s4);
+
+    EXPECT_TRUE(s4 >= s1);
+    EXPECT_TRUE(s2 >= s1);
+    EXPECT_FALSE(s3 >= s4);
+}
+
+TEST(testNon_memberFunc,swap){
+    set<int> s1{1, 2, 3, 4, 5};
+    set<int> s2{6, 7, 8};
+    swap(s1,s2);
+    EXPECT_EQ(s1.size(), 3);
+    EXPECT_EQ(s2.size(), 5);
+    EXPECT_EQ(*s1.begin(), 6);
+}
+
 int main(int argc,char **argv){
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
