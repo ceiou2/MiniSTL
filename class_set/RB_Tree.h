@@ -38,8 +38,18 @@ public:
         return data.first;
     }
 
+    const K& get_key()const
+    {
+        return data.first;
+    }
+
     //获取value值
     V& get_value()
+    {
+        return data.second;
+    }
+
+    const V& get_value()const
     {
         return data.second;
     }
@@ -624,7 +634,7 @@ public:
     }
 
     //找到比当前节点大的下一个节点
-    Node* get_next(Node* cur){
+    static Node* get_next(Node* cur){
         if(cur->right_child){//存在右子树情况
             cur = cur->right_child;
             while(cur->left_child){
@@ -632,7 +642,7 @@ public:
             }
         }
         else{//不存在右子树情况,向上找第一个比cur大的
-            while(cur->parent!=head){
+            while (cur->parent->parent != cur) { // cur->parent!=head
                 if(cur==cur->parent->left_child){
                     return cur;
                 }
@@ -644,15 +654,55 @@ public:
         return cur;
     }
 
+    static const Node* get_next(const Node* cur)
+    {
+        if (cur->right_child) { //存在右子树情况
+            cur = cur->right_child;
+            while (cur->left_child) {
+                cur = cur->left_child;
+            }
+        } else { //不存在右子树情况,向上找第一个比cur大的
+            while (cur->parent->parent != cur) { // cur->parent!=head
+                if (cur == cur->parent->left_child) {
+                    return cur;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
     //找到比当前节点小的下一个节点
-    Node* get_prev(Node* cur){
+    static Node* get_prev(Node* cur){
         if (cur->left_child) { //存在左子树情况
             cur = cur->left_child;
             while (cur->right_child) {
                 cur = cur->right_child;
             }
         } else { //不存在左子树情况,向上找第一个比cur小的
-            while (cur->parent != head) {
+            while (cur->parent->parent != cur) {
+                if (cur == cur->parent->right_child) {
+                    return cur;
+                }
+                cur = cur->parent;
+            }
+            //找遍了都没有比cur大的，此时cur已经最大，返回nullptr
+            return nullptr;
+        }
+        return cur;
+    }
+
+    static const Node* get_prev(const Node* cur)
+    {
+        if (cur->left_child) { //存在左子树情况
+            cur = cur->left_child;
+            while (cur->right_child) {
+                cur = cur->right_child;
+            }
+        } else { //不存在左子树情况,向上找第一个比cur小的
+            while (cur->parent->parent != cur) {
                 if (cur == cur->parent->right_child) {
                     return cur;
                 }

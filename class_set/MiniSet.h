@@ -24,6 +24,7 @@ private:
 
     //========================辅助函数模块=============
 
+
 public:
     //前向声明
     class iterator;
@@ -62,12 +63,12 @@ public:
 
         //重载前置++运算符
         iterator& operator++(){
-            _root = rb.get_next(_root);
+            _root = RB_Tree<key_type,key_type>::get_next(_root);
             return *this;
         }
 
         //重载后置++运算符
-        iterator& operator++(int){
+        iterator operator++(int){
             iterator tmp(*this);
             ++*this;
             return tmp;
@@ -75,19 +76,19 @@ public:
 
         //重载前置--运算符
         iterator& operator--(){
-            _root = rb.get_prev(_root);
+            _root = RB_Tree<key_type, key_type>::get_prev(_root);
             return *this;
         }
 
         //重载后置--运算符
-        iterator& operator--(int){
+        iterator operator--(int){
             iterator temp(*this);
             --*this;
             return temp;
         }
 
         //重载等于==运算符
-        bool operator==(const iterator& other){
+        bool operator==(const iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -95,12 +96,12 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const iterator& other){
+        bool operator!=(const iterator& other)const{
             return !(*this == other);
         }
 
         //override oper==
-        bool operator==(const const_iterator& other){
+        bool operator==(const const_iterator& other)const{
         if(_root==other._root){
             return true;
         }
@@ -108,7 +109,7 @@ public:
         }
 
         //override oper!=
-        bool operator!=(const const_iterator& other){
+        bool operator!=(const const_iterator& other)const{
         if(_root!=other._root){
             return true;
         }
@@ -141,7 +142,7 @@ public:
         }
 
         //重载*运算符
-        key_type operator*(){
+        const key_type& operator*(){
             return _root->get_key();
         }
 
@@ -158,12 +159,12 @@ public:
 
         //重载前置++运算符
         const_iterator& operator++(){
-            _root = rb.get_next(_root);
+            _root = RB_Tree<key_type,key_type>::get_next(_root);
             return *this;
         }
 
         //重载后置++运算符
-        const_iterator& operator++(int){
+        const_iterator operator++(int){
             const_iterator tmp(*this);
             ++*this;
             return tmp;
@@ -171,19 +172,19 @@ public:
 
         //重载前置--运算符
         const_iterator& operator--(){
-            _root = rb.get_prev(_root);
+            _root = RB_Tree<key_type, key_type>::get_prev(_root);
             return *this;
         }
 
         //重载后置--运算符
-        const_iterator& operator--(int){
+        const_iterator operator--(int){
             const_iterator temp(*this);
             --*this;
             return temp;
         }
 
         //重载等于==运算符
-        bool operator==(const const_iterator& other){
+        bool operator==(const const_iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -191,12 +192,12 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const const_iterator& other){
+        bool operator!=(const const_iterator& other)const{
             return !(*this == other);
         }
 
         //重载等于==运算符
-        bool operator==(const iterator& other){
+        bool operator==(const iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -204,7 +205,7 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const iterator& other){
+        bool operator!=(const iterator& other)const{
             return !(*this == other);
         }
 
@@ -241,12 +242,12 @@ public:
 
         //重载前置++运算符
         reverse_iterator& operator++(){
-            _root = rb.get_prev(_root);
+            _root = RB_Tree<key_type,key_type>::get_prev(_root);
             return *this;
         }
 
         //重载后置++运算符
-        reverse_iterator& operator++(int){
+        reverse_iterator operator++(int){
             reverse_iterator tmp(*this);
             ++*this;
             return tmp;
@@ -254,19 +255,19 @@ public:
 
         //重载前置--运算符
         reverse_iterator& operator--(){
-            _root = rb.get_next(_root);
+            _root = RB_Tree<key_type, key_type>::get_next(_root);
             return *this;
         }
 
         //重载后置--运算符
-        reverse_iterator& operator--(int){
+        reverse_iterator operator--(int){
             reverse_iterator temp(*this);
             --*this;
             return temp;
         }
 
         //重载等于==运算符
-        bool operator==(const reverse_iterator& other){
+        bool operator==(const reverse_iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -274,13 +275,13 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const reverse_iterator& other){
+        bool operator!=(const reverse_iterator& other)const{
             return !(*this == other);
         }
 
 
         //重载等于==运算符
-        bool operator==(const const_reverse_iterator& other){
+        bool operator==(const const_reverse_iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -288,7 +289,7 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const const_reverse_iterator& other){
+        bool operator!=(const const_reverse_iterator& other)const{
             return !(*this == other);
         }
 
@@ -317,7 +318,7 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*(){
+        const key_type& operator*(){
             return _root->get_key();
         }
 
@@ -334,12 +335,12 @@ public:
 
         //重载前置++运算符
         const_reverse_iterator& operator++(){
-            _root = rb.get_prev(_root);
+            _root = RB_Tree<key_type, key_type>::get_prev(_root);
             return *this;
         }
 
         //重载后置++运算符
-        const_reverse_iterator& operator++(int){
+        const_reverse_iterator operator++(int){
             const_reverse_iterator tmp(*this);
             ++*this;
             return tmp;
@@ -347,19 +348,19 @@ public:
 
         //重载前置--运算符
         const_reverse_iterator& operator--(){
-            _root = rb.get_next(_root);
+            _root = RB_Tree<key_type, key_type>::get_next(_root);
             return *this;
         }
 
         //重载后置--运算符
-        const_reverse_iterator& operator--(int){
+        const_reverse_iterator operator--(int){
             const_reverse_iterator temp(*this);
             --*this;
             return temp;
         }
 
         //重载等于==运算符
-        bool operator==(const const_reverse_iterator& other){
+        bool operator==(const const_reverse_iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -367,12 +368,12 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const const_reverse_iterator& other){
+        bool operator!=(const const_reverse_iterator& other)const{
             return !(*this == other);
         }
 
         //重载等于==运算符
-        bool operator==(const reverse_iterator& other){
+        bool operator==(const reverse_iterator& other)const{
             if(other._root==_root){
                 return true;
             }
@@ -380,7 +381,7 @@ public:
         }
 
         //重载不等于!=运算符
-        bool operator!=(const reverse_iterator& other){
+        bool operator!=(const reverse_iterator& other)const{
             return !(*this == other);
         }
 
