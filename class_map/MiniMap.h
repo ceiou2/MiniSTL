@@ -1,26 +1,28 @@
-// MiniSet.h
+// MiniMap.h
 #pragma once
-#ifndef MINI_SET_H
-#define MINI_SET_H
+#ifndef MINI_MAP_H
+#define MINI_MAP_H
 
 #include <cstddef>
 #include "RB_Tree.h"
 
 // 迭代器未实现end(),rend(),只是简单地将他们定义为nullptr;后期可以改进
-template<typename Key>
-class set
+template<typename Key,typename T>
+class map
 {
 private:
     typedef Key key_type;
-    typedef Key value_type;
+    typedef T mapped_type;
+    typedef std::pair<const Key, T> value_type;
     typedef size_t size_type;
     typedef ptrdiff_t difference_type;
     typedef value_type& reference;
-    typedef const Key& const_reference;
-    typedef RB_TreeNode<key_type, key_type> Node;
+    typedef const std::pair<const Key,T>& const_reference;
+    typedef RB_TreeNode<key_type, mapped_type> Node;
+    typedef RB_Tree<key_type, mapped_type> map_tree;
 
 private:
-    RB_Tree<key_type, key_type> rb;
+    RB_Tree<key_type, mapped_type> rb;
 
 public:
     //前向声明
@@ -65,7 +67,7 @@ public:
         //重载前置++运算符
         iterator& operator++()
         {
-            _root = RB_Tree<key_type, key_type>::get_next(_root);
+            _root = map_tree::get_next(_root);
             return *this;
         }
 
@@ -80,7 +82,7 @@ public:
         //重载前置--运算符
         iterator& operator--()
         {
-            _root = RB_Tree<key_type, key_type>::get_prev(_root);
+            _root = map_tree::get_prev(_root);
             return *this;
         }
 
@@ -127,7 +129,7 @@ public:
 
         //声明友元类
         friend class const_iterator;
-        friend class set;
+        friend class map;
     };
 
     class const_iterator
@@ -176,7 +178,7 @@ public:
         //重载前置++运算符
         const_iterator& operator++()
         {
-            _root = RB_Tree<key_type, key_type>::get_next(_root);
+            _root = map_tree::get_next(_root);
             return *this;
         }
 
@@ -191,7 +193,7 @@ public:
         //重载前置--运算符
         const_iterator& operator--()
         {
-            _root = RB_Tree<key_type, key_type>::get_prev(_root);
+            _root = map_tree::get_prev(_root);
             return *this;
         }
 
@@ -235,7 +237,7 @@ public:
 
         //声明友元类
         friend class iterator;
-        friend class set;
+        friend class map;
     };
 
     class reverse_iterator
@@ -273,7 +275,7 @@ public:
         //重载前置++运算符
         reverse_iterator& operator++()
         {
-            _root = RB_Tree<key_type, key_type>::get_prev(_root);
+            _root = map_tree::get_prev(_root);
             return *this;
         }
 
@@ -288,7 +290,7 @@ public:
         //重载前置--运算符
         reverse_iterator& operator--()
         {
-            _root = RB_Tree<key_type, key_type>::get_next(_root);
+            _root = map_tree::get_next(_root);
             return *this;
         }
 
@@ -332,7 +334,7 @@ public:
 
         //声明友元类
         friend class const_reverse_iterator;
-        friend class set;
+        friend class map;
     };
 
     class const_reverse_iterator
@@ -381,7 +383,7 @@ public:
         //重载前置++运算符
         const_reverse_iterator& operator++()
         {
-            _root = RB_Tree<key_type, key_type>::get_prev(_root);
+            _root = map_tree::get_prev(_root);
             return *this;
         }
 
@@ -396,7 +398,7 @@ public:
         //重载前置--运算符
         const_reverse_iterator& operator--()
         {
-            _root = RB_Tree<key_type, key_type>::get_next(_root);
+            _root = map_tree::get_next(_root);
             return *this;
         }
 
@@ -440,7 +442,7 @@ public:
 
         //声明友元类
         friend class reverse_iterator;
-        friend class set;
+        friend class map;
     };
 
     //返回指向 set 首元素的迭代器。
@@ -513,7 +515,14 @@ public:
 
     //======================构造函数模块=============
     //默认构造函数
-    set() {}
+    map() {}
+
+    map(int count, value_type value)
+    {
+        while (count--) {
+            rb.insert(value, value);
+        }
+    }
 
     //以范围 [first,
     // last)的内容构造容器。如果范围中的多个元素的键比较相等，那么未指定哪个元素会被插入
