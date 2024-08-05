@@ -515,13 +515,6 @@ public:
     //默认构造函数
     set() {}
 
-    set(int count, value_type value)
-    {
-        while (count--) {
-            rb.insert(value, value);
-        }
-    }
-
     //以范围 [first,
     // last)的内容构造容器。如果范围中的多个元素的键比较相等，那么未指定哪个元素会被插入
     template<typename InputIt>

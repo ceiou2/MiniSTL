@@ -52,9 +52,15 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*()
+        reference& operator*()
         {
-            return _root->get_key();
+            return _root->data;
+        }
+
+        //重载->运算符++++++++++++++++++=start here
+        reference& operator->()
+        {
+            return _root->data;
         }
 
         //重载赋值=运算符
@@ -157,9 +163,15 @@ public:
         }
 
         //重载*运算符
-        const key_type& operator*()
+        const reference& operator*()
         {
-            return _root->get_key();
+            return _root->data;
+        }
+
+        //重载->运算符
+        const reference& operator->()
+        {
+            return _root->data;
         }
 
         //重载赋值=运算符
@@ -260,9 +272,15 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*()
+        reference& operator*()
         {
-            return _root->get_key();
+            return _root->data;
+        }
+
+        //重载->运算符
+        reference& operator->()
+        {
+            return _root->data;
         }
 
         //重载赋值=运算符
@@ -362,9 +380,15 @@ public:
         }
 
         //重载*运算符
-        const key_type& operator*()
+        const reference& operator*()
         {
-            return _root->get_key();
+            return _root->data;
+        }
+
+        //重载->运算符
+        const reference& operator->()
+        {
+            return _root->data;
         }
 
         //重载赋值=运算符
@@ -517,26 +541,19 @@ public:
     //默认构造函数
     map() {}
 
-    map(int count, value_type value)
-    {
-        while (count--) {
-            rb.insert(value, value);
-        }
-    }
-
     //以范围 [first,
     // last)的内容构造容器。如果范围中的多个元素的键比较相等，那么未指定哪个元素会被插入
     template<typename InputIt>
-    set(InputIt first, InputIt last)
+    map(InputIt first, InputIt last)
     {
         while (first != last) {
-            rb.insert(std::make_pair(*first, *first));
+            rb.insert(*first);
             ++first;
         }
     }
-
+//+++++++++++++++++++++++++++++++++++++++++start here
     //复制构造函数。以 other 的内容副本构造容器。
-    set(set& other)
+    map(map& other)
     {
         if (!rb.head) {
             delete rb.head; //删除首结点
