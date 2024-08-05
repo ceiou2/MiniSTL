@@ -644,7 +644,7 @@ public:
         else{//不存在右子树情况,向上找第一个比cur大的
             while (cur->parent->parent != cur) { // cur->parent!=head
                 if(cur==cur->parent->left_child){
-                    return cur;
+                    return cur->parent;
                 }
                 cur = cur->parent;
             }
@@ -664,7 +664,7 @@ public:
         } else { //不存在右子树情况,向上找第一个比cur大的
             while (cur->parent->parent != cur) { // cur->parent!=head
                 if (cur == cur->parent->left_child) {
-                    return cur;
+                    return cur->parent;
                 }
                 cur = cur->parent;
             }
@@ -684,7 +684,7 @@ public:
         } else { //不存在左子树情况,向上找第一个比cur小的
             while (cur->parent->parent != cur) {
                 if (cur == cur->parent->right_child) {
-                    return cur;
+                    return cur->parent;
                 }
                 cur = cur->parent;
             }
@@ -704,7 +704,7 @@ public:
         } else { //不存在左子树情况,向上找第一个比cur小的
             while (cur->parent->parent != cur) {
                 if (cur == cur->parent->right_child) {
-                    return cur;
+                    return cur->parent;
                 }
                 cur = cur->parent;
             }
