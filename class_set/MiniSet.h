@@ -50,7 +50,7 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*()
+        const key_type& operator*()
         {
             return _root->get_key();
         }
@@ -258,7 +258,7 @@ public:
         }
 
         //重载*运算符
-        key_type& operator*()
+        const key_type& operator*()
         {
             return _root->get_key();
         }
@@ -527,7 +527,7 @@ public:
     }
 
     //复制构造函数。以 other 的内容副本构造容器。
-    set(set& other)
+    set(const set& other)
     {
         if (!rb.head) {
             delete rb.head; //删除首结点

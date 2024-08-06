@@ -17,7 +17,7 @@ template<typename K, typename V>
 class RB_TreeNode
 {
 public:
-    std::pair<K, V> data;
+    std::pair<const K, V> data;
     RB_TreeNode<K, V>* left_child;
     RB_TreeNode<K, V>* right_child;
     RB_TreeNode<K, V>* parent;
@@ -33,11 +33,6 @@ public:
     }
 
     //获取key值
-    K& get_key()
-    {
-        return data.first;
-    }
-
     const K& get_key() const
     {
         return data.first;
@@ -52,6 +47,17 @@ public:
     const V& get_value() const
     {
         return data.second;
+    }
+
+    //获取data
+    std::pair<const K, V>& get_data()
+    {
+        return data;
+    }
+
+    const std::pair<const K, V>& get_data() const
+    {
+        return data;
     }
 };
 
@@ -406,7 +412,7 @@ protected:
     // 辅助功能函数：主要为set和map中的一些操作实现，对应RB_Tree::public:功能函数模块
 
     //深拷贝子函数
-    void recursion_cp(Node* _root, Node* new_root)
+    void recursion_cp(Node* _root, Node* new_root) const
     {
         if (_root == head) {    //首结点情况
             if (head->parent) { //存在根节点情况
@@ -590,7 +596,13 @@ public:
             while (cur->left_child != nullptr) {
                 cur = cur->left_child;
             }
-            std::swap(ori_cur->data, cur->data); //被删除数据和替代删除数据交换
+            // discard std::swap(ori_cur->data, cur->data);
+            //被删除数据和替代删除数据交换
+            //数据不变，节点位置互换（等价于数据交换，但是data是const不能交换
+            std::swap(ori_cur->parent, cur->parent);
+            std::swap(ori_cur->left_child, cur->left_child);
+            std::swap(ori_cur->right_child, cur->right_child);
+            std::swap(ori_cur->_col, cur->_col);
         }
         //删除被删除节点
         // case1:被删除节点是红色:直接删除
@@ -680,7 +692,7 @@ public:
     }
 
     //深拷贝一整棵树，返回new_head
-    Node* _cp()
+    Node* _cp() const
     {
         Node* new_head = new Node(std::make_pair(
                 K(),
