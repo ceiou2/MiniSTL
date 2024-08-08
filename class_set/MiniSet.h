@@ -95,10 +95,7 @@ public:
         //重载等于==运算符
         bool operator==(const iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -110,19 +107,13 @@ public:
         // override oper==
         bool operator==(const const_iterator& other) const
         {
-            if (_root == other._root) {
-                return true;
-            }
-            return false;
+            return _root == other._root;
         }
 
         // override oper!=
         bool operator!=(const const_iterator& other) const
         {
-            if (_root != other._root) {
-                return true;
-            }
-            return false;
+            return _root != other._root;
         }
 
         //声明友元类
@@ -206,10 +197,7 @@ public:
         //重载等于==运算符
         bool operator==(const const_iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -221,10 +209,7 @@ public:
         //重载等于==运算符
         bool operator==(const iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -303,10 +288,7 @@ public:
         //重载等于==运算符
         bool operator==(const reverse_iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -318,10 +300,7 @@ public:
         //重载等于==运算符
         bool operator==(const const_reverse_iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            reture other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -411,10 +390,7 @@ public:
         //重载等于==运算符
         bool operator==(const const_reverse_iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
@@ -426,10 +402,7 @@ public:
         //重载等于==运算符
         bool operator==(const reverse_iterator& other) const
         {
-            if (other._root == _root) {
-                return true;
-            }
-            return false;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符
