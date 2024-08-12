@@ -89,15 +89,68 @@ TEST(testIterator, localIterator) {}
 TEST(testIterator, constlocalIterator) {}
 
 //修改器模块
-TEST(testModifier,clear){
+TEST(testModifier, clear)
+{
     unordered_set<int> us{1, 2, 3, 4, 5};
     EXPECT_FALSE(us.empty());
     us.clear();
     EXPECT_TRUE(us.empty());
 }
 
-TEST(testModifier,insert){
+TEST(testModifier, insert)
+{
+    unordered_set<int> us{1, 2, 3, 4, 5};
+    us.insert(6);
+    EXPECT_TRUE(us.find(6) != us.end());
+    EXPECT_EQ(us.size(), 6);
+    vector<int> v{7, 8, 9};
+    us.insert(v.begin(), v.end());
+    EXPECT_EQ(us.size(), 9);
+    us.insert({10, 11, 12});
+    EXPECT_EQ(us.size(), 12);
+}
 
+TEST(testModifier, erase)
+{
+    unordered_set<int> us{1, 2, 3, 4, 5};
+    us.erase(us.begin());
+    EXPECT_EQ(us.size(), 4);
+    us.erase(4);
+    EXPECT_EQ(us.size(), 3);
+    us.erase(us.begin(), us.end());
+    EXPECT_TRUE(us.empty());
+    us.insert(3);
+    EXPECT_EQ(us.size(), 1);
+    unordered_set<int>::const_iterator cit = us.begin();
+    us.erase(cit);
+    EXPECT_TRUE(us.empty());
+}
+
+TEST(testModifier, swap)
+{
+    unordered_set<int> us1{1, 2, 3};
+    unordered_set<int> us2{6, 7, 8, 9, 10};
+    us1.swap(us2);
+    EXPECT_EQ(us1.size(), 5);
+    EXPECT_EQ(us2.size(), 3);
+}
+
+TEST(testLookup, count)
+{
+    unordered_set<int> us{1, 2, 3, 4, 5};
+    EXPECT_EQ(us.count(1), 1);
+    EXPECT_EQ(us.count(9), 0);
+}
+
+TEST(testLookup, find)
+{
+    unordered_set<int> us1{1, 2, 3, 4, 5};
+    auto it1 = us1.find(1);
+    EXPECT_EQ(*it1, 1);
+
+    // const unordered_set<int> us2{2, 3, 4, 5, 6};
+    // auto it2 = us2.find(5);
+    // EXPECT_EQ(*it2, 5);
 }
 
 int main(int argc, char** argv)

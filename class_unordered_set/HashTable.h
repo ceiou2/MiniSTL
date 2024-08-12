@@ -66,15 +66,18 @@ private:
     }
 
     //获得节点的key对应的hash值
+    /*
+    这里在丢失所有const限制以及通过实參的方式勉强通过编译（以封装与内存为代价
+    here
+    */
     size_type hash(const Node* cur) const
     {
-        const key_type& key = kot(cur->data);
+        key_type key = kot(cur->data);
         return key % table.size();
     }
 
-    size_type hash(const T& data) const
+    size_type hash(const key_type& key) const
     {
-        const key_type& key = kot(data);
         return key % table.size();
     }
 
@@ -107,6 +110,10 @@ public:
     }
 
     // 插入函数 成功返回插入节点的指针;失败返回nullptr
+    /*
+    本函数中的swap用vector的非成员函数方式调用会报错
+    swap(ori_table,table)//here
+    */
     Node* insert(T data)
     {
         //检测是否需要扩容：装载因子==1时扩容（size==table.size()）
@@ -114,8 +121,8 @@ public:
             //扩容
             size_type new_size = 2 * size;
             vector<Node*> ori_table(new_size); //开辟新空间
-            swap(ori_table,
-                 table); // ori_table存放原hastableable，table存放新hastableable
+            ori_table.swap(
+                    table); // ori_table存放原hastableable，table存放新hastableable
             // 将hastableable里的所有节点按照data的hash转移到newhastableable上
             for (size_type i = 0; i < ori_table.size(); ++i) {
                 if (ori_table[i]) {
@@ -133,24 +140,36 @@ public:
     }
 
     //查找函数
-    Node* find(T data)
+    // Node* find(T data)
+    // {
+    //     //计算hash
+    //     Node* cur = table[hash(data)];
+    //     while (cur) {
+    //         if (cur->data == data)
+    //             return cur;
+    //         cur = cur->next;
+    //     }
+    //     return nullptr;
+    // }
+
+    Node* find(const key_type& key)
     {
         //计算hash
-        Node* cur = table[hash(data)];
+        Node* cur = table[hash(key)];
         while (cur) {
-            if (cur->data == data)
+            if (kot(cur->data) == key)
                 return cur;
             cur = cur->next;
         }
         return nullptr;
     }
 
-    const Node* find(const T data)
+    const Node* find(const key_type& key) const
     {
         //计算hash
-        Node* cur = table[hash(data)];
+        Node* cur = table[hash(key)];
         while (cur) {
-            if (cur->data == data)
+            if (kot(cur->data) == key)
                 return cur;
             cur = cur->next;
         }
@@ -258,18 +277,17 @@ public:
     {
         other.clear();
         //这里直接交换两个table
-        swap(other.table, table);
-        std::swap(other.size, size);
+        swap(other);
 
         //此后被移动HashTable析构能够自动销毁目的地HashTable的原始数据
         //还不会删除被移动HashTable的原始数据，可谓一举两得
     }
 
-    void swap(HashTable& other){
-        swap(other.table, table);
+    void swap(HashTable& other)
+    {
+        table.swap(other.table);
         std::swap(other.size, size);
     }
-
 };
 
 #endif

@@ -7,7 +7,7 @@
 #include "MiniVector.h" //hash表底层以vector实现
 
 //表项，使用链表节点
-template<typename K, typename T>
+template<typename T>
 class HashNode
 {
 public:
@@ -23,22 +23,22 @@ template<typename K, typename T, typename KeyOfT>
 class HashTable
 {
 private:
-    typedef HashNode<K, T> Node;
+    typedef HashNode<T> Node;
     typedef size_t size_type;
     typedef K key_type;
     typedef T value_type;
 
-    vector<Node*> ht;
+    vector<Node*> table;
     size_type size;
     KeyOfT kot; //仿函数，用于获取T data中的K key
-    //=======辅助功能函数模块=======
+    //=================辅助功能函数模块=====================
     // 清空所有vector上的链表（清空桶
     void release()
     {
-        for (size_type i = 0; i < ht.size(); ++i) {
-            if (ht[i]) {
-                release_list(ht[i]);
-                ht[i] = nullptr;
+        for (size_type i = 0; i < table.size(); ++i) {
+            if (table[i]) {
+                release_list(table[i]);
+                table[i] = nullptr;
             }
         }
         size = 0;
@@ -61,28 +61,46 @@ private:
         hash_in(cur->next);
         // 找到hash位置并插入（头插
         size_type index = hash(cur);
-        cur->next = ht[index];
-        ht[index] = cur;
+        cur->next = table[index];
+        table[index] = cur;
     }
 
     //获得节点的key对应的hash值
-    size_type hash(Node* cur)
+    /*
+    这里在丢失所有const限制以及通过实參的方式勉强通过编译（以封装与内存为代价
+    here
+    */
+    size_type hash(const Node* cur) const
     {
         key_type key = kot(cur->data);
-        return key % ht.size();
+        return key % table.size();
     }
 
-    size_type hash(const T& data)
+    size_type hash(const key_type& key) const
     {
-        key_type key = kot(data);
-        return key % ht.size();
+        return key % table.size();
+    }
+
+    //深拷贝链表，返回新链表头
+    Node* _copy_list(const Node* ori_cur) const
+    {
+        Node* res = new Node(); //哑节点
+        Node* head = res;       //新链表的头节点的前一个哑节点
+        while (ori_cur) {
+            res->next = new Node(ori_cur->data);
+            ori_cur = ori_cur->next;
+            res = res->next;
+        }
+        res = head->next; //新链表的头节点
+        delete head;
+        return res;
     }
 
 public:
     //构造函数
     HashTable(): size(0)
     {
-        ht.resize(10, nullptr);
+        table.resize(10, nullptr);
     }
 
     //析构函数
@@ -92,18 +110,23 @@ public:
     }
 
     // 插入函数 成功返回插入节点的指针;失败返回nullptr
+    /*
+    本函数中的swap用vector的非成员函数方式调用会报错
+    swap(ori_table,table)//here
+    */
     Node* insert(T data)
     {
-        //检测是否需要扩容：装载因子==1时扩容（size==ht.size()）
-        if (size == ht.size()) {
+        //检测是否需要扩容：装载因子==1时扩容（size==table.size()）
+        if (size == table.size()) {
             //扩容
             size_type new_size = 2 * size;
-            vector<Node*> ori_ht(new_size); //开辟新空间
-            swap(ori_ht, ht); // ori_ht存放原hashtable，ht存放新hashtable
-            // 将hashtable里的所有节点按照data的hash转移到newhashtable上
-            for (size_type i = 0; i < ori_ht.size(); ++i) {
-                if (ori_ht[i]) {
-                    hash_in(ori_ht[i]);
+            vector<Node*> ori_table(new_size); //开辟新空间
+            ori_table.swap(
+                    table); // ori_table存放原hastableable，table存放新hastableable
+            // 将hastableable里的所有节点按照data的hash转移到newhastableable上
+            for (size_type i = 0; i < ori_table.size(); ++i) {
+                if (ori_table[i]) {
+                    hash_in(ori_table[i]);
                 }
             }
         }
@@ -117,12 +140,36 @@ public:
     }
 
     //查找函数
-    Node* find(T data)
+    // Node* find(T data)
+    // {
+    //     //计算hash
+    //     Node* cur = table[hash(data)];
+    //     while (cur) {
+    //         if (cur->data == data)
+    //             return cur;
+    //         cur = cur->next;
+    //     }
+    //     return nullptr;
+    // }
+
+    Node* find(const key_type& key)
     {
         //计算hash
-        Node* cur = ht[hash(data)];
+        Node* cur = table[hash(key)];
         while (cur) {
-            if (cur->data == data)
+            if (kot(cur->data) == key)
+                return cur;
+            cur = cur->next;
+        }
+        return nullptr;
+    }
+
+    const Node* find(const key_type& key) const
+    {
+        //计算hash
+        Node* cur = table[hash(key)];
+        while (cur) {
+            if (kot(cur->data) == key)
                 return cur;
             cur = cur->next;
         }
@@ -130,17 +177,19 @@ public:
     }
 
     //删除函数
-    bool erase(T data)
+    bool erase(const T data)
     {
+        //找到data所在节点
         Node* cur = find(data);
         if (!cur) // data不存在
             return false;
+        //找到节点所在位置
         size_type index = hash(cur); //找到cur的hash
-        if (ht[index] == cur) {      //桶里第一个就是cur的情况
-            ht[index] = cur->next;
+        if (table[index] == cur) {   //桶里第一个就是cur的情况
+            table[index] = cur->next;
 
         } else { // cur不是第一个节点
-            Node* pre = ht[index];
+            Node* pre = table[index];
             while (pre->next != cur) { //找到cur的前一个节点
                 pre = pre->next;
             }
@@ -160,6 +209,84 @@ public:
     void clear()
     { //清空所有桶
         release();
+    }
+
+    //获得第一个节点
+    Node* begin()
+    {
+        for (size_type i = 0; i < table.size(); ++i) {
+            if (table[i]) { //第一个非空位置
+                return table[i];
+            }
+        }
+        return nullptr; //空hashtable
+    }
+
+    //获得最后一个节点
+    Node* end()
+    {
+        return nullptr;
+    }
+
+    //找到当前节点的下一个节点（仅桶内
+    Node* get_next_in_bucket(Node* cur)
+    {
+        return cur->next;
+    }
+
+    //找到当前节点的下一个节点（可跨桶
+    Node* get_next(Node* cur)
+    {
+        if (cur->next)
+            return cur->next;
+        for (size_type i = hash(cur) + 1; i < table.size(); ++i) {
+            if (table[i])
+                return table[i];
+        }
+        return nullptr; //后面没元素了
+    }
+
+    const Node* get_next(const Node* cur) const
+    {
+        if (cur->next)
+            return cur->next;
+        for (size_type i = hash(cur) + 1; i < table.size(); ++i) {
+            if (table[i])
+                return table[i];
+        }
+        return nullptr; //后面没元素了
+    }
+
+    //深拷贝一个副本,副本存放在other中
+    void _cp(HashTable& other) const
+    {
+        other.clear();
+        //控制桶数量相同
+        other.table.resize(table.size());
+        //深拷贝链表
+        for (size_type i = 0; i < table.size(); ++i) {
+            if (table[i]) {
+                other.table[i] = _copy_list(table[i]);
+            }
+        }
+        other.size = size;
+    }
+
+    //移动table中的所有链表到新的table中
+    void move_to(HashTable& other)
+    {
+        other.clear();
+        //这里直接交换两个table
+        swap(other);
+
+        //此后被移动HashTable析构能够自动销毁目的地HashTable的原始数据
+        //还不会删除被移动HashTable的原始数据，可谓一举两得
+    }
+
+    void swap(HashTable& other)
+    {
+        table.swap(other.table);
+        std::swap(other.size, size);
     }
 };
 

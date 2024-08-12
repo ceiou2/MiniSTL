@@ -3,11 +3,10 @@
 #include <gtest/gtest.h>
 using namespace std;
 
-//仿函数
 class KeyOfT
 {
 public:
-    int& operator()(int& key)
+    int operator()(const int& key) const
     {
         return key;
     }
