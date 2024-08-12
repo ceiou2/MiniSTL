@@ -1,32 +1,36 @@
-// MiniUnorderedSet.h
+// MiniUnorderedMap.h
 #pragma once
-#ifndef MINI_UNORDERED_SET_H
-#define MINI_UNORDERED_SET_H
+#ifndef MINI_UNORDERED_MAP_H
+#define MINI_UNORDERED_MAP_H
 
 #include "HashTable.h"
 #include <cstddef>
+#include <utility>
 
-template<typename Key>
-class unordered_set
+template<typename Key, typename T>
+class unordered_map
 {
 private:
     typedef Key key_type;
-    typedef Key value_type;
+    typedef T mapped_type;
+    typedef std::pair<const Key, T> value_type;
     typedef size_t size_type;
     typedef value_type& reference;
-    typedef const Key& const_reference;
-    typedef HashNode<Key> Node;
+    typedef const T& const_reference;
+    typedef HashNode<value_type> Node;
+
     class KeyOfT
     {
     public:
-        Key operator()(const Key& key) const
+        const Key operator()(const value_type& data) const
         {
-            return key;
+            return data.first;
         }
     };
-    typedef HashTable<Key, Key, KeyOfT> hashtable;
+    typedef HashTable<Key, value_type, KeyOfT> hashtable;
 
     hashtable ht;
+    KeyOfT kot;
 
     //===================辅助函数模块=============
     //清空内存，size为0,但是数据结构可继续使用，对象还在，没析构
@@ -55,9 +59,15 @@ public:
         iterator(Node* c, hashtable* h): cur(c), hp(hp) {}
 
         //重载operator*
-        const value_type& operator*()
+        value_type& operator*()
         {
             return cur->data;
+        }
+
+        //重载operator->
+        value_type* operator->()
+        {
+            return &(cur->data);
         }
 
         //重载operator=
@@ -117,7 +127,7 @@ public:
 
         //声明友元类
         friend class const_iterator;
-        friend class unordered_set;
+        friend class unordered_map;
     };
     class const_iterator
     {
@@ -138,6 +148,12 @@ public:
         const value_type& operator*()
         {
             return cur->data;
+        }
+
+        //重载operator->
+        const value_type* operator->()
+        {
+            return &(cur->data);
         }
 
         //重载operator=
@@ -197,7 +213,7 @@ public:
 
         //声明友元类
         friend class iterator;
-        friend class unordered_set;
+        friend class unordered_map;
     };
 
     // local_iterator
@@ -277,7 +293,7 @@ public:
 
         //声明友元类
         friend class const_local_iterator;
-        friend class unordered_set;
+        friend class unordered_map;
     };
 
     // const_local_iterator
@@ -362,7 +378,7 @@ public:
 
         //声明友元类
         friend class local_iterator;
-        friend class unordered_set;
+        friend class unordered_map;
     };
 
     //桶接口部分
@@ -402,11 +418,11 @@ public:
     //***********成员函数模块**********
     //============构造函数=============
     //默认构造函数
-    unordered_set() {}
+    unordered_map() {}
 
     //构造具有范围 [first, last) 的内容的容器。
     template<typename InputIt>
-    unordered_set(InputIt first, InputIt last)
+    unordered_map(InputIt first, InputIt last)
     {
         while (first != last) {
             ht.insert(*first);
@@ -415,19 +431,19 @@ public:
     }
 
     //复制构造函数
-    unordered_set(const unordered_set& other)
+    unordered_map(const unordered_map& other)
     {
         other.ht._cp(ht);
     }
 
     //移动构造函数
-    unordered_set(unordered_set&& other)
+    unordered_map(unordered_map&& other)
     {
         other.ht.move_to(ht);
     }
 
     //初始化列表构造函数
-    unordered_set(std::initializer_list<value_type> ilist)
+    unordered_map(std::initializer_list<value_type> ilist)
     {
         for (auto it = ilist.begin(); it != ilist.end(); ++it) {
             ht.insert(*it);
@@ -436,11 +452,11 @@ public:
 
     //=========析构函数模块=========
     //析构函数
-    ~unordered_set() {} // hashtable会自行析构销毁
+    ~unordered_map() {} // hashtable会自行析构销毁
 
     // operator=
     //复制赋值运算符。以 other 内容的副本替换内容。
-    unordered_set& operator=(const unordered_set& other)
+    unordered_map& operator=(const unordered_map& other)
     {
         ht = other.ht._cp();
         return *this;
@@ -448,7 +464,7 @@ public:
 
     //移动赋值运算符。用移动语义以 other 的内容替换内容（即从 other 移动 other
     //中的数据到此容器中）。之后 other 处于合法但未指定的状态。
-    unordered_set& operator=(unordered_set&& other)
+    unordered_map& operator=(unordered_map&& other)
     {
         //不用release，成员hashmap对象会自动调用析构函数
         other.ht.move_to(ht);
@@ -456,7 +472,7 @@ public:
     }
 
     //以 initializer_list ilist 所标识者替换内容。
-    unordered_set& operator=(std::initializer_list<value_type> ilist)
+    unordered_map& operator=(std::initializer_list<value_type> ilist)
     {
         ht.clear();
         for (auto it = ilist.begin(); it != ilist.end(); ++it) {
@@ -466,7 +482,7 @@ public:
     }
 
     //======================容量模块=================
-    //获取unordered_set是否为空
+    //获取unordered_map是否为空
     bool empty() const
     {
         return !(ht.get_size());
@@ -525,13 +541,13 @@ public:
     iterator erase(iterator pos)
     {
         // erase掉pos++中返回的原位置的节点
-        ht.erase(*(pos++));
+        ht.erase(kot(*(pos++)));
         return pos;
     }
 
     const_iterator erase(const_iterator pos)
     {
-        ht.erase(*(pos++));
+        ht.erase(kot(*(pos++)));
         return pos;
     }
 
@@ -548,11 +564,11 @@ public:
 
     size_type erase(const Key& key)
     {
-        return (int)ht.erase(key);
+        return ht.erase(key);
     }
 
     //将内容与 other 的交换。不在单独的元素上调用任何移动、复制或交换操作。
-    void swap(unordered_set& other)
+    void swap(unordered_map& other)
     {
         ht.swap(other.ht);
     }
@@ -583,26 +599,30 @@ public:
 };
 
 //===========================非成员函数模块============
-template<typename Key>
-bool operator==(const unordered_set<Key>& lhs, const unordered_set<Key>& rhs)
+template<typename Key, typename T>
+bool operator==(
+        const unordered_map<Key, T>& lhs,
+        const unordered_map<Key, T>& rhs)
 {
     if (lhs.size() != rhs.size())
         return false;
     for (auto it = lhs.begin(); it != lhs.end(); ++it) {
-        if (rhs.find(*it) == rhs.end())
+        if (rhs.find(it->first) == rhs.end())
             return false;
     }
     return true;
 }
 
-template<typename Key>
-bool operator!=(const unordered_set<Key>& lhs, const unordered_set<Key>& rhs)
+template<typename Key, typename T>
+bool operator!=(
+        const unordered_map<Key, T>& lhs,
+        const unordered_map<Key, T>& rhs)
 {
     return !(lhs == rhs);
 }
 
-template<typename Key>
-void swap(unordered_set<Key>& lhs, unordered_set<Key>& rhs)
+template<typename Key, typename T>
+void swap(unordered_map<Key, T>& lhs, unordered_map<Key, T>& rhs)
 {
     lhs.swap(rhs);
 }

@@ -1,4 +1,8 @@
 // HashTable.h
+/*
+后期可以优化的地方：用户自定义或者传入hash函数，end（）不仅仅返回nullptr的iterator
+目前只能接受可以强制转换为int的关键字
+*/
 #pragma once
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
@@ -69,12 +73,12 @@ private:
     size_type hash(const Node* cur) const
     {
         key_type key = kot(cur->data);
-        return key % table.size();
+        return (int)key % table.size();
     }
 
     size_type hash(const key_type& key) const
     {
-        return key % table.size();
+        return (int)key % table.size();
     }
 
     //深拷贝链表，返回新链表头
@@ -161,10 +165,33 @@ public:
     }
 
     //删除函数
-    bool erase(const T data)
+    // bool erase(const T data)
+    // {
+    //     //找到data所在节点
+    //     Node* cur = find(kot(data));
+    //     if (!cur) // data不存在
+    //         return false;
+    //     //找到节点所在位置
+    //     size_type index = hash(cur); //找到cur的hash
+    //     if (table[index] == cur) {   //桶里第一个就是cur的情况
+    //         table[index] = cur->next;
+
+    //     } else { // cur不是第一个节点
+    //         Node* pre = table[index];
+    //         while (pre->next != cur) { //找到cur的前一个节点
+    //             pre = pre->next;
+    //         }
+    //         pre->next = cur->next;
+    //     }
+    //     delete cur;
+    //     --size;
+    //     return true;
+    // }
+
+    bool erase(const K key)
     {
         //找到data所在节点
-        Node* cur = find(data);
+        Node* cur = find(key);
         if (!cur) // data不存在
             return false;
         //找到节点所在位置

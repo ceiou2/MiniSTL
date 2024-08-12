@@ -147,10 +147,33 @@ TEST(testLookup, find)
     unordered_set<int> us1{1, 2, 3, 4, 5};
     auto it1 = us1.find(1);
     EXPECT_EQ(*it1, 1);
+    const unordered_set<int> us2{2, 3, 4, 5, 6};
+    auto it2 = us2.find(5);
+    EXPECT_EQ(*it2, 5);
+}
 
-    // const unordered_set<int> us2{2, 3, 4, 5, 6};
-    // auto it2 = us2.find(5);
-    // EXPECT_EQ(*it2, 5);
+TEST(testNomenberFunc, equal_Nequal)
+{
+    unordered_set<int> us1{1, 2, 3, 4, 5};
+    unordered_set<int> us2{1, 2, 3, 4, 5};
+    unordered_set<int> us3{1, 2, 3};
+    unordered_set<int> us4{1, 2, 3, 4, 6};
+    unordered_set<int> us5{1, 2, 3, 4, 5, 6};
+    EXPECT_TRUE(us1 == us2);
+    EXPECT_FALSE(us1 != us2);
+    EXPECT_TRUE(us3 != us1);
+    EXPECT_FALSE(us1 == us3);
+    EXPECT_TRUE(us1 != us4);
+    EXPECT_FALSE(us1 == us5);
+}
+
+TEST(testNomenberFunc, swap)
+{
+    unordered_set<int> us1{1, 2, 3};
+    unordered_set<int> us2{6, 7, 8, 9, 10};
+    swap(us1, us2);
+    EXPECT_EQ(us1.size(), 5);
+    EXPECT_EQ(us2.size(), 3);
 }
 
 int main(int argc, char** argv)
