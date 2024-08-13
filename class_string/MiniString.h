@@ -1,20 +1,17 @@
-// MiniVector.h
+//MiniString.h
 #pragma once
-#ifndef _MiniVector_h_
-#define _MiniVector_h_
+#ifndef MINI_STRING_H
+#define MINI_STRING_H
 
-#include <cstddef> //ptrdiff_t  头文件
+#include<cstddef>
 
-/*使用动态数组new进行内存管理*/
-template<typename T>
-class vector
-{
+class string{
 private:
-    typedef T value_type;
+    typedef char value_type;
     typedef value_type* pointer;
-    typedef const T* const_pointer;
+    typedef const char* const_pointer;
     typedef value_type& reference;
-    typedef const T& const_reference;
+    typedef const char& const_reference;
     typedef size_t size_type;
 
 private:
@@ -28,6 +25,7 @@ public:
     class const_iterator;
     class reverse_iterator;
     class const_reverse_iterator;
+
     //======================迭代器模块===============
     class iterator
     {
@@ -143,7 +141,7 @@ public:
 
         //友元声明
         friend class const_iterator;
-        friend class vector;
+        friend class string;
     };
     class const_iterator
     {
@@ -259,7 +257,7 @@ public:
 
         //友元声明
         friend class iterator;
-        friend class vector;
+        friend class string;
     };
     class reverse_iterator
     {
@@ -375,7 +373,7 @@ public:
 
         //友元声明
         friend class const_reverse_iterator;
-        friend class vector;
+        friend class string;
     };
 
     class const_reverse_iterator
@@ -494,7 +492,7 @@ public:
 
         //友元声明
         friend class reverse_iterator;
-        friend class vector;
+        friend class string;
     };
     // begin():获取第一个元素的迭代器
     iterator begin()
@@ -512,7 +510,7 @@ public:
         return const_iterator(start);
     }
 
-    // end()::获取vector最后一个元素的下一个位置的迭代器
+    // end()::获取string最后一个元素的下一个位置的迭代器
     iterator end()
     {
         return iterator(finish);
@@ -612,7 +610,7 @@ public:
         return size_type(end_of_storage - (begin()).p);
     }
 
-    // empty():vector是否为空
+    // empty():string是否为空
     bool empty() const
     {
         return begin() == end();
@@ -643,8 +641,8 @@ public:
 
     //-------------功能函数模块-----------
 
-    // fill_initialize(size_type n,const T& value);
-    void fill_initialize(size_type n, const T& value)
+    // fill_initialize(size_type n,const char& value);
+    void fill_initialize(size_type n, const char& value)
     {
         reserve(n);
         finish = start + n; // set size
@@ -687,20 +685,20 @@ public:
 
     //-------------构造函数模块-----------
     //默认构造函数
-    vector(): start(0), finish(0), end_of_storage(0){};
+    string(): start(0), finish(0), end_of_storage(0){};
 
-    // vector(size_type n,const T& value);
-    vector(size_type n, const T& value): start(0), finish(0), end_of_storage(0)
+    // string(size_type n,const char& value);
+    string(size_type n, const char& value): start(0), finish(0), end_of_storage(0)
     {
         fill_initialize(n, value);
     }
 
-    // vector(int n,const T&
+    // string(int n,const char&
     // value)注：官方文档有这两个函数，但是size_type应该够用，暂时不知道这两个函数的定义有什么作用
-    // vector(long n,const T& value)
+    // string(long n,const char& value)
 
     //列表初始化
-    vector(std::initializer_list<T> init_list)
+    string(std::initializer_list<char> init_list)
         : start(0),
           finish(0),
           end_of_storage(0)
@@ -716,78 +714,70 @@ public:
     }
 
     //拷贝构造函数:深拷贝版本
-    vector(const vector& ori_vector): start(0), finish(0), end_of_storage(0)
+    string(const string& ori_string): start(0), finish(0), end_of_storage(0)
     {
-        reserve(ori_vector.capacity());
-        for (size_type i = 0; i < ori_vector.size(); ++i) {
-            *(start + i) = *(ori_vector.begin() + i);
+        reserve(ori_string.capacity());
+        for (size_type i = 0; i < ori_string.size(); ++i) {
+            *(start + i) = *(ori_string.begin() + i);
             ++finish;
         }
     }
 
     //移动构造函数
-    vector(vector&& ori_vector)
+    string(string&& ori_string)
     {
-        start = (ori_vector.begin()).p;
-        finish = (ori_vector.end()).p;
-        end_of_storage = start + ori_vector.capacity();
+        start = (ori_string.begin()).p;
+        finish = (ori_string.end()).p;
+        end_of_storage = start + ori_string.capacity();
 
-        ori_vector.start = nullptr; //右值中指针置空防止析构时delete掉内存
-        ori_vector.finish = nullptr;
-        ori_vector.end_of_storage = nullptr;
+        ori_string.start = nullptr; //右值中指针置空防止析构时delete掉内存
+        ori_string.finish = nullptr;
+        ori_string.end_of_storage = nullptr;
     }
 
     //拷贝赋值函数
-    vector& operator=(const vector& ori_vector)
+    string& operator=(const string& ori_string)
     {
         release();
-        reserve(ori_vector.capacity());
-        for (size_type i = 0; i < ori_vector.size(); ++i) {
-            *(start + i) = *(ori_vector.begin() + i);
+        reserve(ori_string.capacity());
+        for (size_type i = 0; i < ori_string.size(); ++i) {
+            *(start + i) = *(ori_string.begin() + i);
             ++finish;
         }
         return *this; //返回自身的引用以支持链式赋值
     }
 
     //移动赋值函数
-    vector& operator=(vector&& ori_vector)
+    string& operator=(string&& ori_string)
     {
         release();
-        start = ori_vector.begin();
-        finish = ori_vector.end();
-        end_of_storage = start + ori_vector.capacity();
+        start = ori_string.begin().p;
+        finish = ori_string.end().p;
+        end_of_storage = start + ori_string.capacity();
 
-        ori_vector.start = nullptr; //右值中指针置空防止析构时delete掉内存
-        ori_vector.finish = nullptr;
-        ori_vector.end_of_storage = nullptr;
+        ori_string.start = nullptr; //右值中指针置空防止析构时delete掉内存
+        ori_string.finish = nullptr;
+        ori_string.end_of_storage = nullptr;
 
         return *this; //返回自身的引用以支持链式赋值
     }
 
-    // vector(size_type n);
-    explicit vector(size_type n): start(0), finish(0), end_of_storage(0)
+    // string(size_type n);
+    explicit string(size_type n): start(0), finish(0), end_of_storage(0)
     {
-        fill_initialize(n, T());
+        fill_initialize(n, char());
     }
 
-    //~vector()
-    ~vector()
+    //~string()
+    ~string()
     {
         release();
     }
 
-    void swap(vector& other)
-    {
-        if (*this == other)
-            return;
-
-        std::swap(this->start, other.start);
-        std::swap(this->finish, other.finish);
-        std::swap(this->end_of_storage, other.end_of_storage);
-    }
+    void swap(string& other);
 
     //-------------操作函数模块-----------
-    void push_back(const T& x)
+    void push_back(const char& x)
     { //将元素插入尾端
         if (finish != end_of_storage) {
             *finish = x;
@@ -816,20 +806,6 @@ public:
 
     iterator erase(iterator begin, iterator end)
     {
-        //下面两种注释掉的部分会报错，不知道为什么换种方法就可以了
-        // auto it = begin;
-        // while(it!=end)
-        // {
-        //     it = erase(it);
-        // }
-        // return end;
-
-        // auto it = begin;
-        // for (size_type i = 0; i < (begin - end); ++i) {
-        //     erase(it);
-        // }
-        // return it;
-
         while (begin != end) {
             erase(begin);
             --end;
@@ -837,7 +813,7 @@ public:
         return begin;
     }
 
-    iterator insert(iterator position, const T& x)
+    iterator insert(iterator position, const char& x)
     { //在迭代器位置插入值，返回插入位置的迭代器
         if (finish != end_of_storage) {
             ++finish;
@@ -855,7 +831,7 @@ public:
 
     //写一个move版本的insert规避迭代器失效
 
-    void resize(size_type new_size, const T& x) //改变元素数量
+    void resize(size_type new_size, const char& x) //改变元素数量
     {
         if (new_size <= size()) {
             finish = start + new_size;
@@ -870,7 +846,7 @@ public:
 
     void resize(size_type new_size)
     {
-        resize(new_size, T());
+        resize(new_size, char());
     } //重载
 
     void clear()
@@ -879,15 +855,15 @@ public:
     }
 
     // assign
-    void assign(size_type count, const T& value) //以count份 value的副本替换内容
+    void assign(size_type count, const char& value) //以count份 value的副本替换内容
     {
-        *this = vector<T>(count, value);
+        *this = string(count, value);
     }
 
     void
     assign(const_iterator first,
            const_iterator
-                   last) //将区间[fast,last)的元素赋值到当前vector容器中，原内容释放，其中有任何一个实参是指向*this中的迭代器时行为未定义
+                   last) //将区间[fast,last)的元素赋值到当前string容器中，原内容释放，其中有任何一个实参是指向*this中的迭代器时行为未定义
     {
         release();
         reserve(last - first);
@@ -896,18 +872,25 @@ public:
             ++finish;
         }
     }
+
+    //上面的所以成员函数与vector<char>特化相同，以下是string特有功能函数的补充
+    //=================string 特有功能函数===================
+    //------------------元素访问模块-------------------
+    //返回指向用作字符存储的底层数组的指针。
+    const char* data()const{
+        return start;
+    }
+
+    //返回指向拥有数据等价于存储于字符串中的空终止字符数组的指针。
+    const char* c_str()const{
+        const size_type s = size();
+//start here++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    }
 };
 
-template<typename T>
-void swap(vector<T>& lhs, vector<T>& rhs)
-{
-    if (lhs == rhs)
-        return;
-    lhs.swap(rhs);
-}
+void swap(string& lhs, string& rhs);
 
-template<typename T>
-bool operator==(const vector<T>& lhs, const vector<T>& rhs)
+bool operator==(const string& lhs, const string& rhs)
 {
     if (lhs.size() != rhs.size())
         return false;
@@ -918,14 +901,12 @@ bool operator==(const vector<T>& lhs, const vector<T>& rhs)
     return true;
 }
 
-template<typename T>
-bool operator!=(const vector<T>& lhs, const vector<T>& rhs)
+bool operator!=(const string& lhs, const string& rhs)
 {
     return !(lhs == rhs);
 }
 
-template<typename T>
-bool operator<(const vector<T>& lhs, const vector<T>& rhs)
+bool operator<(const string& lhs, const string& rhs)
 {
     auto lit = lhs.begin();
     auto rit = rhs.begin();
@@ -946,22 +927,36 @@ bool operator<(const vector<T>& lhs, const vector<T>& rhs)
     return false;
 }
 
-template<typename T>
-bool operator<=(const vector<T>& lhs, const vector<T>& rhs)
+bool operator<=(const string& lhs, const string& rhs)
 {
     return (lhs == rhs || lhs < rhs);
 }
 
-template<typename T>
-bool operator>(const vector<T>& lhs, const vector<T>& rhs)
+bool operator>(const string& lhs, const string& rhs)
 {
     return !(lhs == rhs || lhs < rhs);
 }
 
-template<typename T>
-bool operator>=(const vector<T>& lhs, const vector<T>& rhs)
+bool operator>=(const string& lhs, const string& rhs)
 {
     return (lhs == rhs || lhs > rhs);
+}
+
+void swap(string& lhs, string& rhs)
+{
+    if (lhs == rhs)
+        return;
+    lhs.swap(rhs);
+}
+
+void string::swap(string& other)
+{
+    if (*this == other)
+        return;
+
+    std::swap(this->start, other.start);
+    std::swap(this->finish, other.finish);
+    std::swap(this->end_of_storage, other.end_of_storage);
 }
 
 #endif

@@ -161,6 +161,32 @@ TEST(testLookup, find)
     EXPECT_EQ(it2->second, 5);
 }
 
+TEST(testLookup, at)
+{
+    unordered_map<char, int> us1{
+            {'a', 1}, {'b', 2}, {'c', 3}, {'d', 4}, {'e', 5}};
+    int value1 = us1.at('a');
+    EXPECT_EQ(value1, 1);
+    const unordered_map<char, int> us2{
+            {'b', 2}, {'c', 3}, {'d', 4}, {'e', 5}, {'f', 6}};
+    int value2 = us2.at('e');
+    EXPECT_EQ(value2, 5);
+}
+
+TEST(testLookup, oper)
+{
+    unordered_map<char, int> us1{
+            {'a', 1}, {'b', 2}, {'c', 3}, {'d', 4}, {'e', 5}};
+    int value1 = us1['a'];
+    EXPECT_EQ(value1, 1);
+    const unordered_map<char, int> us2{
+            {'b', 2}, {'c', 3}, {'d', 4}, {'e', 5}, {'f', 6}};
+    int value2 = us2['e'];
+    EXPECT_EQ(value2, 5);
+    us1['k'] = 20;
+    EXPECT_EQ(us1['k'], 20);
+}
+
 TEST(testNomenberFunc, equal_Nequal)
 {
     unordered_map<char, int> us1{

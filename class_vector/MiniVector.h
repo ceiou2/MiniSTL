@@ -12,49 +12,569 @@ class vector
 private:
     typedef T value_type;
     typedef value_type* pointer;
-    typedef value_type* iterator;
-    typedef const value_type* const_iterator;
+    typedef const T* const_pointer;
     typedef value_type& reference;
-    typedef const reference const_reference;
+    typedef const T& const_reference;
     typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
 
 private:
-    iterator start;
-    iterator finish;
-    iterator end_of_storage;
+    pointer start;
+    pointer finish;
+    pointer end_of_storage;
 
 public:
-    //-------------迭代器模块-----------
-    // begin():获取第一个元素的迭代器
-    iterator begin() const
+    //前向声明
+    class iterator;
+    class const_iterator;
+    class reverse_iterator;
+    class const_reverse_iterator;
+    //======================迭代器模块===============
+    class iterator
     {
-        return start;
+    private:
+        pointer p;
+
+    public:
+        //构造函数
+        iterator(): p(nullptr) {}
+
+        iterator(pointer in_p): p(in_p) {}
+
+        iterator(const iterator& other): p(other.p) {}
+
+        //重载*
+        reference operator*()
+        {
+            return *p;
+        }
+
+        //重载=
+        iterator& operator=(const iterator& other)
+        {
+            p = other.p;
+            return *this;
+        }
+
+        //重载++
+        iterator& operator++()
+        {
+            ++p;
+            return *this;
+        }
+
+        //重载++(int)
+        iterator operator++(int)
+        {
+            iterator res(p);
+            ++p;
+            return res;
+        }
+
+        //重载--
+        iterator& operator--()
+        {
+            --p;
+            return *this;
+        }
+
+        //重载--(int)
+        iterator operator--(int)
+        {
+            iterator res(p);
+            --p;
+            return res;
+        }
+
+        //重载+
+        iterator operator+(long int offset)
+        {
+            return iterator(p + offset);
+        }
+
+        //重载+=
+        iterator& operator+=(long int offset)
+        {
+            p += offset;
+            return *this;
+        }
+
+        //重载-
+        iterator operator-(long int offset)
+        {
+            return iterator(p - offset);
+        }
+
+        //重载-=
+        iterator& operator-=(long int offset)
+        {
+            p -= offset;
+            return *this;
+        }
+
+        //重载==
+        bool operator==(const iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //重载==
+        bool operator==(const const_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const const_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //计算迭代器之间的距离
+        long int operator-(const iterator& other)
+        {
+            return (int)(p - other.p);
+        }
+
+        //友元声明
+        friend class const_iterator;
+        friend class vector;
+    };
+    class const_iterator
+    {
+    private:
+        const_pointer p;
+
+    public:
+        //构造函数
+        const_iterator(): p(nullptr) {}
+
+        const_iterator(const_pointer in_p): p(in_p) {}
+
+        const_iterator(const const_iterator& other): p(other.p) {}
+
+        //重载*
+        const_reference operator*()
+        {
+            return *p;
+        }
+
+        //重载=
+        const_iterator& operator=(const const_iterator& other)
+        {
+            p = other.p;
+            return *this;
+        }
+
+        //重载++
+        const_iterator& operator++()
+        {
+            ++p;
+            return *this;
+        }
+
+        //重载++(int)
+        const_iterator operator++(int)
+        {
+            const_iterator res(p);
+            ++p;
+            return res;
+        }
+
+        //重载--
+        const_iterator& operator--()
+        {
+            --p;
+            return *this;
+        }
+
+        //重载--(int)
+        const_iterator operator--(int)
+        {
+            const_iterator res(p);
+            --p;
+            return res;
+        }
+
+        //重载+
+        const_iterator operator+(long int offset)
+        {
+            return const_iterator(p + offset);
+        }
+
+        //重载+=
+        const_iterator& operator+=(long int offset)
+        {
+            p += offset;
+            return *this;
+        }
+
+        //重载-
+        const_iterator operator-(long int offset)
+        {
+            return const_iterator(p - offset);
+        }
+
+        //重载-=
+        const_iterator& operator-=(long int offset)
+        {
+            p -= offset;
+            return *this;
+        }
+
+        //重载==
+        bool operator==(const iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //重载==
+        bool operator==(const const_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const const_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //计算迭代器之间的距离
+        long int operator-(const const_iterator& other)
+        {
+            return (int)(p - other.p);
+        }
+
+        //友元声明
+        friend class iterator;
+        friend class vector;
+    };
+    class reverse_iterator
+    {
+    private:
+        pointer p;
+
+    public:
+        //构造函数
+        reverse_iterator(): p(nullptr) {}
+
+        reverse_iterator(pointer in_p): p(in_p) {}
+
+        reverse_iterator(const reverse_iterator& other): p(other.p) {}
+
+        //重载*
+        reference operator*()
+        {
+            return *p;
+        }
+
+        //重载=
+        reverse_iterator& operator=(const reverse_iterator& other)
+        {
+            p = other.p;
+            return *this;
+        }
+
+        //重载++
+        reverse_iterator& operator++()
+        {
+            --p;
+            return *this;
+        }
+
+        //重载++(int)
+        reverse_iterator operator++(int)
+        {
+            reverse_iterator res(p);
+            --p;
+            return res;
+        }
+
+        //重载--
+        reverse_iterator& operator--()
+        {
+            ++p;
+            return *this;
+        }
+
+        //重载--(int)
+        reverse_iterator operator--(int)
+        {
+            reverse_iterator res(p);
+            ++p;
+            return res;
+        }
+
+        //重载+
+        reverse_iterator operator+(long int offset)
+        {
+            return reverse_iterator(p - offset);
+        }
+
+        //重载+=
+        reverse_iterator& operator+=(long int offset)
+        {
+            p -= offset;
+            return *this;
+        }
+
+        //重载-
+        reverse_iterator operator-(long int offset)
+        {
+            return reverse_iterator(p + offset);
+        }
+
+        //重载-=
+        reverse_iterator& operator-=(long int offset)
+        {
+            p += offset;
+            return *this;
+        }
+
+        //重载==
+        bool operator==(const reverse_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const reverse_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //重载==
+        bool operator==(const const_reverse_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const const_reverse_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //计算迭代器之间的距离
+        long int operator-(const reverse_iterator& other)
+        {
+            return (int)(other.p - p);
+        }
+
+        //友元声明
+        friend class const_reverse_iterator;
+        friend class vector;
+    };
+
+    class const_reverse_iterator
+    {
+    private:
+        const_pointer p;
+
+    public:
+        //构造函数
+        const_reverse_iterator(): p(nullptr) {}
+
+        const_reverse_iterator(const_pointer in_p): p(in_p) {}
+
+        const_reverse_iterator(const const_reverse_iterator& other): p(other.p)
+        {
+        }
+
+        //重载*
+        const_reference operator*()
+        {
+            return *p;
+        }
+
+        //重载=
+        const_reverse_iterator& operator=(const const_reverse_iterator& other)
+        {
+            p = other.p;
+            return *this;
+        }
+
+        //重载++
+        const_reverse_iterator& operator++()
+        {
+            --p;
+            return *this;
+        }
+
+        //重载++(int)
+        const_reverse_iterator operator++(int)
+        {
+            const_reverse_iterator res(p);
+            --p;
+            return res;
+        }
+
+        //重载--
+        const_reverse_iterator& operator--()
+        {
+            ++p;
+            return *this;
+        }
+
+        //重载--(int)
+        const_reverse_iterator operator--(int)
+        {
+            const_reverse_iterator res(p);
+            ++p;
+            return res;
+        }
+
+        //重载+
+        const_reverse_iterator operator+(long int offset)
+        {
+            return const_reverse_iterator(p - offset);
+        }
+
+        //重载+=
+        const_reverse_iterator& operator+=(long int offset)
+        {
+            p -= offset;
+            return *this;
+        }
+
+        //重载-
+        const_reverse_iterator operator-(long int offset)
+        {
+            return const_reverse_iterator(p + offset);
+        }
+
+        //重载-=
+        const_reverse_iterator& operator-=(long int offset)
+        {
+            p += offset;
+            return *this;
+        }
+
+        //重载==
+        bool operator==(const reverse_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const reverse_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //重载==
+        bool operator==(const const_reverse_iterator& other) const
+        {
+            return p == other.p;
+        }
+
+        //重载!-
+        bool operator!=(const const_reverse_iterator& other) const
+        {
+            return p != other.p;
+        }
+
+        //计算迭代器之间的距离
+        long int operator-(const const_reverse_iterator& other)
+        {
+            return (int)(other.p - p);
+        }
+
+        //友元声明
+        friend class reverse_iterator;
+        friend class vector;
+    };
+    // begin():获取第一个元素的迭代器
+    iterator begin()
+    {
+        return iterator(start);
+    }
+
+    const_iterator begin() const
+    {
+        return const_iterator(start);
+    }
+
+    const_iterator cbegin() const
+    {
+        return const_iterator(start);
     }
 
     // end()::获取vector最后一个元素的下一个位置的迭代器
-    iterator end() const
+    iterator end()
     {
-        return finish;
+        return iterator(finish);
     }
 
-    //-------------容量模块-----------
-    // size():获取元素数量
-    size_type size() const
+    const_iterator end() const
     {
-        return size_type(end() - begin());
+        return const_iterator(finish);
     }
 
-    // capacity():获取容器容量
-    size_type capacity() const
+    const_iterator cend() const
     {
-        return size_type(end_of_storage - begin());
+        return const_iterator(finish);
     }
 
-    // empty():vector是否为空
-    bool empty() const
+    // reverse begin
+    reverse_iterator rbegin()
     {
-        return begin() == end();
+        return reverse_iterator(finish - 1);
+    }
+
+    const_reverse_iterator rbegin() const
+    {
+        return const_reverse_iterator(finish - 1);
+    }
+
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(finish - 1);
+    }
+
+    // rend
+    reverse_iterator rend()
+    {
+        return reverse_iterator(start - 1);
+    }
+
+    const_reverse_iterator rend() const
+    {
+        return const_reverse_iterator(start - 1);
+    }
+
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(start - 1);
+    }
+    //==============元素访问模块===============
+    // at:有边界检查访问
+    reference at(size_type n)
+    {
+        if (n >= size()) {
+            throw std::out_of_range("out of range");
+        }
+        return *(begin() + n);
+    }
+
+    const_reference at(size_type n) const
+    {
+        if (n >= size()) {
+            throw std::out_of_range("out of range");
+        }
+        return *(begin() + n);
     }
 
     // operator[]:随机访问
@@ -67,6 +587,35 @@ public:
     const_reference operator[](size_type n) const
     {
         return *(begin() + n);
+    }
+
+    reference front()
+    {
+        return *begin();
+    } //第一个元素
+
+    reference back()
+    {
+        return *(end() - 1);
+    } //最后一个元素
+
+    //-------------容量模块-----------
+    // size():获取元素数量
+    size_type size() const
+    {
+        return size_type(end() - begin());
+    }
+
+    // capacity():获取容器容量
+    size_type capacity() const
+    {
+        return size_type(end_of_storage - (begin()).p);
+    }
+
+    // empty():vector是否为空
+    bool empty() const
+    {
+        return begin() == end();
     }
 
     // reserve:分配新空间并转移
@@ -129,7 +678,7 @@ public:
     {
         if (position == end())
             return;
-        for (iterator it = finish - 1; it != position; --it) {
+        for (iterator it = end() - 1; it != position; --it) {
             if (it == begin())
                 return;
             *it = *(it - 1);
@@ -179,8 +728,8 @@ public:
     //移动构造函数
     vector(vector&& ori_vector)
     {
-        start = ori_vector.begin();
-        finish = ori_vector.end();
+        start = (ori_vector.begin()).p;
+        finish = (ori_vector.end()).p;
         end_of_storage = start + ori_vector.capacity();
 
         ori_vector.start = nullptr; //右值中指针置空防止析构时delete掉内存
@@ -204,8 +753,8 @@ public:
     vector& operator=(vector&& ori_vector)
     {
         release();
-        start = ori_vector.begin();
-        finish = ori_vector.end();
+        start = ori_vector.begin().p;
+        finish = ori_vector.end().p;
         end_of_storage = start + ori_vector.capacity();
 
         ori_vector.start = nullptr; //右值中指针置空防止析构时delete掉内存
@@ -238,16 +787,6 @@ public:
     }
 
     //-------------操作函数模块-----------
-    reference front()
-    {
-        return *begin();
-    } //第一个元素
-
-    reference back()
-    {
-        return *(end() - 1);
-    } //最后一个元素
-
     void push_back(const T& x)
     { //将元素插入尾端
         if (finish != end_of_storage) {
@@ -275,8 +814,14 @@ public:
         return position;
     }
 
-    // iterator erase(iterator begin,iterator end)
-    //略
+    iterator erase(iterator begin, iterator end)
+    {
+        while (begin != end) {
+            erase(begin);
+            --end;
+        }
+        return begin;
+    }
 
     iterator insert(iterator position, const T& x)
     { //在迭代器位置插入值，返回插入位置的迭代器
@@ -362,9 +907,7 @@ bool operator==(const vector<T>& lhs, const vector<T>& rhs)
 template<typename T>
 bool operator!=(const vector<T>& lhs, const vector<T>& rhs)
 {
-    if (lhs.size() == rhs.size())
-        return false;
-    return true;
+    return !(lhs == rhs);
 }
 
 template<typename T>
@@ -392,25 +935,19 @@ bool operator<(const vector<T>& lhs, const vector<T>& rhs)
 template<typename T>
 bool operator<=(const vector<T>& lhs, const vector<T>& rhs)
 {
-    if (lhs.size() == rhs.size() || lhs.size() < rhs.size())
-        return true;
-    return false;
+    return (lhs == rhs || lhs < rhs);
 }
 
 template<typename T>
 bool operator>(const vector<T>& lhs, const vector<T>& rhs)
 {
-    if (lhs.size() == rhs.size() || lhs.size() < rhs.size())
-        return false;
-    return true;
+    return !(lhs == rhs || lhs < rhs);
 }
 
 template<typename T>
 bool operator>=(const vector<T>& lhs, const vector<T>& rhs)
 {
-    if (lhs.size() == rhs.size() || lhs.size() > rhs.size())
-        return true;
-    return false;
+    return (lhs == rhs || lhs > rhs);
 }
 
 #endif

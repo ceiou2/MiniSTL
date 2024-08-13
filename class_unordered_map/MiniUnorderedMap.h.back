@@ -595,17 +595,16 @@ public:
     }
 
     //返回到拥有指定键的元素被映射值的引用。如果没有这种元素，那么就会抛出
-    // std::out_of_range 类型的异常。
-    T& at(const Key& key)
-    {
+    //std::out_of_range 类型的异常。
+    T& at(const Key&key){
         Node* p = ht.find(key);
-        if (p) {
+        if(p){
             return (p->data).second;
         }
         throw std::out_of_range("Key not exist");
     }
 
-    const T& at(const Key& key) const
+    const T& at(const Key& key)const
     {
         const Node* p = ht.find(key);
         if (p) {
@@ -615,8 +614,7 @@ public:
     }
 
     //返回到映射等于key的键的值的引用，这种键不存在的情况下就会进行插入。
-    T& operator[](const Key& key)
-    {
+    T& operator[](const Key&key){
         Node* p = ht.find(key);
         if (p) {
             return (p->data).second;
@@ -635,13 +633,13 @@ public:
         return (insert(std::make_pair(key, T())).first)->second;
     }
 
-    const T& operator[](const Key& key) const
+    const T& operator[](const Key& key)const
     {
         const Node* p = ht.find(key);
         return (p->data).second;
     }
 
-    const T& operator[](Key&& key) const
+    const T& operator[](Key&& key)const
     {
         const Node* p = ht.find(key);
         //不进行类型检查

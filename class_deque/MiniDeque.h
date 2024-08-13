@@ -726,9 +726,9 @@ private:
     void add_buffer_front()
     { //头部添加一个buffer,start.cur指向新buffer末尾，空但将分配value，cur不移(指向第一个元素)
         buffer buff = new T[buffer_size];
-        start.node = map.insert(
+        start.node = &(*map.insert(
                 map.begin(),
-                buff); // map头部插入添加,返回T**指向map头：等价于start.node=map;
+                buff)); // map头部插入添加,返回T**指向map头：等价于start.node=map;
         // init start
         start.first = buff;
         start.last = buff + buffer_size;
