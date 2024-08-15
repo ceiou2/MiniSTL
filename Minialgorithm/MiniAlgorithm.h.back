@@ -84,84 +84,8 @@ UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f){
     return f;
 }
 
-//================搜索操作=============
-//++++++++++++++++++++++++++++++++++start here
-// all_of, any_of, none_of
-//检查一元谓词 p 是否对范围 [first, last) 中所有元素返回 true
-template<class InputIt, class UnaryPred>
-bool all_of(InputIt first, InputIt last, UnaryPred p);
-
-//检查一元谓词 p 是否对范围 [first, last) 中至少一个元素返回 true。
-template<class InputIt, class UnaryPred>
-bool any_of(InputIt first, InputIt last, UnaryPred p);
-
-//检查一元谓词 p 是否不对范围 [first, last) 中任何元素返回 true。
-template<class InputIt, class UnaryPred>
-bool none_of(InputIt first, InputIt last, UnaryPred p);
-
-
-// find, find_if, find_if_not
-// find 搜索等于（用 operator== 比较）value 的元素。
-template<class InputIt, class T>
-InputIt find(InputIt first, InputIt last, const T& value);
-
-// find_if 搜索谓词 p 对其返回 true 的元素。
-template<class InputIt, class UnaryPred>
-InputIt find_if(InputIt first, InputIt last, UnaryPred p);
-
-// find_if_not 搜索谓词 q 对其返回 false 的元素。
-template<class InputIt, class UnaryPred>
-InputIt find_if_not(InputIt first, InputIt last, UnaryPred q);
-
-// find_end
-//在范围 [first, last) 中搜索序列 [s_first, s_last) 最后一次出现的位置。
-//用 operator== 比较元素。
-template<class ForwardIt1, class ForwardIt2>
-ForwardIt1 find_end(
-        ForwardIt1 first,
-        ForwardIt1 last,
-        ForwardIt2 s_first,
-        ForwardIt2 s_last);
-
-//用给定的二元谓词 p 比较元素。
-template<class ForwardIt1, class ForwardIt2, class BinaryPred>
-ForwardIt1 find_end(
-        ForwardIt1 first,
-        ForwardIt1 last,
-        ForwardIt2 s_first,
-        ForwardIt2 s_last,
-        BinaryPred p);
-
-//find_first_of
-//在范围 [first, last) 中搜索范围 [s_first, s_last) 中的任何元素。
-//用 operator== 比较元素。
-template<class InputIt, class ForwardIt>
-InputIt
-find_first_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last);
-
-//用给定的二元谓词 p 比较元素。
-template<class InputIt, class ForwardIt, class BinaryPred>
-InputIt find_first_of(
-        InputIt first,
-        InputIt last,
-        ForwardIt s_first,
-        ForwardIt s_last,
-        BinaryPred p);
-
-// count, count_if
-//返回范围 [first, last) 中满足特定判别标准的元素数。
-//计数等于 value 的元素（使用 operator==）。
-template<class InputIt, class T>
-typename std::iterator_traits<InputIt>::difference_type
-count(InputIt first, InputIt last, const T& value);
-
-//计数谓词 p 对其返回 true 的元素。
-template<class InputIt, class UnaryPred>
-typename std::iterator_traits<InputIt>::difference_type
-count_if(InputIt first, InputIt last, UnaryPred p);
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++start here
 ///////////////////修改序列的操作////////////
+
 
 ///////////////////排序和相关操作////////////
 //=============最大最小操作=============

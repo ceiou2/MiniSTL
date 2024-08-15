@@ -383,6 +383,8 @@ TEST(testElementAccess, at)
     EXPECT_EQ(s.at('a'), 27);
     s['b'] = 42; // 更新
     s['x'] = 9;  //插入
+    EXPECT_EQ(s['b'], 42);
+    EXPECT_EQ(s['x'], 9);
 }
 
 TEST(testElementAccess, oper)

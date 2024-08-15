@@ -129,13 +129,15 @@ TEST(TestCapacity, max_size)
     EXPECT_EQ(arr.max_size(), 5);
 }
 
-TEST(TestOperations,fill){
-    array<int, 5> arr{1,2};
+TEST(TestOperations, fill)
+{
+    array<int, 5> arr{1, 2};
     arr.fill(10);
     EXPECT_EQ(arr.at(0), 10);
 }
 
-TEST(TestOperations,swap){
+TEST(TestOperations, swap)
+{
     array<int, 3> arr1{1, 2, 3};
     array<int, 3> arr2{3, 2, 1};
     arr1.swap(arr2);
@@ -143,7 +145,8 @@ TEST(TestOperations,swap){
     EXPECT_EQ(arr2.front(), 1);
 }
 
-TEST(TestNon_MemberFunctions,oper){
+TEST(TestNon_MemberFunctions, oper)
+{
     array<int, 5> arr1{1, 2, 3, 4, 5};
     array<int, 5> arr2(arr1);
     array<int, 5> arr3{1, 2, 3, 4, 6};
@@ -158,10 +161,11 @@ TEST(TestNon_MemberFunctions,oper){
     EXPECT_TRUE(arr1 <= arr2);
 }
 
-TEST(TestNon_MemberFunctions,swap){
+TEST(TestNon_MemberFunctions, swap)
+{
     array<int, 3> arr1{1, 2, 3};
     array<int, 3> arr2{3, 2, 1};
-    swap(arr1,arr2);
+    swap(arr1, arr2);
     EXPECT_EQ(arr1.front(), 3);
     EXPECT_EQ(arr2.front(), 1);
 }

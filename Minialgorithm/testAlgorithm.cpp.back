@@ -1,0 +1,18 @@
+#include<gtest/gtest.h>
+#include"MiniAlgorithm.h"
+#include"MiniVector.h"
+
+TEST(testBatchOperations,for_each){
+  vector<int> v{1,2,3,4,5};
+  for_each(v.begin(),v.end(),[](int param)->{++param;});
+  int i=2;
+  for(auto it=v.begin();it!=v.end();++it){
+    EXPECT_EQ(*it,i);
+    ++i;
+  }
+}
+
+int main(int argc,char** argv){
+  testing::InitGoogleTest();
+  return RUN_ALL_TESTS();
+}
