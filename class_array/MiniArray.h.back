@@ -494,172 +494,199 @@ public:
         friend class reverse_iterator;
         friend class vector;
     };
-    //====================迭代器模块====================
-    //获取首部迭代器
-    iterator begin()
-    {
-        return &array_container[0];
-    }
 
-    const_iterator begin() const
-    {
-        return array_container;
-    }
+    //构造函数与析构函数全部不写，按照cppreference需要遵循聚合初始化的条件
+        // //默认构造函数
+        // array()
+        // {
+        //     for (size_type i = 0; i < Num; ++i) {
+        //         array_container[i] = T(); //初始化
+        //     }
+        // }
 
-    const_iterator cbegin()
-    {
-        return array_container;
-    }
+        // //拷贝构造函数
+        // array(const array<T, Num>& inputArray)
+        // {
+        //     *this = inputArray;
+        // }
 
-    //获取尾部迭代器
-    iterator end()
-    {
-        return &array_container[Num];
-    }
+        // //移动构造函数
+        // array(array<T, Num>&& inputArray)
+        // {
+        //     array_container = inputArray.array_container;
+        //     inputArray.array_container = nullptr;
+        // }
 
-    const_iterator end() const
-    {
-        return array_container;
-    }
+        // //析构函数
+        // ~array() {}
 
-    const_iterator cend()
-    {
-        return array_container;
-    }
+        // //{}列表初始化构造函数
+        // array(std::initializer_list<T> init)
+        // {
+        //     if (init.size() > Num) {
+        //         throw std::length_error(
+        //                 "too many elements in initializer list");
+        //     }
+        //     std::copy(init.begin(), init.end(), data());
+        // }
 
-    //获取反向首部迭代器
-    reverse_iterator rbegin()
-    {
-        return &array_container[Num - 1];
-    }
 
-    const_reverse_iterator rbegin() const
-    {
-        return &array_container[Num - 1];
-    }
-
-    const_reverse_iterator crbegin()
-    {
-        return &array_container[Num - 1];
-    }
-
-    reverse_iterator rend()
-    {
-        return &array_container[0] - 1;
-    }
-
-    const_reverse_iterator rend() const
-    {
-        return &array_container[0] - 1;
-    }
-
-    const_reverse_iterator crend()
-    {
-        return &array_container[0] - 1;
-    }
-
-    //--------元素访问模块----------
-    // at:带越界检查访问指定的元素
-    reference at(const size_type& ind)
-    {
-        if (ind >= Num) // check range
+        //====================迭代器模块====================
+        //获取首部迭代器
+        iterator begin()
         {
-            throw std::out_of_range("out_of_range");
+            return &array_container[0];
         }
-        return data()[ind];
-    }
 
-    // operator[]:访问指定元素
-    reference operator[](const size_type& ind)
-    {
-        return data()[ind];
-    }
-    // const version
-    const_reference operator[](const size_type& ind) const
-    {
-        return data()[ind];
-    }
-
-    // front:访问第一个元素
-    reference front()
-    {
-        return at(0);
-    }
-    const_reference front() const
-    {
-        return at(0);
-    }
-
-    // back:访问最后一个元素
-    reference back()
-    {
-        return at(Num - 1);
-    }
-    const_reference back() const
-    {
-        return at(Num - 1);
-    }
-
-    // data:直接访问底层首地址
-    pointer data()
-    {
-        return array_container;
-    }
-
-    const_pointer data() const
-    {
-        return array_container;
-    }
-
-    //---------容量模块----------
-    // empty()
-    [[nodiscard]] constexpr bool empty() const
-    {
-        return Num == 0;
-    }
-
-    // size
-    constexpr size_type size() const
-    {
-        return Num;
-    }
-
-    // max_size
-    constexpr size_type max_size() const
-    {
-        return Num;
-    }
-
-    //---------操作模块----------
-    // fill():以指定值填充容器
-    void fill(const value_type& value)
-    {
-        for (size_type i = 0; i < Num; ++i) {
-            array_container[i] = value;
+        const_iterator begin()const{
+            return array_container;
         }
-    }
 
-    // swap:将容器内容与other的内容交换。不会导致迭代器和引用关联到别的容器
-    void swap(array& other)
-    {
-        if (other.size() != Num) //检查大小,防止越界
+        const_iterator cbegin(){
+            return array_container;
+        }
+
+        //获取尾部迭代器
+        iterator end()
         {
-            return;
+            return &array_container[Num];
         }
-        for (size_type i = 0; i < Num; ++i) {
-            std::swap(array_container[i], other[i]);
+
+        const_iterator end()const{
+            return array_container;
         }
-    }
-};
+
+        const_iterator cend(){
+            return array_container;
+        }
+
+        //获取反向首部迭代器
+        reverse_iterator rbegin(){
+            return &array_container[Num - 1];
+        }
+
+        const_reverse_iterator rbegin()const{
+            return &array_container[Num - 1];
+        }
+
+        const_reverse_iterator crbegin(){
+            return &array_container[Num - 1];
+        }
+
+        reverse_iterator rend(){
+            return &array_container[0] - 1;
+        }
+
+        const_reverse_iterator rend()const{
+            return &array_container[0] - 1;
+        }
+
+        const_reverse_iterator crend(){
+            return &array_container[0] - 1;
+        }
+
+        //--------元素访问模块----------
+        // at:带越界检查访问指定的元素
+        reference at(const size_type& ind)
+        {
+            if (ind >= Num) // check range
+            {
+                throw std::out_of_range("out_of_range");
+            }
+            return data()[ind];
+        }
+
+        // operator[]:访问指定元素
+        reference operator[](const size_type& ind)
+        {
+            return data()[ind];
+        }
+        // const version
+        const_reference operator[](const size_type& ind) const
+        {
+            return data()[ind];
+        }
+
+        // front:访问第一个元素
+        reference front()
+        {
+            return at(0);
+        }
+        const_reference front() const
+        {
+            return at(0);
+        }
+
+        // back:访问最后一个元素
+        reference back()
+        {
+            return at(Num - 1);
+        }
+        const_reference back() const
+        {
+            return at(Num - 1);
+        }
+
+        // data:直接访问底层首地址
+        pointer data()
+        {
+            return array_container;
+        }
+
+        const_pointer data()const
+        {
+            return array_container;
+        }
+
+        //---------容量模块----------
+        // empty()
+        [[nodiscard]] constexpr bool empty() const
+        {
+            return Num == 0;
+        }
+
+        // size
+        constexpr size_type size() const
+        {
+            return Num;
+        }
+
+        // max_size
+        constexpr size_type max_size() const
+        {
+            return Num;
+        }
+
+        //---------操作模块----------
+        // fill():以指定值填充容器
+        void fill(const value_type& value)
+        {
+            for (size_type i = 0; i < Num; ++i) {
+                array_container[i] = value;
+            }
+        }
+
+        // swap:将容器内容与other的内容交换。不会导致迭代器和引用关联到别的容器
+        void swap(array& other)
+        {
+            if (other.size() != Num) //检查大小,防止越界
+            {
+                return;
+            }
+            for (size_type i = 0; i < Num; ++i) {
+                std::swap(array_container[i], other[i]);
+            }
+        }
+
+    };
 
 //---------非成员函数模块----------
-template<typename T, size_t N>
-bool operator==(const array<T, N>& lhs, const array<T, N>& rhs)
-{
-    if (lhs.size() != rhs.size())
+template<typename T,size_t N>
+bool operator==(const array<T,N>&lhs,const array<T,N>&rhs){
+    if(lhs.size()!=rhs.size())
         return false;
-    for (size_t i = 0; i < lhs.size(); ++i) {
-        if (lhs[i] != rhs[i])
+    for (size_t i = 0; i < lhs.size();++i){
+        if(lhs[i]!=rhs[i])
             return false;
     }
     return true;
@@ -675,10 +702,11 @@ template<typename T, size_t N>
 bool operator<(const array<T, N>& lhs, const array<T, N>& rhs)
 {
     size_t i = 0;
-    while (i < lhs.size() && i < rhs.size()) {
-        if (lhs[i] < rhs[i]) {
+    while(i<lhs.size() && i<rhs.size()){
+        if(lhs[i]<rhs[i]){
             return true;
-        } else if (lhs[i] > rhs[i]) {
+        }
+        else if(lhs[i]>rhs[i]){
             return false;
         }
         ++i;
@@ -705,9 +733,8 @@ bool operator>=(const array<T, N>& lhs, const array<T, N>& rhs)
 }
 
 //特化swap算法
-template<typename T, size_t N>
-void swap(array<T, N>& lhs, array<T, N>& rhs)
-{
+template<typename T,size_t N>
+void swap(array<T,N>&lhs, array<T,N>&rhs){
     lhs.swap(rhs);
 }
 

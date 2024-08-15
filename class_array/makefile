@@ -1,4 +1,4 @@
-testarray:testarray.cpp
-	g++ -o testarray testarray.cpp -g -lgtest -lpthread
+testArray:testArray.cpp
+	g++ -o testArray testArray.cpp -g -lgtest -lpthread
 clean:
-	rm -f testarray
+	rm -f testArray
