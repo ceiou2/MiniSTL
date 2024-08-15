@@ -300,7 +300,7 @@ public:
         //重载等于==运算符
         bool operator==(const const_reverse_iterator& other) const
         {
-            reture other._root == _root;
+            return other._root == _root;
         }
 
         //重载不等于!=运算符

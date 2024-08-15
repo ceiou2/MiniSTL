@@ -4,6 +4,7 @@
 #define MINI_STRING_H
 
 #include<cstddef>
+#include"MiniAlgorithm.h"
 
 class string{
 private:
@@ -20,7 +21,8 @@ private:
     pointer end_of_storage;
 
 public:
-    //前向声明
+    static const size_type npos = -1;//表示一个不存在的位置
+    // 前向声明
     class iterator;
     class const_iterator;
     class reverse_iterator;
@@ -774,16 +776,6 @@ public:
         release();
     }
 
-    // void swap(string& other)
-    // {
-    //     if (*this == other)
-    //         return;
-
-    //     std::swap(this->start, other.start);
-    //     std::swap(this->finish, other.finish);
-    //     std::swap(this->end_of_storage, other.end_of_storage);
-    // }
-
     void swap(string& other);
 
     //-------------操作函数模块-----------
@@ -882,6 +874,152 @@ public:
             ++finish;
         }
     }
+
+    //上面的所以成员函数与vector<char>特化相同，以下是string特有功能函数的补充
+    //=================string 特有功能函数===================
+    //------------------元素访问模块-------------------
+    //返回指向用作字符存储的底层数组的指针。
+    const char* data()const{
+        return start;
+    }
+
+    //返回字符串的不可修改的标准 C 字符数组版本
+    //返回指向拥有数据等价于存储于字符串中的空终止字符数组的指针。
+    const char* c_str()const{
+        string s(*this);
+        s.push_back('\0');
+        return s.start;
+    }
+
+    //----------------容量模块---------------------
+    size_type length(){
+        return size();
+    }
+
+    //----------------修改器模块-------------------
+    //后附字符到结尾
+    string& append(size_type count,char ch){
+        while(count--){
+            push_back(ch);
+        }
+        return *this;
+    }
+
+    string& append(const string& str)
+    {
+        for (auto i = 0; i < str.size(); ++i) {
+            push_back(str[i]);
+        }
+        return *this;
+    }
+
+    string& append(const string& str, size_type pos, size_type count = npos)
+    {
+        if(count==npos){
+            count = str.size()-pos;
+        }
+        for (auto i = pos; i < pos + count;++i){
+            push_back(str[i]);
+        }
+        return *this;
+    }
+
+    string& append(std::initializer_list<char> ilist){
+        for (auto it = ilist.begin(); it != ilist.end();++it){
+            push_back(*it);
+        }
+        return *this;
+    }
+
+    string& append(const char* s,size_type count){
+        for (auto i = 0; i < count;++i){
+            push_back(*(s + i));
+        }
+        return *this;
+    }
+
+    string& append(const char* s)
+    {
+        while(s!='\0'){
+            push_back(*s);
+            ++s;
+        }
+        return *this;
+    }
+
+    template<typename InputIt>
+    string& append(InputIt first, InputIt last){
+        while(first!=last){
+            push_back(*first);
+            ++first;
+        }
+        return *this;
+    }
+
+    //向字符串后附额外字符。
+    string& operator+=(const string& str){
+        return append(str);
+    }
+
+    string& operator+=(char ch)
+    {
+        push_back(ch);
+        return *this;
+    }
+
+    string& operator+=(const char* s)
+    {
+        return append(s);
+    }
+
+    string& operator+=(std::initializer_list<char> ilist)
+    {
+        return append(ilist);
+    }
+
+    //复制子串 [pos, pos + count) 到 dest
+    //指向的字符串。如果请求的子串越过字符串结尾，或 count ==
+    //npos，那么复制的子串是 [pos, size())。
+    size_type copy(char* dest,size_type count,size_type pos=0)const{
+        size_type res=0;
+        if(count==npos)
+            count = size() - pos;
+        for (auto i = pos; i < min(pos + count, size()); ++i) {
+            dest[i] = at(i);
+            ++res;
+        }
+    }
+
+    //替换字符串的指定部分
+    //以若干给定字符替换范围 [begin() + pos, begin() + std::min(pos + count,
+    //size())) 或 [first, last) 中的字符。
+    string& replace(size_type pos,size_type count,const string& str){
+        //找到原字符串的末尾保留子串
+        auto epos = min(pos + count, size());
+        //保存子串
+        char* temp=new char[size()-epos];
+        copy(temp, npos, epos);
+        //原字符串移除从pos到末尾全部字符
+        resize(pos);
+        //append要插入的str
+        append(str);
+        //append之前保留的原str末尾子串
+        append(temp);
+
+        return *this;
+    }
+
+    string& replace(const_iterator first, const_iterator last, const string& str) {
+        erase(iterator(const_pointer_cast(first.p)), iterator(last.p));
+    }
+
+    string& replace() {}
+
+    string& replace() {}
+
+    string& replace() {}
+
+    string& replace() {}
 };
 
 void swap(string& lhs, string& rhs);
