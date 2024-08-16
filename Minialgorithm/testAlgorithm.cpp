@@ -15,6 +15,222 @@ TEST(testBatchOperations, for_each)
     }
 }
 
+TEST(testSearchOperations, all_ofANDany_ofANDnone_of){
+    vector<int> v{1, 2, 3, 4, 5};
+    bool res=all_of(v.begin(), v.end(), [](const int& a) -> bool {
+        return a > 0;
+    });
+    EXPECT_TRUE(res);
+    res = any_of(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 5;
+    });
+    EXPECT_TRUE(res);
+    res = none_of(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 9;
+    });
+    EXPECT_TRUE(res);
+}
+
+TEST(testSearchOperations, find)
+{
+    vector<int> v{1, 2, 3, 4, 5};
+    auto res = find(v.begin(), v.end(),1);
+    EXPECT_EQ(res,v.begin());
+    res = find_if(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 1;
+    });
+    EXPECT_EQ(res, v.begin());
+    res = find_if_not(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 9;
+    });
+    EXPECT_EQ(res, v.begin());
+}
+
+TEST(testSearchOperations, findAfind_ifAfind_if_not)
+{
+    vector<int> v{1, 2, 3, 4, 5};
+    auto res = find(v.begin(), v.end(), 1);
+    EXPECT_EQ(res, v.begin());
+    res = find_if(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 1;
+    });
+    EXPECT_EQ(res, v.begin());
+    res = find_if_not(v.begin(), v.end(), [](const int& a) -> bool {
+        return a == 9;
+    });
+    EXPECT_EQ(res, v.begin());
+}
+
+TEST(testSearchOperations, find_end)
+{
+    vector<int> v{1, 2, 3, 4, 5, 1, 2, 3};
+    vector<int> v2{1, 2, 3};
+    auto ans = v.begin() + 5;
+    auto res = find_end(v.begin(), v.end(), v2.begin(), v2.end());
+    EXPECT_EQ(res, ans);
+    res = find_end(
+            v.begin(), v.end(), v2.begin(),
+            v2.end(),[](const int& a,const int& b)->bool { return a == b; });
+    EXPECT_EQ(res, ans);
+}
+
+TEST(testSearchOperations, find_first_of)
+{
+    vector<int> v{1, 2, 3, 4, 5, 1, 2, 3};
+    vector<int> v2{1, 2, 3};
+    auto ans = v.begin();
+    auto res = find_first_of(v.begin(), v.end(), v2.begin(), v2.end());
+    EXPECT_EQ(res, ans);
+    res = find_first_of(
+            v.begin(), v.end(), v2.begin(), v2.end(),
+            [](const int& a, const int& b) -> bool {
+                return a == b;
+            });
+    EXPECT_EQ(res, ans);
+}
+
+TEST(testSearchOperations, countANDcount_if)
+{
+    vector<int> v{1, 2, 3, 4, 5, 1, 2, 3};
+    auto ans = 2;
+    auto res = count(v.begin(), v.end(), 1);
+    EXPECT_EQ(res, ans);
+    res = count_if(
+            v.begin(), v.end(),
+            [](const int& a) -> bool {
+                return a == 1;
+            });
+    EXPECT_EQ(res, ans);
+}
+
+TEST(testSearchOperations, equal)
+{
+    vector<int> v{1, 2, 3, 4, 5, 1, 2, 3};
+    vector<int> v2{1, 2, 3};
+    auto res = equal(v.begin(), v.begin()+3, v2.begin());
+    EXPECT_TRUE(res);
+    res = equal(v.begin(), v.begin() + 3, v2.begin(), [](const int& a,const int& b) -> bool {
+        return a == b;
+    });
+    EXPECT_TRUE(res);
+}
+
+TEST(testSearchOperations, search)
+{
+    vector<int> v{1, 2, 3, 4, 5, 1, 2, 3};
+    vector<int> v2{1, 2, 3};
+    auto ans = v.begin();
+    auto res = search(v.begin(), v.end(), v2.begin(),v2.end());
+    EXPECT_EQ(res,ans);
+    res =
+            search(v.begin(), v.end(), v2.begin(), v2.end(),
+                  [](const int& a, const int& b) -> bool {
+                      return a == b;
+                  });
+    EXPECT_EQ(res, ans);
+}
+
+TEST(testCopyOperations,copyANDcopy_if){
+    vector<int> v{9, 9, 9, 9, 9, 9, 9, 9};
+    vector<int> v2{1, 2, 3};
+    copy(v2.begin(), v2.end(), v.begin());
+    auto ans = v.begin();
+    auto res = search(v.begin(), v.end(), v2.begin(), v2.end());
+    EXPECT_EQ(res, ans);
+    copy_if(v2.begin(), v2.end(), v.begin() + 3, [](const int& a) -> bool {
+        return a == 3;
+    });
+    EXPECT_EQ(*(v.begin() + 3), 3);
+}
+
+TEST(testSwapOperations,swap){
+    vector<int> v{1, 2, 3};
+    vector<int> v2{5};
+    swap(v, v2);
+    EXPECT_EQ(v.size(), 1);
+    EXPECT_EQ(v2.size(), 3);
+}
+
+TEST(testTransformation_Oprations,transform){
+    vector<int> v(5,1);
+    vector<int> v2(5,9);
+    transform(v.begin(), v.end(), v2.begin(), [](const int& a) -> int {
+        return a + 1;
+    });
+    EXPECT_EQ(v2, vector<int>(5, 2));
+    vector<int> v3(5);
+    transform(
+            v.begin(), v.end(), v2.begin(), v3.begin(),
+            [](const int& a, const int& b) -> int {
+                return a + b;
+            });
+    EXPECT_EQ(*(v3.begin() + 1), 3);
+}
+
+TEST(testTransformation_Oprations, replaceANDreplace_if)
+{
+    vector<int> v(5, 1);
+    replace(v.begin(), v.end(), 1, 2);
+    EXPECT_EQ(v, vector<int>(5, 2));
+    replace_if(
+            v.begin(), v.end(),
+            [](const int& a) -> bool {
+                return a == 2;
+            },3);
+    EXPECT_EQ(*(v.begin() + 1), 3);
+}
+
+TEST(testGeneration_Oprations, fill)
+{
+    vector<int> v(5, 1);
+    fill(v.begin(), v.end(), 2);
+    EXPECT_EQ(v, vector<int>(5,2));
+}
+
+TEST(testGeneration_Operations, generate)
+{
+    vector<int> v(5, 1);
+    generate(v.begin(), v.end(), []() -> int {
+        return 2;
+    });
+    EXPECT_EQ(v, vector<int>(5, 2));
+}
+
+TEST(testRemoving_Operations,Remove__Remove_if){
+    vector<int> v{1, 2, 3, 4, 5};
+    auto new_end_i=remove(v.begin(), v.end(), 3);
+    EXPECT_EQ(*(v.begin() + 2), 4);
+    //计算剩余元素的数量
+    auto ret = 0;
+    for (auto i = v.begin(); i != new_end_i;++i,++ret){}
+    EXPECT_EQ(ret, 4);
+    new_end_i = remove_if(v.begin(), new_end_i, [](const int& a) -> bool {
+        return a == 2;
+    });
+    EXPECT_EQ(*(v.begin() + 1), 4);
+    ret = 0;
+    for (auto i = v.begin(); i != new_end_i; ++i, ++ret) {}
+    EXPECT_EQ(ret, 3);
+}
+
+TEST(testRemoving_Operations, unique) {
+    vector<int> v{1, 1, 2, 2, 3, 3};
+    auto new_end_i = unique(v.begin(), v.end());
+    auto ret = 0;
+    for (auto i = v.begin(); i != new_end_i; ++i, ++ret) {}
+    EXPECT_EQ(ret, 3);
+    vector<int> v2{1, 1, 2, 2, 3, 3};
+    new_end_i =
+            unique(v2.begin(), v2.end(), [](const int& a, const int& b) -> bool {
+                return a == b;
+            });
+    ret = 0;
+    for (auto i = v2.begin(); i != new_end_i; ++i, ++ret) {}
+    EXPECT_EQ(ret, 3);
+}
+
+//+++++++++++++++++++start here
+
 TEST(testMinimum_MaximumOperations, min_element)
 {
     vector<int> v{1, 2, 3, 4, 5};
