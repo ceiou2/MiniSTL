@@ -229,7 +229,32 @@ TEST(testRemoving_Operations, unique) {
     EXPECT_EQ(ret, 3);
 }
 
-//+++++++++++++++++++start here
+TEST(testOrder_Changing_operations,reverse){
+    vector<int> v{1, 2, 3};
+    reverse(v.begin(), v.begin() + 2);
+    EXPECT_EQ(v[0], 2);
+    EXPECT_EQ(v[1], 1);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(testOrder_Changing_operations,reverse_copy){
+    vector<int> v1{1, 2, 3};
+    vector<int> v2(9, 2);
+    reverse_copy(v1.begin(), v1.end(),v2.begin());
+    EXPECT_EQ(v2.front(), 1);
+}
+
+TEST(testOrder_Changing_operations, rotate)
+{
+
+}
+
+TEST(testOrder_Changing_operations,random_shuffle){
+    vector<int> vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    vector<int> vec1(vec);
+    random_shuffle(vec.begin(), vec.end());
+    EXPECT_TRUE(vec != vec1);//这里有小概率失败，但是不代表程序错误
+}
 
 TEST(testMinimum_MaximumOperations, min_element)
 {
@@ -244,6 +269,54 @@ TEST(testMinimum_MaximumOperations, min_element)
                     }),
             v.begin() + 4);
 }
+
+TEST(testPartitioningOperations,is_partitioned){
+    vector<int> vec_true{1, 2, 3, 4, 5};
+    vector<int> vec_false{1, 6, 2, 3, 4};
+    EXPECT_TRUE(
+            is_partitioned(vec_true.begin(), vec_true.end(),
+            [](const int& a) -> bool {
+                return a <= 3;
+            }));
+    EXPECT_FALSE(is_partitioned(
+            vec_false.begin(), vec_false.end(), [](const int& a) -> bool {
+                return a <= 3;
+            }));
+}
+
+TEST(testPartitioningOperations,partition)
+{
+    vector<int> vec_false{1, 5, 2, 3, 4};
+    EXPECT_FALSE(is_partitioned(
+            vec_false.begin(), vec_false.end(), [](const int& a) -> bool {
+                return a <= 3;
+            }));
+    partition(
+            vec_false.begin(), vec_false.end(), [](const int& a) -> bool {
+                return a <= 3;
+            });
+    EXPECT_TRUE(is_partitioned(
+            vec_false.begin(), vec_false.end(), [](const int& a) -> bool {
+                return a <= 3;
+            }));
+}
+
+TEST(testPartitioningOperations, partition_copy)
+{
+    vector<int> vec{1, 5, 2, 3, 4};
+    vector<int> vec1{9, 9};
+    vector<int> vec2{9, 9, 9};
+    partition_copy(
+            vec.begin(), vec.end(), vec1.begin(), vec2.begin(),
+            [](const int& a) -> bool {
+                return a < 3;
+            });
+    EXPECT_EQ(find(vec1.begin(), vec1.end(), 9), vec1.end());
+    EXPECT_NE(find(vec1.begin(), vec1.end(), 2), vec1.end());
+    EXPECT_EQ(find(vec1.begin(), vec1.end(), 9), vec1.end());
+    EXPECT_NE(find(vec1.begin(), vec1.end(), 5), vec1.end());
+}
+//++++++++++++++=starthere
 
 TEST(testMinimum_MaximumOperations, max_element)
 {

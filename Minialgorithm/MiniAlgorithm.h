@@ -4,12 +4,31 @@
 #define MINI_ALGORITHM_H
 
 #include<cstddef>
+#include<random>
+
+//********************辅助函数******************************* */
+// iter_swap
+//交换两个迭代器内容
+template<typename InputIt>
+void iter_swap(InputIt& lhs, InputIt& rhs)
+{
+    std::swap(*lhs, *rhs);
+}
+
+// next
+//得到当前迭代器的下一个位置的迭代器
+template<typename InputIt>
+InputIt next(InputIt cur_iter)
+{
+    return ++cur_iter;
+}
 
 /*
 **************************************************************
 ========================以下为函数声明模块=======================
 **************************************************************
 */
+
 ///////////////////不改变序列的操作///////////
 //=============批量操作================
 // for_each
@@ -216,26 +235,63 @@ template<class ForwardIt, class BinaryPred>
 ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p);
 
 //==============顺序变更操作================
-//+++++++++++++++++++++++++++++++++++++++++++++++start here
 // reverse
+//反转 [first, last) 范围中的元素顺序。
+template<class BidirIt>
+void reverse(BidirIt first, BidirIt last);
 
 // reverse_copy
+//给定 N 为 std::distance(first, last)。将范围 [first,
+//last)（源范围）中的元素复制到从 d_first 开始的包含 N
+//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+template<class BidirIt, class OutputIt>
+OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first);
 
 // rotate
+//+++++++++++++++++++++here
 
 // rotate_copy
 
-// shuffle
+// random_shuffle
+//重排序给定范围 [first, last)
+//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+template<class RandomIt>
+void random_shuffle(RandomIt first, RandomIt last);
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
 // is_partitioned
+//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+//的元素都会在所有不满足的元素之前出现。
+template<class InputIt, class UnaryPred>
+bool is_partitioned(InputIt first, InputIt last, UnaryPred p);
 
 // partition
+//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
+//对其返回 false 的所有元素之前。不保持相对顺序。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p);
 
 // partition_copy
+//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+template<
+        class InputIt,
+        class OutputIt1,
+
+        class OutputIt2,
+        class UnaryPred>
+std::pair<OutputIt1, OutputIt2> partition_copy(
+        InputIt first,
+        InputIt last,
+        OutputIt1 d_first_true,
+        OutputIt2 d_first_false,
+        UnaryPred p);
 
 // stable_partition
+//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+template<class BidirIt, class UnaryPred>
+BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 
 // partition_point
 
@@ -768,28 +824,111 @@ ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p)
 }
 
 //==============顺序变更操作================
-//+++++++++++++++++++++++++++++++++++++++++++++++start here
-//reverse
+// reverse
+//反转 [first, last) 范围中的元素顺序。
+template<class BidirIt>
+void reverse(BidirIt first, BidirIt last)
+{
+    while (first!=last && first != --last) {
+        iter_swap(first++, last);
+    }
+}
 
-//reverse_copy
+// reverse_copy
+//给定 N 为 std::distance(first, last)。将范围 [first,
+//last)（源范围）中的元素复制到从 d_first 开始的包含 N
+//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+template<class BidirIt, class OutputIt>
+OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first){
+    for (; first != last; ++d_first)
+        *d_first = *(--last);
+    return d_first;
+}
 
 //rotate
 
 //rotate_copy
 
-//shuffle
+// random_shuffle
+//重排序给定范围 [first, last)
+//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+template<class RandomIt>
+void random_shuffle(RandomIt first, RandomIt last){
+    for (int i = last - first - 1; i > 0; --i) {
+        std::swap(first[i], first[std::rand() % (i + 1)]);
+    }
+}
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
-//is_partitioned
+// is_partitioned
+//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+//的元素都会在所有不满足的元素之前出现。
+template<class InputIt, class UnaryPred>
+bool is_partitioned(InputIt first, InputIt last, UnaryPred p){
+    for (; first != last; ++first)
+        if (!p(*first))
+            break;
+    for (; first != last; ++first)
+        if (p(*first))
+            return false;
+    return true;
+}
 
-//partition
+// partition
+//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
+//对其返回 false 的所有元素之前。不保持相对顺序。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p){
+    first = find_if_not(first, last, p);
+    if (first == last)
+        return first;
 
-//partition_copy
+    for (auto i = next(first); i != last; ++i) {
+        if (p(*i)) {
+            iter_swap(i, first);
+            ++first;
+        }
+    }
 
-//stable_partition
+    return first;
+}
 
-//partition_point
+// partition_copy
+//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+template<
+        class InputIt,
+        class OutputIt1,
+
+        class OutputIt2,
+        class UnaryPred>
+std::pair<OutputIt1, OutputIt2> partition_copy(
+        InputIt first,
+        InputIt last,
+        OutputIt1 d_first_true,
+        OutputIt2 d_first_false,
+        UnaryPred p)
+{
+    for (; first != last; ++first) {
+        if (p(*first)) {
+            *d_first_true = *first;
+            ++d_first_true;
+        } else {
+            *d_first_false = *first;
+            ++d_first_false;
+        }
+    }
+
+    return std::pair<OutputIt1, OutputIt2>(d_first_true, d_first_false);
+}
+
+// stable_partition
+//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+template<class BidirIt, class UnaryPred>
+BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
+//+++++++++++++++++++++start here
+// partition_point
 
 //============排序操作==================
 //sort
