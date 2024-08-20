@@ -23,6 +23,18 @@ InputIt next(InputIt cur_iter)
     return ++cur_iter;
 }
 
+//distance
+//得到两个迭代器之间的距离，要求第一参数在第二参数前面,不然会访问到last
+template<typename InputIt>
+size_t distance(InputIt first, InputIt second){
+    size_t ret = 0;
+    while (first != second) {
+        ++ret;
+        ++first;
+    }
+    return ret;
+}
+
 /*
 **************************************************************
 ========================以下为函数声明模块=======================
@@ -294,6 +306,11 @@ template<class BidirIt, class UnaryPred>
 BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 
 // partition_point
+//检验（如同用 std::partition）已划分范围 [first,
+//last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
+//last。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p);
 
 //============排序操作==================
 // sort
@@ -929,6 +946,23 @@ template<class BidirIt, class UnaryPred>
 BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 //+++++++++++++++++++++start here
 // partition_point
+//检验（如同用 std::partition）已划分范围 [first,
+// last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
+// last。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
+    for (auto length = distance(first, last); 0 < length;) {
+        auto half = length / 2;
+        auto middle = std::next(first, half);
+        if (p(*middle)) {
+            first = std::next(middle);
+            length -= (half + 1);
+        } else
+            length = half;
+    }
+
+    return first;
+}
 
 //============排序操作==================
 //sort

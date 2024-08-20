@@ -318,6 +318,14 @@ TEST(testPartitioningOperations, partition_copy)
 }
 //++++++++++++++=starthere
 
+TEST(testPartitioning_operations,partition_point){
+    vector<int> v{1, 2, 3, 4, 5};
+    auto it = partition_point(v.begin(), v.end(), [](const int& n) -> bool {
+        return n < 3;
+    });
+    EXPECT_EQ(*it, 3);
+}
+
 TEST(testMinimum_MaximumOperations, max_element)
 {
     vector<int> v{1, 2, 3, 4, 5};
