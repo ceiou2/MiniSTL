@@ -442,7 +442,7 @@ public:
     //复制赋值运算符。以 other 内容的副本替换内容。
     unordered_set& operator=(const unordered_set& other)
     {
-        ht = other.ht._cp();
+        other.ht._cp(ht);
         return *this;
     }
 
