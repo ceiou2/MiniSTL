@@ -47,6 +47,9 @@ TEST(testOper, oper)
     unordered_set<int> us{1, 2, 3};
     unordered_set<int> us2 = us;
     EXPECT_EQ(us2.size(), us.size());
+    unordered_set<int> us3{1};
+    us3=us;
+    EXPECT_EQ(us3.size(),us.size());
 }
 
 //=========迭代器模块==========
