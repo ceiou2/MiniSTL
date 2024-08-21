@@ -359,8 +359,6 @@ TEST(testSortingOperations, stable_sort)
 TEST(testSortingOperations, partial_sort)
 {
     vector<int> a{4, 1, 2, 6, 2, 3};
-    auto first_2 = a.begin() + 2;
-    auto second_2 = a.begin() + 4;
     partial_sort(a.begin(),a.begin()+2, a.end());
     for (auto i = 1; i < 3; ++i) {
         EXPECT_TRUE(a[i - 1] <= a[i]);
@@ -378,18 +376,15 @@ TEST(testSortingOperations, partial_sort)
 TEST(testSortingOperations, partial_sort_copy)
 {
     vector<int> a{4, 1, 2, 6, 2, 3};
-    auto first_2 = a.begin() + 2;
-    auto second_2 = a.begin() + 4;
-    partial_sort(a.begin(), a.begin() + 2, a.end());
-    for (auto i = 1; i < 3; ++i) {
+    vector<int> b(2, 3);
+    partial_sort_copy(a.begin(), a.end(), b.begin(), b.end());
+    for (auto i = 1; i < 2; ++i) {
         EXPECT_TRUE(a[i - 1] <= a[i]);
     }
-    partial_sort(
-            a.begin(), a.begin() + 2, a.end(),
-            [](const int& a, const int& b) -> bool {
-                return a > b;
-            });
-    for (auto i = 1; i < 3; ++i) {
+    partial_sort_copy(
+            a.begin(), a.end(), b.begin(),
+            b.end(),[](const int& a, const int& b)->bool { return a > b; });
+    for (auto i = 1; i < 2; ++i) {
         EXPECT_TRUE(a[i - 1] >= a[i]);
     }
 }

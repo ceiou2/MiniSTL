@@ -30,6 +30,21 @@ InputIt next(InputIt cur_iter,size_t step=1)
     return cur_iter;
 }
 
+//advance
+//将迭代器前进n个距离单位
+template<typename InputIt>
+void advance(InputIt& it,long long int n)
+{
+    while(n>0){
+        ++it;
+        --n;
+    }
+    while(n<0){
+        --it;
+        ++n;
+    }
+}
+
 //distance
 //得到两个迭代器之间的距离，要求第一参数在第二参数前面,不然会访问到last
 template<typename InputIt>
@@ -418,11 +433,40 @@ RandomIt partial_sort_copy(
         Compare comp);
 
 // is_sorted
+//检查范围 [first, last) 中的元素是否以非降序排序。
+template<class ForwardIt>
+bool is_sorted(ForwardIt first, ForwardIt last);
+
+template<class ForwardIt, class Compare>
+bool is_sorted(ForwardIt first, ForwardIt last, Compare comp);
+
+// is_sorted_until
+// 检验范围 [first, last)，并寻找从 first
+// 开始且其中元素已按非降序排序的最大范围。
+template<class ForwardIt>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last);
+
+template<class ForwardIt, class Compare>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp);
 
 //======二分搜索操作（在以划分范围上）=====
 // lower_bound
+//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+template<class ForwardIt, class T>
+ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value);
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 // upper_bound
+//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+template<class ForwardIt, class T>
+ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value);
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 // equal_range
 
@@ -1117,12 +1161,103 @@ RandomIt partial_sort_copy(
         RandomIt d_last,
         Compare comp);
 
-//is_sorted
+// is_sorted
+//检查范围 [first, last) 中的元素是否以非降序排序。
+template<class ForwardIt>
+bool is_sorted(ForwardIt first, ForwardIt last)
+{
+    return is_sorted_until(first, last) == last;
+}
+
+template<class ForwardIt, class Compare>
+bool is_sorted(ForwardIt first, ForwardIt last, Compare comp)
+{
+    return is_sorted_until(first, last, comp) == last;
+}
+
+// is_sorted_until
+// 检验范围 [first, last)，并寻找从 first
+// 开始且其中元素已按非降序排序的最大范围。
+template<class ForwardIt>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last)
+{
+    return is_sorted_until(first, last, less<>());//here
+}
+
+template<class ForwardIt, class Compare>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp){
+    if (first != last) {
+        ForwardIt next = first;
+        while (++next != last) {
+            if (comp(*next, *first))
+                return next;
+            first = next;
+        }
+    }
+    return last;
+}
 
 //======二分搜索操作（在以划分范围上）=====
-//lower_bound
+// lower_bound
+//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+template<class ForwardIt, class T>
+ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value)
+{
+    return lower_bound(first, last, value, less{});
+}
 
-//upper_bound
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+{
+    ForwardIt it;
+    size_t count = distance(first, last);
+
+    while (count > 0) {
+        it = first;
+        size_t step = count / 2;
+        advance(it, step);
+
+        if (comp(*it, value)) {
+            first = ++it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+
+    return first;
+}
+
+// upper_bound
+//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+template<class ForwardIt, class T>
+ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value)
+{
+    return upper_bound(first, last, value, less{});
+}
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+{
+    ForwardIt it;
+    size_t count, step;
+    count = distance(first, last);
+
+    while (count > 0) {
+        it = first;
+        step = count / 2;
+        advance(it, step);
+
+        if (!comp(value, *it)) {
+            first = ++it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+
+    return first;
+}
 
 //equal_range
 
