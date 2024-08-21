@@ -967,7 +967,7 @@ public:
 
     string& append(const char* s)
     {
-        while(s!='\0'){
+        while(*s!='\0'){
             push_back(*s);
             ++s;
         }
@@ -1015,6 +1015,7 @@ public:
             dest[i] = at(i);
             ++res;
         }
+        return res;
     }
 
     //替换字符串的指定部分
@@ -1101,6 +1102,7 @@ public:
         }
         string res;
         res.append(*this, pos, count);
+        return res;
     }
 
 };
@@ -1223,14 +1225,14 @@ string operator+(string&& lhs, char rhs)
 }
 
 //----------输入输出---------------
-std::ostream& operator<<(std::ostream os, const string& str) {
+std::ostream& operator<<(std::ostream& os, const string& str) {
     for (auto i = 0; i < str.size();++i){
         os << str[i];
     }
     return os;
 }
 
-std::istream& operator>>(std::istream is, string& str)
+std::istream& operator>>(std::istream& is, string& str)
 {
     char ich;
     while(is>>ich){
@@ -1241,7 +1243,7 @@ std::istream& operator>>(std::istream is, string& str)
     return is;
 }
 
-std::istream& getline(std::istream is, string& str)
+std::istream& getline(std::istream& is, string& str)
 {
     char ich;
     while (is >> ich) {

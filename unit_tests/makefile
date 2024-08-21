@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-g -lgtest -lpthread -I../Container_library
+CFLAGS=-g -lgtest -lpthread -I../Container_library -O0
 
 # 源文件
 SRC=$(wildcard *.cpp)
