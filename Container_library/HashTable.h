@@ -18,8 +18,8 @@ public:
     T data;
     HashNode* next;
     // 构造函数
-    HashNode() {}
-    HashNode(T d): data(d) {}
+    HashNode():next(nullptr) {}
+    HashNode(T d): data(d), next(nullptr) {}
 };
 
 //使用开散列，vector+链表的方式
