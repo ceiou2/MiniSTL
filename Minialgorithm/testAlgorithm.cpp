@@ -240,8 +240,8 @@ TEST(testOrder_Changing_operations,reverse){
 TEST(testOrder_Changing_operations,reverse_copy){
     vector<int> v1{1, 2, 3};
     vector<int> v2(9, 2);
-    reverse_copy(v1.begin(), v1.end(),v2.begin());
-    EXPECT_EQ(v2.front(), 1);
+    reverse_copy(v1.begin(), v1.end(), v2.begin());
+    EXPECT_EQ(v2.front(), 3);
 }
 
 TEST(testOrder_Changing_operations, rotate)
@@ -304,8 +304,8 @@ TEST(testPartitioningOperations,partition)
 TEST(testPartitioningOperations, partition_copy)
 {
     vector<int> vec{1, 5, 2, 3, 4};
-    vector<int> vec1{9, 9};
-    vector<int> vec2{9, 9, 9};
+    vector<int> vec1{9, 9};//1 2
+    vector<int> vec2{9, 9, 9};//3 4 5
     partition_copy(
             vec.begin(), vec.end(), vec1.begin(), vec2.begin(),
             [](const int& a) -> bool {
@@ -313,10 +313,86 @@ TEST(testPartitioningOperations, partition_copy)
             });
     EXPECT_EQ(find(vec1.begin(), vec1.end(), 9), vec1.end());
     EXPECT_NE(find(vec1.begin(), vec1.end(), 2), vec1.end());
-    EXPECT_EQ(find(vec1.begin(), vec1.end(), 9), vec1.end());
-    EXPECT_NE(find(vec1.begin(), vec1.end(), 5), vec1.end());
+    EXPECT_EQ(find(vec2.begin(), vec2.end(), 9), vec2.end());
+    EXPECT_NE(find(vec2.begin(), vec2.end(), 5), vec2.end());
 }
-//++++++++++++++=starthere
+
+TEST(testSortingOperations,sort){
+    vector<int> a{4, 1, 2, 6, 2, 3};
+    sort(a.begin(), a.end());
+    for (auto i = 1; i < a.size();++i){
+        EXPECT_TRUE(a[i - 1] <= a[i]);
+        // std::cout << a[i-1];
+    }
+    // std::cout << a[a.size() - 1] << std::endl;
+    sort(a.begin(), a.end(), [](const int& a, const int& b) -> bool {
+        return a > b;
+    });
+    for (auto i = 1; i < a.size(); ++i) {
+        EXPECT_TRUE(a[i - 1] >= a[i]);
+        // std::cout << a[i-1];
+    }
+}
+
+TEST(testSortingOperations, stable_sort)
+{
+    vector<int> a{4, 1, 2, 6, 2, 3};
+    auto first_2 = a.begin() + 2;
+    auto second_2 = a.begin() + 4;
+    stable_sort(a.begin(), a.end());
+    for (auto i = 1; i < a.size(); ++i) {
+        EXPECT_TRUE(a[i - 1] <= a[i]);
+        // std::cout << a[i-1];
+    }
+    EXPECT_TRUE(next(first_2) == second_2);
+    // std::cout << a[a.size() - 1] << std::endl;
+    stable_sort(a.begin(), a.end(), [](const int& a, const int& b) -> bool {
+        return a > b;
+    });
+    for (auto i = 1; i < a.size(); ++i) {
+        EXPECT_TRUE(a[i - 1] >= a[i]);
+        // std::cout << a[i-1];
+    }
+    EXPECT_TRUE(next(first_2) == second_2);
+}
+
+TEST(testSortingOperations, partial_sort)
+{
+    vector<int> a{4, 1, 2, 6, 2, 3};
+    auto first_2 = a.begin() + 2;
+    auto second_2 = a.begin() + 4;
+    partial_sort(a.begin(),a.begin()+2, a.end());
+    for (auto i = 1; i < 3; ++i) {
+        EXPECT_TRUE(a[i - 1] <= a[i]);
+    }
+    partial_sort(
+            a.begin(), a.begin() + 2, a.end(),
+            [](const int& a, const int& b) -> bool {
+                return a > b;
+            });
+    for (auto i = 1; i < 3; ++i) {
+        EXPECT_TRUE(a[i - 1] >= a[i]);
+    }
+}
+
+TEST(testSortingOperations, partial_sort_copy)
+{
+    vector<int> a{4, 1, 2, 6, 2, 3};
+    auto first_2 = a.begin() + 2;
+    auto second_2 = a.begin() + 4;
+    partial_sort(a.begin(), a.begin() + 2, a.end());
+    for (auto i = 1; i < 3; ++i) {
+        EXPECT_TRUE(a[i - 1] <= a[i]);
+    }
+    partial_sort(
+            a.begin(), a.begin() + 2, a.end(),
+            [](const int& a, const int& b) -> bool {
+                return a > b;
+            });
+    for (auto i = 1; i < 3; ++i) {
+        EXPECT_TRUE(a[i - 1] >= a[i]);
+    }
+}
 
 TEST(testPartitioning_operations,partition_point){
     vector<int> v{1, 2, 3, 4, 5};

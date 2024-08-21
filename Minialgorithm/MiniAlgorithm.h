@@ -1,4 +1,5 @@
 //MiniAlgorithm.h
+//部分未实现：sort中的堆排序，stable_sort堆排序实现
 #pragma once
 #ifndef MINI_ALGORITHM_H
 #define MINI_ALGORITHM_H
@@ -6,11 +7,14 @@
 #include<cstddef>
 #include<random>
 
+#define Insert_Sort_Maxsize 32
+#define Sort_MaxDepth   16
+
 //********************辅助函数******************************* */
 // iter_swap
 //交换两个迭代器内容
 template<typename InputIt>
-void iter_swap(InputIt& lhs, InputIt& rhs)
+void iter_swap(InputIt lhs, InputIt rhs)
 {
     std::swap(*lhs, *rhs);
 }
@@ -18,9 +22,12 @@ void iter_swap(InputIt& lhs, InputIt& rhs)
 // next
 //得到当前迭代器的下一个位置的迭代器
 template<typename InputIt>
-InputIt next(InputIt cur_iter)
+InputIt next(InputIt cur_iter,size_t step=1)
 {
-    return ++cur_iter;
+    while (step--) {
+        ++cur_iter;
+    }
+    return cur_iter;
 }
 
 //distance
@@ -33,6 +40,61 @@ size_t distance(InputIt first, InputIt second){
         ++first;
     }
     return ret;
+}
+
+//insert_sort
+//插入排序
+template<class RandomIt, class Compare>
+void insert_sort(RandomIt first, RandomIt last, Compare comp)
+{
+    size_t diff = distance(first, last);//获取元素数量
+    for (auto i = 1; i < diff; ++i){//待排序的数组的遍历
+        for (auto j = i; j > 0;--j){//待排序的元素向前方不断swap直至正确位置
+            if(comp(*(first+j-1),*(first+j))){
+                break;
+            }
+            iter_swap(first + j, first + j - 1);
+        }
+    }
+}
+
+//_sort
+//sort的子函数，用于递归调用
+template<class RandomIt, class Compare>
+void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
+{
+    //获取元素总数
+    size_t diff = distance(first, last);
+    //若元素很少则通过插入排序进行排序操作
+    if (diff <= Insert_Sort_Maxsize) {
+        return insert_sort(first, last, comp);
+    }
+
+    // if(depth<=0){//转换采用堆排序
+
+    //     return;
+    // }
+
+    --depth;
+
+    //一般情况下快排
+    if (first ==
+        last) // 只有一个元素，算排序完成（这里是预防性代码，当<=32时应该是插入排序才对，也就是说快排不会出现这种情况
+        return;
+    auto key = *first;
+    //这里采用前后指针法进行快排
+    auto pre = first;
+    auto cur = pre + 1;
+    while(cur!=last){//使pre+1左边都小于key
+        if(!comp(key,*cur)){
+            iter_swap(cur, ++pre);
+        }
+        ++cur;
+    }
+    iter_swap(first, pre);//最后将哨位放到pre的位置(pre一直是属于key左侧的)
+    // 递归调用左右两侧[first,pre) [pre+1,last);pre位置上是key不用动了
+    _sort(first, pre,depth,comp);
+    _sort(pre + 1, last,depth,comp);
 }
 
 /*
@@ -314,12 +376,46 @@ ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p);
 
 //============排序操作==================
 // sort
+//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+template<class RandomIt>
+void sort(RandomIt first, RandomIt last);
+
+template<class RandomIt, class Compare>
+void sort(RandomIt first, RandomIt last, Compare comp);
 
 // stable_sort
+//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+template<class RandomIt>
+void stable_sort(RandomIt first, RandomIt last);
+
+template<class RandomIt, class Compare>
+void stable_sort(RandomIt first, RandomIt last, Compare comp);
 
 // partial_sort
+//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+//first 个最小元素。不保证保持相等元素间的顺序。
+template<class RandomIt>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last);
+
+template<class RandomIt, class Compare>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
 
 // partial_sort_copy
+//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+template<class InputIt, class RandomIt>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last);
+
+template<class InputIt, class RandomIt, class Compare>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last,
+        Compare comp);
 
 // is_sorted
 
@@ -872,7 +968,7 @@ OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first){
 template<class RandomIt>
 void random_shuffle(RandomIt first, RandomIt last){
     for (int i = last - first - 1; i > 0; --i) {
-        std::swap(first[i], first[std::rand() % (i + 1)]);
+        iter_swap(first+i, first+(std::rand() % (i + 1)));
     }
 }
 
@@ -953,9 +1049,9 @@ template<class ForwardIt, class UnaryPred>
 ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
     for (auto length = distance(first, last); 0 < length;) {
         auto half = length / 2;
-        auto middle = std::next(first, half);
+        auto middle = next(first, half);
         if (p(*middle)) {
-            first = std::next(middle);
+            first = next(middle);
             length -= (half + 1);
         } else
             length = half;
@@ -966,12 +1062,60 @@ ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
 
 //============排序操作==================
 //sort
+//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+template<class RandomIt>
+void sort(RandomIt first, RandomIt last){
+    sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
+        return lhs < rhs;
+    });
+}
 
-//stable_sort
+template<class RandomIt, class Compare>
+void sort(RandomIt first, RandomIt last, Compare comp){
+    _sort(first, last, Sort_MaxDepth, comp);
+}
 
-//partial_sort
+// stable_sort
+//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+template<class RandomIt>
+void stable_sort(RandomIt first, RandomIt last){
+    stable_sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
+        return lhs < rhs;
+    });
+}
 
-//partial_sort_copy
+template<class RandomIt, class Compare>
+void stable_sort(RandomIt first, RandomIt last, Compare comp){
+    //堆排序稳定版
+}
+
+// partial_sort
+//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+// first 个最小元素。不保证保持相等元素间的顺序。
+template<class RandomIt>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last){
+    //这里cppreference有实现
+}
+
+template<class RandomIt, class Compare>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
+
+// partial_sort_copy
+//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+template<class InputIt, class RandomIt>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last);
+
+template<class InputIt, class RandomIt, class Compare>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last,
+        Compare comp);
 
 //is_sorted
 
