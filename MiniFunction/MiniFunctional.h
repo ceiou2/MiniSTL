@@ -1,7 +1,7 @@
 //MiniFunctional.h
 #pragma once
-#ifndef MINI_STRING_H
-#define MINI_STRING_H
+#ifndef MINI_FUNCTIONAL_H
+#define MINI_FUNCTIONAL_H
 
 #include<cstddef>
 
@@ -39,7 +39,7 @@ struct multiplies
 };
 
 // divides
-//进行乘法的函数对象。相当于在两个 T 类型实例上调用 operator*
+//进行除法的函数对象。相当于在两个 T 类型实例上调用 operator/
 template<typename T>
 struct divides
 {
@@ -50,7 +50,7 @@ struct divides
 };
 
 // modulus
-//进行乘法的函数对象。相当于在两个 T 类型实例上调用 operator*
+//进行取余的函数对象。相当于在两个 T 类型实例上调用 operator%
 template<typename T>
 struct modulus
 {
@@ -61,7 +61,7 @@ struct modulus
 };
 
 // negate
-//进行乘法的函数对象。相当于在两个 T 类型实例上调用 operator*
+//进行取反的函数对象。相当于在一个 T 类型实例上调用 operator-
 template<typename T>
 struct negate
 {
@@ -85,7 +85,7 @@ struct equal_to
 };
 
 // not_equal_to
-//进行比较的函数对象。除非被特化，调用类型 T 上的 operator==
+//进行比较的函数对象。除非被特化，调用类型 T 上的 operator!=
 template<typename T>
 struct not_equal_to
 {
@@ -203,16 +203,19 @@ struct bit_xor
     }
 };
 
-// bit_not
-//提供进行逐位非的函数对象。相当于调用类型 T 上的 operator~
-template<typename T>
-struct bit_not
-{
-    T operator()(const T& arg) const
-    {
-        return ~arg;
-    }
-};
+//C++ 14才有
+// // bit_not
+// //提供进行逐位非的函数对象。相当于调用类型 T 上的 operator~
+// template<typename T>
+// struct bit_not
+// {
+//     T operator()(const T& arg) const
+//     {
+//         return ~arg;
+//     }
+// };
+
+//++++++++++here function + bind
 
 template<typename>
 class function;
