@@ -4,6 +4,10 @@
 #define MINI_FUNCTIONAL_H
 
 #include<cstddef>
+#include<typeindex>
+#include<typeinfo>
+#include<memory>
+#include<utility>
 
 
 //===================算术运算模块================
@@ -215,24 +219,32 @@ struct bit_xor
 //     }
 // };
 
-//++++++++++here function + bind
+//++++++++++here function + bind，function还没有完全实现
 
+//类模板声明
 template<typename>
 class function;
 
 template<typename R, typename... Args>
-class function<R(Args...)>
+class function<R(Args...)>//函数签名
 {
     private:
-        typedef R result_type;
+        using result_type = R;
+        using FuncPtr = R (*)(Args...);
+
+        FuncPtr functionPtr;
 
     public:
+        // 默认构造函数
+        function() = default;
 
+        //构造函数接受一个函数指针
+        function(FuncPtr ptr):functionPtr(ptr){}
+
+        //重载调用操作符
+        result_type operator()(Args... args){
+            return (*functionPtr)(std::forward<Args>(args)...);
+        }
 };
-
-
-
-
-
 
 #endif

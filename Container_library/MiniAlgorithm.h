@@ -1,15 +1,123 @@
 //MiniAlgorithm.h
+//部分未实现：sort中的堆排序，stable_sort堆排序实现
 #pragma once
 #ifndef MINI_ALGORITHM_H
 #define MINI_ALGORITHM_H
 
 #include<cstddef>
+#include<random>
+
+#define Insert_Sort_Maxsize 32
+#define Sort_MaxDepth   16
+
+//********************辅助函数******************************* */
+// iter_swap
+//交换两个迭代器内容
+template<typename InputIt>
+void iter_swap(InputIt lhs, InputIt rhs)
+{
+    std::swap(*lhs, *rhs);
+}
+
+// next
+//得到当前迭代器的下一个位置的迭代器
+template<typename InputIt>
+InputIt next(InputIt cur_iter,size_t step=1)
+{
+    while (step--) {
+        ++cur_iter;
+    }
+    return cur_iter;
+}
+
+//advance
+//将迭代器前进n个距离单位
+template<typename InputIt>
+void advance(InputIt& it,long long int n)
+{
+    while(n>0){
+        ++it;
+        --n;
+    }
+    while(n<0){
+        --it;
+        ++n;
+    }
+}
+
+//distance
+//得到两个迭代器之间的距离，要求第一参数在第二参数前面,不然会访问到last
+template<typename InputIt>
+size_t distance(InputIt first, InputIt second){
+    size_t ret = 0;
+    while (first != second) {
+        ++ret;
+        ++first;
+    }
+    return ret;
+}
+
+//insert_sort
+//插入排序
+template<class RandomIt, class Compare>
+void insert_sort(RandomIt first, RandomIt last, Compare comp)
+{
+    size_t diff = distance(first, last);//获取元素数量
+    for (auto i = 1; i < diff; ++i){//待排序的数组的遍历
+        for (auto j = i; j > 0;--j){//待排序的元素向前方不断swap直至正确位置
+            if(comp(*(first+j-1),*(first+j))){
+                break;
+            }
+            iter_swap(first + j, first + j - 1);
+        }
+    }
+}
+
+//_sort
+//sort的子函数，用于递归调用
+template<class RandomIt, class Compare>
+void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
+{
+    //获取元素总数
+    size_t diff = distance(first, last);
+    //若元素很少则通过插入排序进行排序操作
+    if (diff <= Insert_Sort_Maxsize) {
+        return insert_sort(first, last, comp);
+    }
+
+    // if(depth<=0){//转换采用堆排序
+
+    //     return;
+    // }
+
+    --depth;
+
+    //一般情况下快排
+    if (first ==
+        last) // 只有一个元素，算排序完成（这里是预防性代码，当<=32时应该是插入排序才对，也就是说快排不会出现这种情况
+        return;
+    auto key = *first;
+    //这里采用前后指针法进行快排
+    auto pre = first;
+    auto cur = pre + 1;
+    while(cur!=last){//使pre+1左边都小于key
+        if(!comp(key,*cur)){
+            iter_swap(cur, ++pre);
+        }
+        ++cur;
+    }
+    iter_swap(first, pre);//最后将哨位放到pre的位置(pre一直是属于key左侧的)
+    // 递归调用左右两侧[first,pre) [pre+1,last);pre位置上是key不用动了
+    _sort(first, pre,depth,comp);
+    _sort(pre + 1, last,depth,comp);
+}
 
 /*
 **************************************************************
 ========================以下为函数声明模块=======================
 **************************************************************
 */
+
 ///////////////////不改变序列的操作///////////
 //=============批量操作================
 // for_each
@@ -216,44 +324,149 @@ template<class ForwardIt, class BinaryPred>
 ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p);
 
 //==============顺序变更操作================
-//+++++++++++++++++++++++++++++++++++++++++++++++start here
 // reverse
+//反转 [first, last) 范围中的元素顺序。
+template<class BidirIt>
+void reverse(BidirIt first, BidirIt last);
 
 // reverse_copy
+//给定 N 为 std::distance(first, last)。将范围 [first,
+//last)（源范围）中的元素复制到从 d_first 开始的包含 N
+//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+template<class BidirIt, class OutputIt>
+OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first);
 
 // rotate
+//+++++++++++++++++++++here
 
 // rotate_copy
 
-// shuffle
+// random_shuffle
+//重排序给定范围 [first, last)
+//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+template<class RandomIt>
+void random_shuffle(RandomIt first, RandomIt last);
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
 // is_partitioned
+//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+//的元素都会在所有不满足的元素之前出现。
+template<class InputIt, class UnaryPred>
+bool is_partitioned(InputIt first, InputIt last, UnaryPred p);
 
 // partition
+//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
+//对其返回 false 的所有元素之前。不保持相对顺序。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p);
 
 // partition_copy
+//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+template<
+        class InputIt,
+        class OutputIt1,
+
+        class OutputIt2,
+        class UnaryPred>
+std::pair<OutputIt1, OutputIt2> partition_copy(
+        InputIt first,
+        InputIt last,
+        OutputIt1 d_first_true,
+        OutputIt2 d_first_false,
+        UnaryPred p);
 
 // stable_partition
+//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+template<class BidirIt, class UnaryPred>
+BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 
 // partition_point
+//检验（如同用 std::partition）已划分范围 [first,
+//last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
+//last。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p);
 
 //============排序操作==================
 // sort
+//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+template<class RandomIt>
+void sort(RandomIt first, RandomIt last);
+
+template<class RandomIt, class Compare>
+void sort(RandomIt first, RandomIt last, Compare comp);
 
 // stable_sort
+//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+template<class RandomIt>
+void stable_sort(RandomIt first, RandomIt last);
+
+template<class RandomIt, class Compare>
+void stable_sort(RandomIt first, RandomIt last, Compare comp);
 
 // partial_sort
+//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+//first 个最小元素。不保证保持相等元素间的顺序。
+template<class RandomIt>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last);
+
+template<class RandomIt, class Compare>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
 
 // partial_sort_copy
+//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+template<class InputIt, class RandomIt>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last);
+
+template<class InputIt, class RandomIt, class Compare>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last,
+        Compare comp);
 
 // is_sorted
+//检查范围 [first, last) 中的元素是否以非降序排序。
+template<class ForwardIt>
+bool is_sorted(ForwardIt first, ForwardIt last);
+
+template<class ForwardIt, class Compare>
+bool is_sorted(ForwardIt first, ForwardIt last, Compare comp);
+
+// is_sorted_until
+// 检验范围 [first, last)，并寻找从 first
+// 开始且其中元素已按非降序排序的最大范围。
+template<class ForwardIt>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last);
+
+template<class ForwardIt, class Compare>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp);
 
 //======二分搜索操作（在以划分范围上）=====
 // lower_bound
+//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+template<class ForwardIt, class T>
+ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value);
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 // upper_bound
+//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+template<class ForwardIt, class T>
+ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value);
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 // equal_range
 
@@ -768,44 +981,283 @@ ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p)
 }
 
 //==============顺序变更操作================
-//+++++++++++++++++++++++++++++++++++++++++++++++start here
-//reverse
+// reverse
+//反转 [first, last) 范围中的元素顺序。
+template<class BidirIt>
+void reverse(BidirIt first, BidirIt last)
+{
+    while (first!=last && first != --last) {
+        iter_swap(first++, last);
+    }
+}
 
-//reverse_copy
+// reverse_copy
+//给定 N 为 std::distance(first, last)。将范围 [first,
+//last)（源范围）中的元素复制到从 d_first 开始的包含 N
+//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+template<class BidirIt, class OutputIt>
+OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first){
+    for (; first != last; ++d_first)
+        *d_first = *(--last);
+    return d_first;
+}
 
 //rotate
 
 //rotate_copy
 
-//shuffle
+// random_shuffle
+//重排序给定范围 [first, last)
+//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+template<class RandomIt>
+void random_shuffle(RandomIt first, RandomIt last){
+    for (int i = last - first - 1; i > 0; --i) {
+        iter_swap(first+i, first+(std::rand() % (i + 1)));
+    }
+}
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
-//is_partitioned
+// is_partitioned
+//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+//的元素都会在所有不满足的元素之前出现。
+template<class InputIt, class UnaryPred>
+bool is_partitioned(InputIt first, InputIt last, UnaryPred p){
+    for (; first != last; ++first)
+        if (!p(*first))
+            break;
+    for (; first != last; ++first)
+        if (p(*first))
+            return false;
+    return true;
+}
 
-//partition
+// partition
+//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
+//对其返回 false 的所有元素之前。不保持相对顺序。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p){
+    first = find_if_not(first, last, p);
+    if (first == last)
+        return first;
 
-//partition_copy
+    for (auto i = next(first); i != last; ++i) {
+        if (p(*i)) {
+            iter_swap(i, first);
+            ++first;
+        }
+    }
 
-//stable_partition
+    return first;
+}
 
-//partition_point
+// partition_copy
+//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+template<
+        class InputIt,
+        class OutputIt1,
+
+        class OutputIt2,
+        class UnaryPred>
+std::pair<OutputIt1, OutputIt2> partition_copy(
+        InputIt first,
+        InputIt last,
+        OutputIt1 d_first_true,
+        OutputIt2 d_first_false,
+        UnaryPred p)
+{
+    for (; first != last; ++first) {
+        if (p(*first)) {
+            *d_first_true = *first;
+            ++d_first_true;
+        } else {
+            *d_first_false = *first;
+            ++d_first_false;
+        }
+    }
+
+    return std::pair<OutputIt1, OutputIt2>(d_first_true, d_first_false);
+}
+
+// stable_partition
+//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+template<class BidirIt, class UnaryPred>
+BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
+//+++++++++++++++++++++start here
+// partition_point
+//检验（如同用 std::partition）已划分范围 [first,
+// last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
+// last。
+template<class ForwardIt, class UnaryPred>
+ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
+    for (auto length = distance(first, last); 0 < length;) {
+        auto half = length / 2;
+        auto middle = next(first, half);
+        if (p(*middle)) {
+            first = next(middle);
+            length -= (half + 1);
+        } else
+            length = half;
+    }
+
+    return first;
+}
 
 //============排序操作==================
 //sort
+//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+template<class RandomIt>
+void sort(RandomIt first, RandomIt last){
+    sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
+        return lhs < rhs;
+    });
+}
 
-//stable_sort
+template<class RandomIt, class Compare>
+void sort(RandomIt first, RandomIt last, Compare comp){
+    _sort(first, last, Sort_MaxDepth, comp);
+}
 
-//partial_sort
+// stable_sort
+//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+template<class RandomIt>
+void stable_sort(RandomIt first, RandomIt last){
+    stable_sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
+        return lhs < rhs;
+    });
+}
 
-//partial_sort_copy
+template<class RandomIt, class Compare>
+void stable_sort(RandomIt first, RandomIt last, Compare comp){
+    //堆排序稳定版
+}
 
-//is_sorted
+// partial_sort
+//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+// first 个最小元素。不保证保持相等元素间的顺序。
+template<class RandomIt>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last){
+    //这里cppreference有实现
+}
+
+template<class RandomIt, class Compare>
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
+
+// partial_sort_copy
+//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+template<class InputIt, class RandomIt>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last);
+
+template<class InputIt, class RandomIt, class Compare>
+RandomIt partial_sort_copy(
+        InputIt first,
+        InputIt last,
+        RandomIt d_first,
+        RandomIt d_last,
+        Compare comp);
+
+// is_sorted
+//检查范围 [first, last) 中的元素是否以非降序排序。
+template<class ForwardIt>
+bool is_sorted(ForwardIt first, ForwardIt last)
+{
+    return is_sorted_until(first, last) == last;
+}
+
+template<class ForwardIt, class Compare>
+bool is_sorted(ForwardIt first, ForwardIt last, Compare comp)
+{
+    return is_sorted_until(first, last, comp) == last;
+}
+
+// is_sorted_until
+// 检验范围 [first, last)，并寻找从 first
+// 开始且其中元素已按非降序排序的最大范围。
+template<class ForwardIt>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last)
+{
+    return is_sorted_until(first, last, less<>());//here
+}
+
+template<class ForwardIt, class Compare>
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp){
+    if (first != last) {
+        ForwardIt next = first;
+        while (++next != last) {
+            if (comp(*next, *first))
+                return next;
+            first = next;
+        }
+    }
+    return last;
+}
 
 //======二分搜索操作（在以划分范围上）=====
-//lower_bound
+// lower_bound
+//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+template<class ForwardIt, class T>
+ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value)
+{
+    return lower_bound(first, last, value, less{});
+}
 
-//upper_bound
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+{
+    ForwardIt it;
+    size_t count = distance(first, last);
+
+    while (count > 0) {
+        it = first;
+        size_t step = count / 2;
+        advance(it, step);
+
+        if (comp(*it, value)) {
+            first = ++it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+
+    return first;
+}
+
+// upper_bound
+//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+template<class ForwardIt, class T>
+ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value)
+{
+    return upper_bound(first, last, value, less{});
+}
+
+template<class ForwardIt, class T, class Compare>
+ForwardIt
+upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
+{
+    ForwardIt it;
+    size_t count, step;
+    count = distance(first, last);
+
+    while (count > 0) {
+        it = first;
+        step = count / 2;
+        advance(it, step);
+
+        if (!comp(value, *it)) {
+            first = ++it;
+            count -= step + 1;
+        } else
+            count = step;
+    }
+
+    return first;
+}
 
 //equal_range
 
