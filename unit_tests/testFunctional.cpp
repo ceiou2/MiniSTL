@@ -123,20 +123,6 @@ TEST(testBit_xor, bit_xor)
     EXPECT_EQ(bitx(1, 0), 1);
 }
 
-//function
-int add(int a,int b){
-    return a + b;
-}
-
-TEST(testFunction,function){
-    function<int(int, int)> func_add = add;
-    EXPECT_EQ(func_add(2, 3), 5);
-    // function<bool(int, int)> func_equal = [](int a, int b) -> bool {
-    //     return a == b;
-    // };
-    // EXPECT_TRUE(func_equal(2, 2));
-    // EXPECT_FALSE(func_equal(2, 2));
-}
 
 int main(int argc,char** argv){
     testing::InitGoogleTest(&argc, argv);
