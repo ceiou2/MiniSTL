@@ -52,6 +52,12 @@ public:
         Node* cur;
         hashtable* hp;
 
+        iterator(const const_iterator& other)
+            : cur(const_cast<Node*>(other.cur)),
+              hp(const_cast<hashtable*>(other.hp))
+        {
+        }
+
     public:
         //构造函数
         iterator() {}
@@ -96,33 +102,25 @@ public:
         // override operator==
         bool operator==(const iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         // override operator==
         bool operator==(const const_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const const_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         //声明友元类
@@ -182,33 +180,25 @@ public:
         // override operator==
         bool operator==(const const_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const const_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         // override operator==
         bool operator==(const iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         //声明友元类
@@ -262,33 +252,25 @@ public:
         // override operator==
         bool operator==(const local_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const local_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         // override operator==
         bool operator==(const const_local_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const const_local_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         //声明友元类
@@ -347,33 +329,25 @@ public:
         // override operator==
         bool operator==(const const_local_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const const_local_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         // override operator==
         bool operator==(const local_iterator& other) const
         {
-            if (cur == other.cur)
-                return true;
-            return false;
+            return cur == other.cur;
         }
 
         // override operator!=
         bool operator!=(const local_iterator& other) const
         {
-            if (cur != other.cur)
-                return true;
-            return false;
+            return cur != other.cur;
         }
 
         //声明友元类
@@ -506,19 +480,15 @@ public:
     std::pair<iterator, bool> insert(const value_type& value)
     {
         Node* tmp = ht.insert(value); //插入，失败返回nullptr
-        if (tmp) {
-            return std::make_pair(iterator(tmp, &ht), true);
-        }
-        return std::make_pair(iterator(), false);
+        return tmp ? std::make_pair(iterator(tmp, &ht), true)
+                   : std::make_pair(iterator(), false);
     }
 
     std::pair<iterator, bool> insert(value_type&& value)
     {
         Node* tmp = ht.insert(value); //插入，失败返回nullptr
-        if (tmp) {
-            return std::make_pair(iterator(tmp, &ht), true);
-        }
-        return std::make_pair(iterator(), false);
+        return tmp ? std::make_pair(iterator(tmp, &ht), true)
+                   : std::make_pair(iterator(), false);
     }
 
     template<typename InputIt>
@@ -545,21 +515,18 @@ public:
         return pos;
     }
 
-    const_iterator erase(const_iterator pos)
+    iterator erase(const_iterator pos)
     {
         ht.erase(kot(*(pos++)));
-        return pos;
+        return iterator(pos);
     }
 
-    /*
-    here 官方文档返回iterator，不知道为什么，不是会丢失const修饰吗
-    */
-    const_iterator erase(const_iterator first, const_iterator last)
+    iterator erase(const_iterator first, const_iterator last)
     {
         while (first != last) {
             first = erase(first);
         }
-        return first;
+        return iterator(first);
     }
 
     size_type erase(const Key& key)
