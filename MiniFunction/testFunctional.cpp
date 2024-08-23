@@ -128,9 +128,17 @@ int add(int a,int b){
     return a + b;
 }
 
+class mul
+{
+    public:
+        void operator()(){
+        }
+};
+
 TEST(testFunction,function){
     function<int(int, int)> func_add = add;
     EXPECT_EQ(func_add(2, 3), 5);
+    function<void()>mu=mul() ;
     // function<bool(int, int)> func_equal = [](int a, int b) -> bool {
     //     return a == b;
     // };
