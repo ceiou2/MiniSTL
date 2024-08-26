@@ -157,6 +157,7 @@ TEST(testLookUp, at)
     vector<int> v{1, 2, 3, 4, 5};
     EXPECT_EQ(v.at(0), 1);
     EXPECT_EQ(v.at(4), 5);
+    EXPECT_THROW(v.at(10), std::out_of_range);
 }
 
 TEST(testLookUp, oper)
@@ -187,6 +188,8 @@ TEST(testModifier, insert)
     vector<int> v{1, 2, 3, 4, 5};
     v.insert(v.begin(), 9);
     EXPECT_EQ(*(v.begin()), 9);
+    v.insert(v.begin() + 3, 20);
+    EXPECT_EQ(*(v.begin() + 3), 20);
 }
 
 TEST(testModifier, push_back)

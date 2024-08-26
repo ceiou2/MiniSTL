@@ -222,29 +222,90 @@ struct bit_xor
 //++++++++++here function + bind，function还没有完全实现
 
 //类模板声明
+// template<typename>
+// class function;
+
+// template<typename R, typename... Args>
+// class function<R(Args...)>//函数签名
+// {
+//     private:
+//         using result_type = R;
+//         using FuncPtr = R (*)(Args...);
+
+//         FuncPtr functionPtr;
+
+//     public:
+//         // 默认构造函数
+//         function() = default;
+
+//         //构造函数接受一个函数指针
+//         function(FuncPtr ptr):functionPtr(ptr){}
+
+//         //重载调用操作符
+//         result_type operator()(Args... args){
+//             return (*functionPtr)(std::forward<Args>(args)...);
+//         }
+// };
+
+//=================function===============
+//function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
+//主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
 template<typename>
 class function;
 
 template<typename R, typename... Args>
-class function<R(Args...)>//函数签名
+class function<R(Args...)>
 {
-    private:
-        using result_type = R;
-        using FuncPtr = R (*)(Args...);
+private:
+    //接口类：其指针储存在function类中，利用虚基类的动态联编特性为function提供类型擦除模块
+    class type_erase
+    {
+    public:
+        virtual ~type_erase() {}
+        virtual R call(Args...) = 0;//用于调用容器类中的可调用对象，由容器类实现
+    };
 
-        FuncPtr functionPtr;
+    //容器类：继承接口类，将实际的对象储存，为function提供真正的调用内容
+    template<typename functor>
+    class Container: public type_erase
+    {
+    private:
+        functor RealPtr;//函数指针或者函数对象!!!!!!
 
     public:
-        // 默认构造函数
-        function() = default;
-
-        //构造函数接受一个函数指针
-        function(FuncPtr ptr):functionPtr(ptr){}
-
-        //重载调用操作符
-        result_type operator()(Args... args){
-            return (*functionPtr)(std::forward<Args>(args)...);
+        //构造函数，用于储存指向可调用对象的指针
+        Container(functor funcptr)
+        {
+            RealPtr = funcptr;
         }
+
+        R call(Args... args){
+            //return (*RealPtr)(std::forward(args)...);
+            return RealPtr(args...);
+        }
+
+        //析构函数
+        ~Container(){}
+    };
+
+    type_erase* funcPtr;
+
+public:
+    template<typename functor>
+    function(functor f){
+        funcPtr = (new Container<functor>(f));
+    }
+
+    // ~function(){
+    //     if(funcPtr)
+    //         delete funcPtr;//调用容器析构函数，而非原可调用对象析构函数
+    //     funcPtr = nullptr;
+    // }
+
+    R operator()(Args... args){
+        //return funcPtr->call(std::forward<Args>(args)...);
+        return funcPtr->call(args...);
+    }
 };
 
 #endif

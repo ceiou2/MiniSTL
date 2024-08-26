@@ -131,19 +131,21 @@ int add(int a,int b){
 class mul
 {
     public:
-        void operator()(){
+        int operator()(int a, int b){
+            return a * b;
         }
 };
 
 TEST(testFunction,function){
     function<int(int, int)> func_add = add;
     EXPECT_EQ(func_add(2, 3), 5);
-    function<void()>mu=mul() ;
-    // function<bool(int, int)> func_equal = [](int a, int b) -> bool {
-    //     return a == b;
+    // function<int(int)> func_print = [](int a) -> int {
+    //     return a;
     // };
-    // EXPECT_TRUE(func_equal(2, 2));
-    // EXPECT_FALSE(func_equal(2, 2));
+    function<int(int, int)> func_mul = mul();
+    //EXPECT_EQ(func_print(4), 4);
+    EXPECT_EQ(func_mul(2, 5), 10);
+    //+++++++++++++++++++++++++++++++++++++++lambda还有问题here
 }
 
 int main(int argc,char** argv){
