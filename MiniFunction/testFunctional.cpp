@@ -149,11 +149,12 @@ TEST(testFunction, function)
 {
     function<int(int, int)> func_add = add;
     EXPECT_EQ(func_add(2, 3), 5);
-    // function<int(int)> func_print = [](int a) -> int {
-    //     return a;
-    // };
+    function<int(int)> func_print = [](int a) -> int {
+         return a;
+     };
     function<int(int, int)> func_mul = mul();
-    // EXPECT_EQ(func_print(4), 4);
+    EXPECT_EQ(func_print(4), 4);
+
     EXPECT_EQ(func_mul(2, 5), 10);
     //+++++++++++++++++++++++++++++++++++++++lambda还有问题here
 }

@@ -4,8 +4,6 @@
 #define MINI_FUNCTIONAL_H
 
 #include <cstddef>
-#include <typeindex>
-#include <typeinfo>
 #include <memory>
 #include <utility>
 
@@ -250,9 +248,77 @@ struct bit_xor
 //         }
 // };
 
+// //=================function===============
+// // function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
+// //主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
+// //已解决：// 这里是function的声明，也就是泛化版本，下面的是模板特化，要现有泛化版本，才能特化，当然了。
+// template<typename>
+// class function;
+
+// template<typename R, typename... Args>
+// class function<R(Args...)>
+// {
+// private:
+//     //接口类：其指针储存在function类中，利用虚基类的动态联编特性为function提供类型擦除模块
+//     class type_erase
+//     {
+//     public:
+//         virtual ~type_erase() {}
+//         virtual R call(
+//                 Args...) = 0; //用于调用容器类中的可调用对象，由容器类实现
+//     };
+
+//     //容器类：继承接口类，将实际的对象储存，为function提供真正的调用内容
+//     template<typename functor>
+//     class Container: public type_erase
+//     {
+//     private:
+//         functor RealPtr; //函数指针或者函数对象!!!!!!
+
+//     public:
+//         //构造函数，用于储存指向可调用对象的指针
+//         Container(functor funcptr)
+//         {
+//             RealPtr = std::move(funcptr);
+//         }
+
+//         R call(Args... args) override
+//         {
+//             // return (*RealPtr)(std::forward(args)...);
+//             return RealPtr(args...);
+//         }
+
+//         //析构函数
+//         ~Container() {}
+//     };
+
+//     type_erase funcPtr;
+
+// public:
+//     template<typename functor>
+//     function(functor f)
+//     {
+//         funcPtr = (new Container<functor>(std::move(f)));
+//     }
+
+//     // ~function(){
+//     //     if(funcPtr)
+//     //         delete funcPtr;//调用容器析构函数，而非原可调用对象析构函数
+//     //     funcPtr = nullptr;
+//     // }
+
+//     R operator()(Args... args)
+//     {
+//         // return funcPtr->call(std::forward<Args>(args)...);
+//         return funcPtr->call(args...);
+//     }
+// };
+
 //=================function===============
 // function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
 //主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
+//已解决：//
+//这里是function的声明，也就是泛化版本，下面的是模板特化，要现有泛化版本，才能特化，当然了。
 template<typename>
 class function;
 
@@ -274,19 +340,15 @@ private:
     class Container: public type_erase
     {
     private:
-        functor RealPtr; //函数指针或者函数对象!!!!!!
+        functor f; //函数指针或者函数对象!!!!!!
 
     public:
         //构造函数，用于储存指向可调用对象的指针
-        Container(functor funcptr)
-        {
-            RealPtr = funcptr;
-        }
+        Container(functor fu):f(fu){}
 
         R call(Args... args)
         {
-            // return (*RealPtr)(std::forward(args)...);
-            return RealPtr(args...);
+            return f(args...);
         }
 
         //析构函数
