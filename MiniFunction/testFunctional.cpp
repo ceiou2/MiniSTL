@@ -1,34 +1,40 @@
-//testFunctional.cpp
-#include<gtest/gtest.h>
-#include"MiniFunctional.h"
+// testFunctional.cpp
+#include <gtest/gtest.h>
+#include "MiniFunctional.h"
 
 //算术运算模块
-TEST(testPlus,plus){
+TEST(testPlus, plus)
+{
     plus<int> add;
     EXPECT_EQ(5, add(2, 3));
 }
 
-TEST(testMinux,minus){
+TEST(testMinux, minus)
+{
     minus<int> m;
     EXPECT_EQ(2, m(5, 3));
 }
 
-TEST(testMultiplies,multiplies){
+TEST(testMultiplies, multiplies)
+{
     multiplies<int> mul;
     EXPECT_EQ(6, mul(2, 3));
 }
 
-TEST(testDivides,divides){
+TEST(testDivides, divides)
+{
     divides<int> div;
     EXPECT_EQ(3, div(6, 2));
 }
 
-TEST(testModulus,modulus){
+TEST(testModulus, modulus)
+{
     modulus<int> mod;
     EXPECT_EQ(2, mod(10, 4));
 }
 
-TEST(testNegate,negate){
+TEST(testNegate, negate)
+{
     negate<int> neg;
     EXPECT_EQ(-1, neg(1));
 }
@@ -81,7 +87,8 @@ TEST(testLess_equal, less_equal)
 }
 
 //逻辑运算模块
-TEST(testLogical_and,logical_and){
+TEST(testLogical_and, logical_and)
+{
     logical_and<bool> log_a;
     EXPECT_TRUE(log_a(1, 1));
     EXPECT_FALSE(log_a(1, 0));
@@ -105,8 +112,8 @@ TEST(testLogical_not, logical_not)
 TEST(testBit_and, bit_and)
 {
     bit_and<int> bita;
-    EXPECT_EQ(bita(1,3),1);
-    EXPECT_EQ(bita(1,0),0);
+    EXPECT_EQ(bita(1, 3), 1);
+    EXPECT_EQ(bita(1, 0), 0);
 }
 
 TEST(testBit_or, bit_or)
@@ -123,32 +130,36 @@ TEST(testBit_xor, bit_xor)
     EXPECT_EQ(bitx(1, 0), 1);
 }
 
-//function
-int add(int a,int b){
+// function
+int add(int a, int b)
+{
     return a + b;
 }
 
 class mul
 {
-    public:
-        int operator()(int a, int b){
-            return a * b;
-        }
+public:
+    int operator()(int a, int b)
+    {
+        return a * b;
+    }
 };
 
-TEST(testFunction,function){
+TEST(testFunction, function)
+{
     function<int(int, int)> func_add = add;
     EXPECT_EQ(func_add(2, 3), 5);
     // function<int(int)> func_print = [](int a) -> int {
     //     return a;
     // };
     function<int(int, int)> func_mul = mul();
-    //EXPECT_EQ(func_print(4), 4);
+    // EXPECT_EQ(func_print(4), 4);
     EXPECT_EQ(func_mul(2, 5), 10);
     //+++++++++++++++++++++++++++++++++++++++lambda还有问题here
 }
 
-int main(int argc,char** argv){
+int main(int argc, char** argv)
+{
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

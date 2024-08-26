@@ -1,22 +1,22 @@
-//MiniFunctional.h
+// MiniFunctional.h
 #pragma once
 #ifndef MINI_FUNCTIONAL_H
 #define MINI_FUNCTIONAL_H
 
-#include<cstddef>
-#include<typeindex>
-#include<typeinfo>
-#include<memory>
-#include<utility>
-
+#include <cstddef>
+#include <typeindex>
+#include <typeinfo>
+#include <memory>
+#include <utility>
 
 //===================算术运算模块================
-//plus
+// plus
 //进行加法的函数对象。相当于在两个 T 类型的实例上调用 operator+
 template<typename T>
 struct plus
 {
-    T operator()(const T& lhs, const T& rhs)const{
+    T operator()(const T& lhs, const T& rhs) const
+    {
         return lhs + rhs;
     }
 };
@@ -26,7 +26,8 @@ struct plus
 template<typename T>
 struct minus
 {
-    T operator()(const T& lhs, const T& rhs)const{
+    T operator()(const T& lhs, const T& rhs) const
+    {
         return lhs - rhs;
     }
 };
@@ -83,7 +84,8 @@ struct negate
 template<typename T>
 struct equal_to
 {
-    bool operator()(const T&lhs, const T& rhs)const{
+    bool operator()(const T& lhs, const T& rhs) const
+    {
         return lhs == rhs;
     }
 };
@@ -144,11 +146,12 @@ struct less_equal
 };
 
 //===================逻辑运算模块================
-//logical_and
+// logical_and
 template<typename T>
 struct logical_and
 {
-    bool operator()(const T& lhs, const T& rhs)const{
+    bool operator()(const T& lhs, const T& rhs) const
+    {
         return lhs && rhs;
     }
 };
@@ -207,7 +210,7 @@ struct bit_xor
     }
 };
 
-//C++ 14才有
+// C++ 14才有
 // // bit_not
 // //提供进行逐位非的函数对象。相当于调用类型 T 上的 operator~
 // template<typename T>
@@ -248,7 +251,7 @@ struct bit_xor
 // };
 
 //=================function===============
-//function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
+// function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
 //主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
 template<typename>
 class function;
@@ -262,7 +265,8 @@ private:
     {
     public:
         virtual ~type_erase() {}
-        virtual R call(Args...) = 0;//用于调用容器类中的可调用对象，由容器类实现
+        virtual R call(
+                Args...) = 0; //用于调用容器类中的可调用对象，由容器类实现
     };
 
     //容器类：继承接口类，将实际的对象储存，为function提供真正的调用内容
@@ -270,7 +274,7 @@ private:
     class Container: public type_erase
     {
     private:
-        functor RealPtr;//函数指针或者函数对象!!!!!!
+        functor RealPtr; //函数指针或者函数对象!!!!!!
 
     public:
         //构造函数，用于储存指向可调用对象的指针
@@ -279,20 +283,22 @@ private:
             RealPtr = funcptr;
         }
 
-        R call(Args... args){
-            //return (*RealPtr)(std::forward(args)...);
+        R call(Args... args)
+        {
+            // return (*RealPtr)(std::forward(args)...);
             return RealPtr(args...);
         }
 
         //析构函数
-        ~Container(){}
+        ~Container() {}
     };
 
     type_erase* funcPtr;
 
 public:
     template<typename functor>
-    function(functor f){
+    function(functor f)
+    {
         funcPtr = (new Container<functor>(f));
     }
 
@@ -302,8 +308,9 @@ public:
     //     funcPtr = nullptr;
     // }
 
-    R operator()(Args... args){
-        //return funcPtr->call(std::forward<Args>(args)...);
+    R operator()(Args... args)
+    {
+        // return funcPtr->call(std::forward<Args>(args)...);
         return funcPtr->call(args...);
     }
 };
