@@ -1,18 +1,17 @@
-//MiniAlgorithm.h
-//部分未实现：sort中的堆排序，stable_sort堆排序实现
+// MiniAlgorithm.h
 #pragma once
 #ifndef MINI_ALGORITHM_H
 #define MINI_ALGORITHM_H
 
-#include<cstddef>
-#include<random>
+#include <cstddef>
+#include <random>
 
 #define Insert_Sort_Maxsize 32
-#define Sort_MaxDepth   16
+#define Sort_MaxDepth 16
 
 //********************辅助函数******************************* */
 // iter_swap
-//交换两个迭代器内容
+// 交换两个迭代器内容
 template<typename InputIt>
 void iter_swap(InputIt lhs, InputIt rhs)
 {
@@ -20,9 +19,9 @@ void iter_swap(InputIt lhs, InputIt rhs)
 }
 
 // next
-//得到当前迭代器的下一个位置的迭代器
+// 得到当前迭代器的下一个位置的迭代器
 template<typename InputIt>
-InputIt next(InputIt cur_iter,size_t step=1)
+InputIt next(InputIt cur_iter, size_t step = 1)
 {
     while (step--) {
         ++cur_iter;
@@ -30,25 +29,26 @@ InputIt next(InputIt cur_iter,size_t step=1)
     return cur_iter;
 }
 
-//advance
-//将迭代器前进n个距离单位
+// advance
+// 将迭代器前进n个距离单位
 template<typename InputIt>
-void advance(InputIt& it,long long int n)
+void advance(InputIt& it, long long int n)
 {
-    while(n>0){
+    while (n > 0) {
         ++it;
         --n;
     }
-    while(n<0){
+    while (n < 0) {
         --it;
         ++n;
     }
 }
 
-//distance
-//得到两个迭代器之间的距离，要求第一参数在第二参数前面,不然会访问到last
+// distance
+// 得到两个迭代器之间的距离，要求第一参数在第二参数前面,不然会访问到last
 template<typename InputIt>
-size_t distance(InputIt first, InputIt second){
+size_t distance(InputIt first, InputIt second)
+{
     size_t ret = 0;
     while (first != second) {
         ++ret;
@@ -57,15 +57,15 @@ size_t distance(InputIt first, InputIt second){
     return ret;
 }
 
-//insert_sort
-//插入排序
+// insert_sort
+// 插入排序
 template<class RandomIt, class Compare>
 void insert_sort(RandomIt first, RandomIt last, Compare comp)
 {
-    size_t diff = distance(first, last);//获取元素数量
-    for (auto i = 1; i < diff; ++i){//待排序的数组的遍历
-        for (auto j = i; j > 0;--j){//待排序的元素向前方不断swap直至正确位置
-            if(comp(*(first+j-1),*(first+j))){
+    size_t diff = distance(first, last); // 获取元素数量
+    for (auto i = 1; i < diff; ++i) {    // 待排序的数组的遍历
+        for (auto j = i; j > 0; --j) { // 待排序的元素向前方不断swap直至正确位置
+            if (comp(*(first + j - 1), *(first + j))) {
                 break;
             }
             iter_swap(first + j, first + j - 1);
@@ -74,13 +74,13 @@ void insert_sort(RandomIt first, RandomIt last, Compare comp)
 }
 
 //_sort
-//sort的子函数，用于递归调用
+// sort的子函数，用于递归调用
 template<class RandomIt, class Compare>
 void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
 {
-    //获取元素总数
+    // 获取元素总数
     size_t diff = distance(first, last);
-    //若元素很少则通过插入排序进行排序操作
+    // 若元素很少则通过插入排序进行排序操作
     if (diff <= Insert_Sort_Maxsize) {
         return insert_sort(first, last, comp);
     }
@@ -92,26 +92,84 @@ void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
 
     --depth;
 
-    //一般情况下快排
+    // 一般情况下快排
     if (first ==
         last) // 只有一个元素，算排序完成（这里是预防性代码，当<=32时应该是插入排序才对，也就是说快排不会出现这种情况
         return;
     auto key = *first;
-    //这里采用前后指针法进行快排
+    // 这里采用前后指针法进行快排
     auto pre = first;
     auto cur = pre + 1;
-    while(cur!=last){//使pre+1左边都小于key
-        if(!comp(key,*cur)){
+    while (cur != last) { // 使pre+1左边都小于key
+        if (!comp(key, *cur)) {
             iter_swap(cur, ++pre);
         }
         ++cur;
     }
-    iter_swap(first, pre);//最后将哨位放到pre的位置(pre一直是属于key左侧的)
+    iter_swap(first, pre); // 最后将哨位放到pre的位置(pre一直是属于key左侧的)
     // 递归调用左右两侧[first,pre) [pre+1,last);pre位置上是key不用动了
-    _sort(first, pre,depth,comp);
-    _sort(pre + 1, last,depth,comp);
+    _sort(first, pre, depth, comp);
+    _sort(pre + 1, last, depth, comp);
 }
 
+// percolate_up
+// 上溯平衡操作:[first,finish]
+template<typename iterator>
+void percolate_up(
+        iterator first,
+        iterator finish) // 其中first是根节点，finish是插入节点
+{
+    auto cur_index =
+            distance(first, finish) + 1; // 堆的序号由1开始数，所以是distance+1
+    while (cur_index != 1 &&
+           !comp(*(finish),
+                 *(first + (cur_index / 2) -
+                   1))) { // 插入节点不是根节点且父节点比当前节点符合comp则已平衡
+        // 调整,此时父亲节点比插入节点倒序
+        swap(*(finish),
+             *(first + (cur_index / 2) - 1)); // 交换父亲节点和插入节点
+        cur_index /= 2;                       // 转向父亲节点
+    }
+}
+
+// less
+// less函数对象
+struct less
+{
+    template<typename T>
+    bool operator()(const T& lhs, const T& rhs) const
+    {
+        return lhs < rhs;
+    }
+};
+
+// greater
+// greater函数对象
+struct greater
+{
+    template<typename T>
+    bool operator()(const T& lhs, const T& rhs) const
+    {
+        return lhs > rhs;
+    }
+};
+
+// get_prev
+// 获得当前迭代器的前一个迭代器，可以处理end()情况，begin（）时未定义
+template<typename InputIt>
+InputIt get_prev(const InputIt& first, const InputIt& curIt)
+{
+    auto it = first;
+    if (it == curIt)
+        return;
+    auto ret = it;
+    ++it;
+    while (it != curIt) {
+        ++ret;
+        ++it;
+    }
+    return ret;
+}
 /*
 **************************************************************
 ========================以下为函数声明模块=======================
@@ -121,22 +179,22 @@ void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
 ///////////////////不改变序列的操作///////////
 //=============批量操作================
 // for_each
-//对范围 [first, last) 中每个迭代器的解引用结果应用给定的函数对象
+// 对范围 [first, last) 中每个迭代器的解引用结果应用给定的函数对象
 // f。忽略 f返回的结果。
 template<class InputIt, class UnaryFunc>
 UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f);
 
 //================搜索操作=============
 // all_of, any_of, none_of
-//检查一元谓词 p 是否对范围 [first, last) 中所有元素返回 true
+// 检查一元谓词 p 是否对范围 [first, last) 中所有元素返回 true
 template<class InputIt, class UnaryPred>
 bool all_of(InputIt first, InputIt last, UnaryPred p);
 
-//检查一元谓词 p 是否对范围 [first, last) 中至少一个元素返回 true。
+// 检查一元谓词 p 是否对范围 [first, last) 中至少一个元素返回 true。
 template<class InputIt, class UnaryPred>
 bool any_of(InputIt first, InputIt last, UnaryPred p);
 
-//检查一元谓词 p 是否不对范围 [first, last) 中任何元素返回 true。
+// 检查一元谓词 p 是否不对范围 [first, last) 中任何元素返回 true。
 template<class InputIt, class UnaryPred>
 bool none_of(InputIt first, InputIt last, UnaryPred p);
 
@@ -154,8 +212,8 @@ template<class InputIt, class UnaryPred>
 InputIt find_if_not(InputIt first, InputIt last, UnaryPred q);
 
 // find_end
-//在范围 [first, last) 中搜索序列 [s_first, s_last) 最后一次出现的位置。
-//用 operator== 比较元素。
+// 在范围 [first, last) 中搜索序列 [s_first, s_last) 最后一次出现的位置。
+// 用 operator== 比较元素。
 template<class ForwardIt1, class ForwardIt2>
 ForwardIt1 find_end(
         ForwardIt1 first,
@@ -163,7 +221,7 @@ ForwardIt1 find_end(
         ForwardIt2 s_first,
         ForwardIt2 s_last);
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class ForwardIt1, class ForwardIt2, class BinaryPred>
 ForwardIt1 find_end(
         ForwardIt1 first,
@@ -173,13 +231,13 @@ ForwardIt1 find_end(
         BinaryPred p);
 
 // find_first_of
-//在范围 [first, last) 中搜索范围 [s_first, s_last) 中的任何元素。
-//用 operator== 比较元素。
+// 在范围 [first, last) 中搜索范围 [s_first, s_last) 中的任何元素。
+// 用 operator== 比较元素。
 template<class InputIt, class ForwardIt>
 InputIt
 find_first_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last);
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class InputIt, class ForwardIt, class BinaryPred>
 InputIt find_first_of(
         InputIt first,
@@ -189,30 +247,28 @@ InputIt find_first_of(
         BinaryPred p);
 
 // count, count_if
-//返回范围 [first, last) 中满足特定判别标准的元素数。
-//计数等于 value 的元素（使用 operator==）。
+// 返回范围 [first, last) 中满足特定判别标准的元素数。
+// 计数等于 value 的元素（使用 operator==）。
 template<class InputIt, class T>
-size_t
-count(InputIt first, InputIt last, const T& value);
+size_t count(InputIt first, InputIt last, const T& value);
 
-//计数谓词 p 对其返回 true 的元素。
+// 计数谓词 p 对其返回 true 的元素。
 template<class InputIt, class UnaryPred>
-size_t
-count_if(InputIt first, InputIt last, UnaryPred p);
+size_t count_if(InputIt first, InputIt last, UnaryPred p);
 
 // equal
-//检查 [first1, last1) 与从 first2 开始的另一个范围是否相等：
-//用 operator== 比较元素。
+// 检查 [first1, last1) 与从 first2 开始的另一个范围是否相等：
+// 用 operator== 比较元素。
 template<class InputIt1, class InputIt2>
 bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2);
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class InputIt1, class InputIt2, class BinaryPred>
 bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryPred p);
 
 // search
-//搜索范围 [first, last) 中首次出现元素序列 [s_first, s_last) 的位置。
-//元素用 operator== 比较
+// 搜索范围 [first, last) 中首次出现元素序列 [s_first, s_last) 的位置。
+// 元素用 operator== 比较
 template<class ForwardIt1, class ForwardIt2>
 ForwardIt1 search(
         ForwardIt1 first,
@@ -220,7 +276,7 @@ ForwardIt1 search(
         ForwardIt2 s_first,
         ForwardIt2 s_last);
 
-//元素用给定的二元谓词 p 比较
+// 元素用给定的二元谓词 p 比较
 template<class ForwardIt1, class ForwardIt2, class BinaryPred>
 ForwardIt1 search(
         ForwardIt1 first,
@@ -232,37 +288,37 @@ ForwardIt1 search(
 ///////////////////修改序列的操作////////////
 //================复制操作==================
 // copy,copy_if
-//复制范围 [first, last) 中的元素到从 d_first
-//开始的另一范围（复制目标范围）。如果 d_first 在 [first, last)
-//中，那么行为未定义。此时可以用 copy_backward 代替。
+// 复制范围 [first, last) 中的元素到从 d_first
+// 开始的另一范围（复制目标范围）。如果 d_first 在 [first, last)
+// 中，那么行为未定义。此时可以用 copy_backward 代替。
 template<class InputIt, class OutputIt>
 OutputIt copy(InputIt first, InputIt last, OutputIt d_first);
 
-//仅复制谓词 pred 对其返回 true
-//的元素。此复制算法是稳定的：保持被复制元素的相对顺序。如果 [first, last)
-//与复制目标范围重叠，那么行为未定义。
+// 仅复制谓词 pred 对其返回 true
+// 的元素。此复制算法是稳定的：保持被复制元素的相对顺序。如果 [first, last)
+// 与复制目标范围重叠，那么行为未定义。
 template<class InputIt, class OutputIt, class UnaryPred>
 OutputIt copy_if(InputIt first, InputIt last, OutputIt d_first, UnaryPred pred);
 
 //=================交换操作=================
 // swap
-//交换给定值
+// 交换给定值
 // template<class T>
 // void swap(T& a, T& b);
-//这一部分由容器实现swap特化
+// 这一部分由容器实现swap特化
 
 //================变换操作==================
 // transform
 // transform 应用给定的函数到某个/些输入范围中的元素，并将结果存储到从 d_first
 // 开始的输出范围。
-//应用一元函数 unary_op 到 [first1, last1) 中的元素。
+// 应用一元函数 unary_op 到 [first1, last1) 中的元素。
 template<class InputIt, class OutputIt, class UnaryOp>
 OutputIt
 transform(InputIt first1, InputIt last1, OutputIt d_first, UnaryOp unary_op);
 
-//应用二元函数 binary_op 到来自两个范围的元素对：一个范围是 [first1,
-// last1)，而另一个范围包含 distance(first1, last1) 个元素并从 first2
-// 开始。
+// 应用二元函数 binary_op 到来自两个范围的元素对：一个范围是 [first1,
+//  last1)，而另一个范围包含 distance(first1, last1) 个元素并从 first2
+//  开始。
 template<class InputIt1, class InputIt2, class OutputIt, class BinaryOp>
 OutputIt transform(
         InputIt1 first1,
@@ -272,8 +328,8 @@ OutputIt transform(
         BinaryOp binary_op);
 
 // replace,replace_if
-//以 new_value 替换范围 [first, last) 中所有满足特定判别标准的元素
-//替换所有等于（用 operator== 比较）old_value 的元素。
+// 以 new_value 替换范围 [first, last) 中所有满足特定判别标准的元素
+// 替换所有等于（用 operator== 比较）old_value 的元素。
 template<class ForwardIt, class T>
 void replace(
         ForwardIt first,
@@ -281,7 +337,7 @@ void replace(
         const T& old_value,
         const T& new_value);
 
-//替换所有谓词 p 对其返回 true 的元素。
+// 替换所有谓词 p 对其返回 true 的元素。
 template<class ForwardIt, class UnaryPred, class T>
 void replace_if(
         ForwardIt first,
@@ -291,7 +347,7 @@ void replace_if(
 
 //================生成操作==================
 // fill
-//将给定的 value 赋给 [first, last) 中的所有元素。
+// 将给定的 value 赋给 [first, last) 中的所有元素。
 template<class ForwardIt, class T>
 void fill(ForwardIt first, ForwardIt last, const T& value);
 
@@ -302,37 +358,37 @@ void generate(ForwardIt first, ForwardIt last, Generator g);
 
 //================移除操作==================
 // remove,remove_it
-//从范围 [first, last)
-//移除所有满足特定判别标准的元素，并返回范围新结尾的尾后迭代器。
+// 从范围 [first, last)
+// 移除所有满足特定判别标准的元素，并返回范围新结尾的尾后迭代器。
 // 移除所有等于（用 operator== 比较）value 的元素。
 template<class ForwardIt, class T>
 ForwardIt remove(ForwardIt first, ForwardIt last, const T& value);
 
-//移除所有 p 对于它返回 true 的元素。
+// 移除所有 p 对于它返回 true 的元素。
 template<class ForwardIt, class UnaryPred>
 ForwardIt remove_if(ForwardIt first, ForwardIt last, UnaryPred p);
 
 // unique
-//从范围 [first, last)
-//移除相继等价元素组中首元素以外的所有元素，并返回范围新结尾的尾后迭代器。
-//用 operator== 比较元素。
+// 从范围 [first, last)
+// 移除相继等价元素组中首元素以外的所有元素，并返回范围新结尾的尾后迭代器。
+// 用 operator== 比较元素。
 template<class ForwardIt>
 ForwardIt unique(ForwardIt first, ForwardIt last);
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class ForwardIt, class BinaryPred>
 ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p);
 
 //==============顺序变更操作================
 // reverse
-//反转 [first, last) 范围中的元素顺序。
+// 反转 [first, last) 范围中的元素顺序。
 template<class BidirIt>
 void reverse(BidirIt first, BidirIt last);
 
 // reverse_copy
-//给定 N 为 std::distance(first, last)。将范围 [first,
-//last)（源范围）中的元素复制到从 d_first 开始的包含 N
-//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+// 给定 N 为 std::distance(first, last)。将范围 [first,
+// last)（源范围）中的元素复制到从 d_first 开始的包含 N
+// 个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
 template<class BidirIt, class OutputIt>
 OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first);
 
@@ -342,27 +398,27 @@ OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first);
 // rotate_copy
 
 // random_shuffle
-//重排序给定范围 [first, last)
-//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+// 重排序给定范围 [first, last)
+// 中的元素，使得这些元素的每个排列拥有相等的出现概率。
 template<class RandomIt>
 void random_shuffle(RandomIt first, RandomIt last);
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
 // is_partitioned
-//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
-//的元素都会在所有不满足的元素之前出现。
+// 检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+// 的元素都会在所有不满足的元素之前出现。
 template<class InputIt, class UnaryPred>
 bool is_partitioned(InputIt first, InputIt last, UnaryPred p);
 
 // partition
-//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
-//对其返回 false 的所有元素之前。不保持相对顺序。
+// 排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词
+// p 对其返回 false 的所有元素之前。不保持相对顺序。
 template<class ForwardIt, class UnaryPred>
 ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p);
 
 // partition_copy
-//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+// 根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
 template<
         class InputIt,
         class OutputIt1,
@@ -377,21 +433,21 @@ std::pair<OutputIt1, OutputIt2> partition_copy(
         UnaryPred p);
 
 // stable_partition
-//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
-//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+// 重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+// 的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
 template<class BidirIt, class UnaryPred>
 BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 
 // partition_point
-//检验（如同用 std::partition）已划分范围 [first,
-//last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
-//last。
+// 检验（如同用 std::partition）已划分范围 [first,
+// last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
+// last。
 template<class ForwardIt, class UnaryPred>
 ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p);
 
 //============排序操作==================
 // sort
-//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+// 以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
 template<class RandomIt>
 void sort(RandomIt first, RandomIt last);
 
@@ -399,7 +455,7 @@ template<class RandomIt, class Compare>
 void sort(RandomIt first, RandomIt last, Compare comp);
 
 // stable_sort
-//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+// 以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
 template<class RandomIt>
 void stable_sort(RandomIt first, RandomIt last);
 
@@ -407,8 +463,8 @@ template<class RandomIt, class Compare>
 void stable_sort(RandomIt first, RandomIt last, Compare comp);
 
 // partial_sort
-//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
-//first 个最小元素。不保证保持相等元素间的顺序。
+// 重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+// first 个最小元素。不保证保持相等元素间的顺序。
 template<class RandomIt>
 void partial_sort(RandomIt first, RandomIt middle, RandomIt last);
 
@@ -416,7 +472,7 @@ template<class RandomIt, class Compare>
 void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
 
 // partial_sort_copy
-//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+// 以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
 template<class InputIt, class RandomIt>
 RandomIt partial_sort_copy(
         InputIt first,
@@ -433,7 +489,7 @@ RandomIt partial_sort_copy(
         Compare comp);
 
 // is_sorted
-//检查范围 [first, last) 中的元素是否以非降序排序。
+// 检查范围 [first, last) 中的元素是否以非降序排序。
 template<class ForwardIt>
 bool is_sorted(ForwardIt first, ForwardIt last);
 
@@ -451,7 +507,7 @@ ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp);
 
 //======二分搜索操作（在以划分范围上）=====
 // lower_bound
-//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+// 在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
 template<class ForwardIt, class T>
 ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value);
 
@@ -460,7 +516,7 @@ ForwardIt
 lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 // upper_bound
-//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+// 在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value);
 
@@ -501,7 +557,7 @@ upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp);
 
 //=============最大最小操作=============
 // min_element
-//寻找范围 [first, last) 中的最小元素。
+// 寻找范围 [first, last) 中的最小元素。
 template<class ForwardIt>
 ForwardIt min_element(ForwardIt first, ForwardIt last);
 
@@ -509,7 +565,7 @@ template<class ForwardIt, class Compare>
 ForwardIt min_element(ForwardIt first, ForwardIt last, Compare comp);
 
 // min
-//返回给定值中的较小者。
+// 返回给定值中的较小者。
 template<typename T>
 const T& min(const T& a, const T& b);
 
@@ -523,7 +579,7 @@ template<typename T, typename Compare>
 T min(std::initializer_list<T> ilist, Compare comp);
 
 // max_element
-//寻找范围 [first, last) 中的最大元素。
+// 寻找范围 [first, last) 中的最大元素。
 template<class ForwardIt>
 ForwardIt max_element(ForwardIt first, ForwardIt last);
 
@@ -531,7 +587,7 @@ template<class ForwardIt, class Compare>
 ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp);
 
 // max
-//返回给定值中的较大者。
+// 返回给定值中的较大者。
 template<class T>
 const T& max(const T& a, const T& b);
 
@@ -544,13 +600,12 @@ T max(std::initializer_list<T> ilist);
 template<class T, class Compare>
 T max(std::initializer_list<T> ilist, Compare comp);
 
-//minmax
+// minmax
 
-//minmax_element
+// minmax_element
 
 //================字典序比较操作==============
-//lexicographical_compare
-
+// lexicographical_compare
 
 /*
 **************************************************************
@@ -560,10 +615,11 @@ T max(std::initializer_list<T> ilist, Compare comp);
 ///////////////////不改变序列的操作///////////
 //=============批量操作================
 // for_each
-//对范围 [first, last) 中每个迭代器的解引用结果应用给定的函数对象
+// 对范围 [first, last) 中每个迭代器的解引用结果应用给定的函数对象
 // f。忽略 f返回的结果。
 template<class InputIt, class UnaryFunc>
-UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f){
+UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f)
+{
     for (; first != last; ++first)
         f(*first);
 
@@ -572,29 +628,32 @@ UnaryFunc for_each(InputIt first, InputIt last, UnaryFunc f){
 
 //================搜索操作=============
 // all_of, any_of, none_of
-//检查一元谓词 p 是否对范围 [first, last) 中所有元素返回 true
+// 检查一元谓词 p 是否对范围 [first, last) 中所有元素返回 true
 template<class InputIt, class UnaryPred>
-bool all_of(InputIt first, InputIt last, UnaryPred p){
+bool all_of(InputIt first, InputIt last, UnaryPred p)
+{
     return find_if_not(first, last, p) == last;
 }
 
-//检查一元谓词 p 是否对范围 [first, last) 中至少一个元素返回 true。
+// 检查一元谓词 p 是否对范围 [first, last) 中至少一个元素返回 true。
 template<class InputIt, class UnaryPred>
-bool any_of(InputIt first, InputIt last, UnaryPred p){
+bool any_of(InputIt first, InputIt last, UnaryPred p)
+{
     return find_if(first, last, p) != last;
 }
 
-//检查一元谓词 p 是否不对范围 [first, last) 中任何元素返回 true。
+// 检查一元谓词 p 是否不对范围 [first, last) 中任何元素返回 true。
 template<class InputIt, class UnaryPred>
-bool none_of(InputIt first, InputIt last, UnaryPred p){
+bool none_of(InputIt first, InputIt last, UnaryPred p)
+{
     return find_if(first, last, p) == last;
 }
-
 
 // find, find_if, find_if_not
 // find 搜索等于（用 operator== 比较）value 的元素。
 template<class InputIt, class T>
-InputIt find(InputIt first, InputIt last, const T& value){
+InputIt find(InputIt first, InputIt last, const T& value)
+{
     for (; first != last; ++first)
         if (*first == value)
             return first;
@@ -604,7 +663,8 @@ InputIt find(InputIt first, InputIt last, const T& value){
 
 // find_if 搜索谓词 p 对其返回 true 的元素。
 template<class InputIt, class UnaryPred>
-InputIt find_if(InputIt first, InputIt last, UnaryPred p){
+InputIt find_if(InputIt first, InputIt last, UnaryPred p)
+{
     for (; first != last; ++first)
         if (p(*first))
             return first;
@@ -614,7 +674,8 @@ InputIt find_if(InputIt first, InputIt last, UnaryPred p){
 
 // find_if_not 搜索谓词 q 对其返回 false 的元素。
 template<class InputIt, class UnaryPred>
-InputIt find_if_not(InputIt first, InputIt last, UnaryPred q){
+InputIt find_if_not(InputIt first, InputIt last, UnaryPred q)
+{
     for (; first != last; ++first)
         if (!q(*first))
             return first;
@@ -623,8 +684,8 @@ InputIt find_if_not(InputIt first, InputIt last, UnaryPred q){
 }
 
 // find_end
-//在范围 [first, last) 中搜索序列 [s_first, s_last) 最后一次出现的位置。
-//用 operator== 比较元素。
+// 在范围 [first, last) 中搜索序列 [s_first, s_last) 最后一次出现的位置。
+// 用 operator== 比较元素。
 template<class ForwardIt1, class ForwardIt2>
 ForwardIt1 find_end(
         ForwardIt1 first,
@@ -649,7 +710,7 @@ ForwardIt1 find_end(
     return result;
 }
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class ForwardIt1, class ForwardIt2, class BinaryPred>
 ForwardIt1 find_end(
         ForwardIt1 first,
@@ -675,9 +736,9 @@ ForwardIt1 find_end(
     return result;
 }
 
-//find_first_of
-//在范围 [first, last) 中搜索范围 [s_first, s_last) 中的任何元素。
-//用 operator== 比较元素。
+// find_first_of
+// 在范围 [first, last) 中搜索范围 [s_first, s_last) 中的任何元素。
+// 用 operator== 比较元素。
 template<class InputIt, class ForwardIt>
 InputIt
 find_first_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last)
@@ -689,7 +750,7 @@ find_first_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last)
     return last;
 }
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class InputIt, class ForwardIt, class BinaryPred>
 InputIt find_first_of(
         InputIt first,
@@ -697,20 +758,19 @@ InputIt find_first_of(
         ForwardIt s_first,
         ForwardIt s_last,
         BinaryPred p)
-        {
-            for (; first != last; ++first)
-                for (ForwardIt it = s_first; it != s_last; ++it)
-                    if (p(*first, *it))
-                        return first;
-            return last;
-        }
+{
+    for (; first != last; ++first)
+        for (ForwardIt it = s_first; it != s_last; ++it)
+            if (p(*first, *it))
+                return first;
+    return last;
+}
 
 // count, count_if
-//返回范围 [first, last) 中满足特定判别标准的元素数。
-//计数等于 value 的元素（使用 operator==）。
+// 返回范围 [first, last) 中满足特定判别标准的元素数。
+// 计数等于 value 的元素（使用 operator==）。
 template<class InputIt, class T>
-size_t
-count(InputIt first, InputIt last, const T& value)
+size_t count(InputIt first, InputIt last, const T& value)
 {
     size_t ret = 0;
     for (; first != last; ++first)
@@ -719,10 +779,9 @@ count(InputIt first, InputIt last, const T& value)
     return ret;
 }
 
-//计数谓词 p 对其返回 true 的元素。
+// 计数谓词 p 对其返回 true 的元素。
 template<class InputIt, class UnaryPred>
-size_t
-count_if(InputIt first, InputIt last, UnaryPred p)
+size_t count_if(InputIt first, InputIt last, UnaryPred p)
 {
     size_t ret = 0;
     for (; first != last; ++first)
@@ -732,8 +791,8 @@ count_if(InputIt first, InputIt last, UnaryPred p)
 }
 
 // equal
-//检查 [first1, last1) 与从 first2 开始的另一个范围是否相等：
-//用 operator== 比较元素。
+// 检查 [first1, last1) 与从 first2 开始的另一个范围是否相等：
+// 用 operator== 比较元素。
 template<class InputIt1, class InputIt2>
 bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
 {
@@ -744,7 +803,7 @@ bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
     return true;
 }
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class InputIt1, class InputIt2, class BinaryPred>
 bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryPred p)
 {
@@ -756,14 +815,11 @@ bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryPred p)
 }
 
 // search
-//搜索范围 [first, last) 中首次出现元素序列 [s_first, s_last) 的位置。
-//元素用 operator== 比较
+// 搜索范围 [first, last) 中首次出现元素序列 [s_first, s_last) 的位置。
+// 元素用 operator== 比较
 template<class ForwardIt1, class ForwardIt2>
-ForwardIt1 search(
-        ForwardIt1 first,
-        ForwardIt1 last,
-        ForwardIt2 s_first,
-        ForwardIt2 s_last)
+ForwardIt1
+search(ForwardIt1 first, ForwardIt1 last, ForwardIt2 s_first, ForwardIt2 s_last)
 {
     while (true) {
         ForwardIt1 it = first;
@@ -779,7 +835,7 @@ ForwardIt1 search(
     }
 }
 
-//元素用给定的二元谓词 p 比较
+// 元素用给定的二元谓词 p 比较
 template<class ForwardIt1, class ForwardIt2, class BinaryPred>
 ForwardIt1 search(
         ForwardIt1 first,
@@ -787,27 +843,27 @@ ForwardIt1 search(
         ForwardIt2 s_first,
         ForwardIt2 s_last,
         BinaryPred p)
-        {
-            while (true) {
-                ForwardIt1 it = first;
-                for (ForwardIt2 s_it = s_first;; ++it, ++s_it) {
-                    if (s_it == s_last)
-                        return first;
-                    if (it == last)
-                        return last;
-                    if (!p(*it, *s_it))
-                        break;
-                }
-                ++first;
-            }
+{
+    while (true) {
+        ForwardIt1 it = first;
+        for (ForwardIt2 s_it = s_first;; ++it, ++s_it) {
+            if (s_it == s_last)
+                return first;
+            if (it == last)
+                return last;
+            if (!p(*it, *s_it))
+                break;
         }
+        ++first;
+    }
+}
 
 ///////////////////修改序列的操作////////////
 //================复制操作==================
 // copy,copy_if
-//复制范围 [first, last) 中的元素到从 d_first
-//开始的另一范围（复制目标范围）。如果 d_first 在 [first, last)
-//中，那么行为未定义。此时可以用 copy_backward 代替。
+// 复制范围 [first, last) 中的元素到从 d_first
+// 开始的另一范围（复制目标范围）。如果 d_first 在 [first, last)
+// 中，那么行为未定义。此时可以用 copy_backward 代替。
 template<class InputIt, class OutputIt>
 OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
 {
@@ -817,9 +873,9 @@ OutputIt copy(InputIt first, InputIt last, OutputIt d_first)
     return d_first;
 }
 
-//仅复制谓词 pred 对其返回 true
-//的元素。此复制算法是稳定的：保持被复制元素的相对顺序。如果 [first, last)
-//与复制目标范围重叠，那么行为未定义。
+// 仅复制谓词 pred 对其返回 true
+// 的元素。此复制算法是稳定的：保持被复制元素的相对顺序。如果 [first, last)
+// 与复制目标范围重叠，那么行为未定义。
 template<class InputIt, class OutputIt, class UnaryPred>
 OutputIt copy_if(InputIt first, InputIt last, OutputIt d_first, UnaryPred pred)
 {
@@ -834,18 +890,19 @@ OutputIt copy_if(InputIt first, InputIt last, OutputIt d_first, UnaryPred pred)
 
 //=================交换操作=================
 // swap
-//交换给定值
+// 交换给定值
 // template<class T>
 // void swap(T& a, T& b);
-//这一部分由容器实现swap特化
+// 这一部分由容器实现swap特化
 
 //================变换操作==================
 // transform
 // transform 应用给定的函数到某个/些输入范围中的元素，并将结果存储到从 d_first
 // 开始的输出范围。
-//应用一元函数 unary_op 到 [first1, last1) 中的元素。
+// 应用一元函数 unary_op 到 [first1, last1) 中的元素。
 template<class InputIt, class OutputIt, class UnaryOp>
-OutputIt transform(InputIt first1, InputIt last1, OutputIt d_first, UnaryOp unary_op)
+OutputIt
+transform(InputIt first1, InputIt last1, OutputIt d_first, UnaryOp unary_op)
 {
     for (; first1 != last1; ++d_first, ++first1)
         *d_first = unary_op(*first1);
@@ -853,13 +910,9 @@ OutputIt transform(InputIt first1, InputIt last1, OutputIt d_first, UnaryOp unar
     return d_first;
 }
 
-//应用二元函数 binary_op 到来自两个范围的元素对：一个范围是 [first1,
-//last1)，而另一个范围包含 distance(first1, last1) 个元素并从 first2 开始。
-template<
-        class InputIt1,
-        class InputIt2,
-        class OutputIt,
-        class BinaryOp>
+// 应用二元函数 binary_op 到来自两个范围的元素对：一个范围是 [first1,
+// last1)，而另一个范围包含 distance(first1, last1) 个元素并从 first2 开始。
+template<class InputIt1, class InputIt2, class OutputIt, class BinaryOp>
 OutputIt transform(
         InputIt1 first1,
         InputIt1 last1,
@@ -874,8 +927,8 @@ OutputIt transform(
 }
 
 // replace,replace_if
-//以 new_value 替换范围 [first, last) 中所有满足特定判别标准的元素
-//替换所有等于（用 operator== 比较）old_value 的元素。
+// 以 new_value 替换范围 [first, last) 中所有满足特定判别标准的元素
+// 替换所有等于（用 operator== 比较）old_value 的元素。
 template<class ForwardIt, class T>
 void replace(
         ForwardIt first,
@@ -888,7 +941,7 @@ void replace(
             *first = new_value;
 }
 
-//替换所有谓词 p 对其返回 true 的元素。
+// 替换所有谓词 p 对其返回 true 的元素。
 template<class ForwardIt, class UnaryPred, class T>
 void replace_if(
         ForwardIt first,
@@ -903,9 +956,10 @@ void replace_if(
 
 //================生成操作==================
 // fill
-//将给定的 value 赋给 [first, last) 中的所有元素。
+// 将给定的 value 赋给 [first, last) 中的所有元素。
 template<class ForwardIt, class T>
-void fill(ForwardIt first, ForwardIt last, const T& value){
+void fill(ForwardIt first, ForwardIt last, const T& value)
+{
     for (; first != last; ++first)
         *first = value;
 }
@@ -921,8 +975,8 @@ void generate(ForwardIt first, ForwardIt last, Generator g)
 
 //================移除操作==================
 // remove,remove_it
-//从范围 [first, last)
-//移除所有满足特定判别标准的元素，并返回范围新结尾的尾后迭代器。
+// 从范围 [first, last)
+// 移除所有满足特定判别标准的元素，并返回范围新结尾的尾后迭代器。
 // 移除所有等于（用 operator== 比较）value 的元素。
 template<class ForwardIt, class T>
 ForwardIt remove(ForwardIt first, ForwardIt last, const T& value)
@@ -935,7 +989,7 @@ ForwardIt remove(ForwardIt first, ForwardIt last, const T& value)
     return first;
 }
 
-//移除所有 p 对于它返回 true 的元素。
+// 移除所有 p 对于它返回 true 的元素。
 template<class ForwardIt, class UnaryPred>
 ForwardIt remove_if(ForwardIt first, ForwardIt last, UnaryPred p)
 {
@@ -948,9 +1002,9 @@ ForwardIt remove_if(ForwardIt first, ForwardIt last, UnaryPred p)
 }
 
 // unique
-//从范围 [first, last)
-//移除相继等价元素组中首元素以外的所有元素，并返回范围新结尾的尾后迭代器。
-//用 operator== 比较元素。
+// 从范围 [first, last)
+// 移除相继等价元素组中首元素以外的所有元素，并返回范围新结尾的尾后迭代器。
+// 用 operator== 比较元素。
 template<class ForwardIt>
 ForwardIt unique(ForwardIt first, ForwardIt last)
 {
@@ -965,7 +1019,7 @@ ForwardIt unique(ForwardIt first, ForwardIt last)
     return ++result;
 }
 
-//用给定的二元谓词 p 比较元素。
+// 用给定的二元谓词 p 比较元素。
 template<class ForwardIt, class BinaryPred>
 ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p)
 {
@@ -982,47 +1036,50 @@ ForwardIt unique(ForwardIt first, ForwardIt last, BinaryPred p)
 
 //==============顺序变更操作================
 // reverse
-//反转 [first, last) 范围中的元素顺序。
+// 反转 [first, last) 范围中的元素顺序。
 template<class BidirIt>
 void reverse(BidirIt first, BidirIt last)
 {
-    while (first!=last && first != --last) {
+    while (first != last && first != --last) {
         iter_swap(first++, last);
     }
 }
 
 // reverse_copy
-//给定 N 为 std::distance(first, last)。将范围 [first,
-//last)（源范围）中的元素复制到从 d_first 开始的包含 N
-//个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
+// 给定 N 为 std::distance(first, last)。将范围 [first,
+// last)（源范围）中的元素复制到从 d_first 开始的包含 N
+// 个元素的新范围（目标范围），使得目标范围中元素以逆序排列。
 template<class BidirIt, class OutputIt>
-OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first){
+OutputIt reverse_copy(BidirIt first, BidirIt last, OutputIt d_first)
+{
     for (; first != last; ++d_first)
         *d_first = *(--last);
     return d_first;
 }
 
-//rotate
+// rotate
 
-//rotate_copy
+// rotate_copy
 
 // random_shuffle
-//重排序给定范围 [first, last)
-//中的元素，使得这些元素的每个排列拥有相等的出现概率。
+// 重排序给定范围 [first, last)
+// 中的元素，使得这些元素的每个排列拥有相等的出现概率。
 template<class RandomIt>
-void random_shuffle(RandomIt first, RandomIt last){
+void random_shuffle(RandomIt first, RandomIt last)
+{
     for (int i = last - first - 1; i > 0; --i) {
-        iter_swap(first+i, first+(std::rand() % (i + 1)));
+        iter_swap(first + i, first + (std::rand() % (i + 1)));
     }
 }
 
 ///////////////////排序和相关操作////////////
 //=============划分操作==================
 // is_partitioned
-//检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
-//的元素都会在所有不满足的元素之前出现。
+// 检查范围 [first, last) 是否已按谓词 p 划分：所有满足 p
+// 的元素都会在所有不满足的元素之前出现。
 template<class InputIt, class UnaryPred>
-bool is_partitioned(InputIt first, InputIt last, UnaryPred p){
+bool is_partitioned(InputIt first, InputIt last, UnaryPred p)
+{
     for (; first != last; ++first)
         if (!p(*first))
             break;
@@ -1033,10 +1090,11 @@ bool is_partitioned(InputIt first, InputIt last, UnaryPred p){
 }
 
 // partition
-//排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词 p
-//对其返回 false 的所有元素之前。不保持相对顺序。
+// 排序范围 [first, last) 中的元素，使得谓词 p 对其返回 true 的所有元素位于谓词
+// p 对其返回 false 的所有元素之前。不保持相对顺序。
 template<class ForwardIt, class UnaryPred>
-ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p){
+ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p)
+{
     first = find_if_not(first, last, p);
     if (first == last)
         return first;
@@ -1052,7 +1110,7 @@ ForwardIt partition(ForwardIt first, ForwardIt last, UnaryPred p){
 }
 
 // partition_copy
-//根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
+// 根据谓词 p 的返回值，将范围 [first, last) 中的元素复制到两个不同范围。
 template<
         class InputIt,
         class OutputIt1,
@@ -1080,17 +1138,18 @@ std::pair<OutputIt1, OutputIt2> partition_copy(
 }
 
 // stable_partition
-//重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
-//的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
+// 重排序范围 [first, last) 中的元素，使得所有谓词 p 对其返回 true
+// 的元素均先于谓词 p 对其返回 false 的元素。保持元素的相对顺序。
 template<class BidirIt, class UnaryPred>
 BidirIt stable_partition(BidirIt first, BidirIt last, UnaryPred p);
 //+++++++++++++++++++++start here
 // partition_point
-//检验（如同用 std::partition）已划分范围 [first,
+// 检验（如同用 std::partition）已划分范围 [first,
 // last)，并定位第一分段的结尾，即首个不满足 p 的元素，或者在所有元素满足 p 时是
 // last。
 template<class ForwardIt, class UnaryPred>
-ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
+ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p)
+{
     for (auto length = distance(first, last); 0 < length;) {
         auto half = length / 2;
         auto middle = next(first, half);
@@ -1105,47 +1164,52 @@ ForwardIt partition_point(ForwardIt first, ForwardIt last, UnaryPred p){
 }
 
 //============排序操作==================
-//sort
-//以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
+// sort
+// 以非降序排序范围 [first, last) 中的元素。不保证维持相等元素的顺序。
 template<class RandomIt>
-void sort(RandomIt first, RandomIt last){
+void sort(RandomIt first, RandomIt last)
+{
     sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
         return lhs < rhs;
     });
 }
 
 template<class RandomIt, class Compare>
-void sort(RandomIt first, RandomIt last, Compare comp){
+void sort(RandomIt first, RandomIt last, Compare comp)
+{
     _sort(first, last, Sort_MaxDepth, comp);
 }
 
 // stable_sort
-//以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
+// 以非降序排序范围 [first, last) 中的元素。保证保持等价元素间的顺序
 template<class RandomIt>
-void stable_sort(RandomIt first, RandomIt last){
+void stable_sort(RandomIt first, RandomIt last)
+{
     stable_sort(first, last, [](const auto& lhs, const auto& rhs) -> bool {
         return lhs < rhs;
     });
 }
 
 template<class RandomIt, class Compare>
-void stable_sort(RandomIt first, RandomIt last, Compare comp){
-    //堆排序稳定版
+void stable_sort(RandomIt first, RandomIt last, Compare comp)
+{
+    // 堆排序稳定版
 }
 
 // partial_sort
-//重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
+// 重排元素，使得范围 [first, middle) 含有范围 [first, last) 中已排序的 middle -
 // first 个最小元素。不保证保持相等元素间的顺序。
 template<class RandomIt>
-void partial_sort(RandomIt first, RandomIt middle, RandomIt last){
-    //这里cppreference有实现
+void partial_sort(RandomIt first, RandomIt middle, RandomIt last)
+{
+    // 这里cppreference有实现
 }
 
 template<class RandomIt, class Compare>
 void partial_sort(RandomIt first, RandomIt middle, RandomIt last, Compare comp);
 
 // partial_sort_copy
-//以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
+// 以升序排序范围 [first, last) 中的某些元素，存储结果于范围 [d_first, d_last)。
 template<class InputIt, class RandomIt>
 RandomIt partial_sort_copy(
         InputIt first,
@@ -1162,7 +1226,7 @@ RandomIt partial_sort_copy(
         Compare comp);
 
 // is_sorted
-//检查范围 [first, last) 中的元素是否以非降序排序。
+// 检查范围 [first, last) 中的元素是否以非降序排序。
 template<class ForwardIt>
 bool is_sorted(ForwardIt first, ForwardIt last)
 {
@@ -1181,11 +1245,12 @@ bool is_sorted(ForwardIt first, ForwardIt last, Compare comp)
 template<class ForwardIt>
 ForwardIt is_sorted_until(ForwardIt first, ForwardIt last)
 {
-    return is_sorted_until(first, last, less<>());//here
+    return is_sorted_until(first, last, less<>()); // here
 }
 
 template<class ForwardIt, class Compare>
-ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp){
+ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp)
+{
     if (first != last) {
         ForwardIt next = first;
         while (++next != last) {
@@ -1199,7 +1264,7 @@ ForwardIt is_sorted_until(ForwardIt first, ForwardIt last, Compare comp){
 
 //======二分搜索操作（在以划分范围上）=====
 // lower_bound
-//在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
+// 在已划分的范围 [first, last) 中查找第一个不先序于 value 的元素。
 template<class ForwardIt, class T>
 ForwardIt lower_bound(ForwardIt first, ForwardIt last, const T& value)
 {
@@ -1229,7 +1294,7 @@ lower_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
 }
 
 // upper_bound
-//在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
+// 在已划分的范围 [first, last) 中查找第一个后序于 value 的元素
 template<class ForwardIt, class T>
 ForwardIt upper_bound(ForwardIt first, ForwardIt last, const T& value)
 {
@@ -1259,42 +1324,124 @@ upper_bound(ForwardIt first, ForwardIt last, const T& value, Compare comp)
     return first;
 }
 
-//equal_range
+// equal_range
 
-//binary_search
+// binary_search
 
 //========集合操作（在一排序范围上）======
-//includes
+// includes
 
-//set_union
+// set_union
 
-//set_intersection
+// set_intersection
 
-//set_difference
+// set_difference
 
 //=======归并操作（在以排序范围上）======
-//merge
+// merge
 
-//inplace_merge
+// inplace_merge
 
 //================堆操作==============
-//push_heap
+// 堆类:类型要求 RandomIt为老式随机访问迭代器; Compare必须满足比较
+template<typename RandomIt, typename Compare>
+class heap
+{
+private:
+    using iterator = RandomIt;
+    iterator first;
+    iterator last;
+    size_t length;
+    Compare comp;
 
-//pop_heap
+    //==============辅助函数===============
+    // percolate_up
+    // 上溯平衡操作:[first,finish]
+    void percolate_up(
+            iterator first,
+            iterator finish) // 其中first是根节点，finish是插入节点
+    {
+        auto cur_index = distance(first, finish) +
+                         1; // 堆的序号由1开始数，所以是distance+1
+        while (cur_index != 1 &&
+               !comp(*(finish),
+                     *(first + (cur_index / 2) -
+                       1))) { // 插入节点不是根节点且父节点比当前节点符合comp则已平衡
+            // 调整,此时父亲节点比插入节点倒序
+            swap(*(finish),
+                 *(first + (cur_index / 2) - 1)); // 交换父亲节点和插入节点
+            cur_index /= 2;                       // 转向父亲节点
+        }
+    }
 
-//make_heap
+public:
+    heap(iterator start, iterator finish, Compare c)
+        : first(start), last(finish), comp(c)
+    {
+        length = distance(start, finish);
+        make_heap(first, last, comp);
+    }
 
-//sort_heap
+    // 创建堆[start,finish)
+    void make_heap(iterator start, iterator finish, Compare c)
+    {
+        // 插入并平衡
+        for (auto i = 1; i <= length; ++i) {
+            percolate_up(
+                    first,
+                    start); // start位置为当前插入元素，默认在树尾部，开始上溯平衡
+            ++start; // start在即将插入位置
+        }
+    }
+};
 
-//is_heap
+// push_heap
+// 将last-1插入到[first,last-1)当中
+template<typename RandomIt, typename Compare>
+void push_heap(RandomIt first, RandomIt last)
+{
+    last = get_prev(first, last);
+    percolate_up(first, last);
+}
 
-//is_heap_until
+// pop_heap
+// 移除堆顶元素
+template<typename RandomIt>
+void pop_heap(RandomIt first, RandomIt last)
+{
+}
 
+// make_heap
+template<typename RandomIt>
+void make_heap(RandomIt start, RandomIt finish)
+{
+    make_heap(start, finish, less());
+}
+
+template<typename RandomIt, typename Compare>
+void make_heap(RandomIt start, RandomIt finish, Compare c)
+{
+    if (start == finish)
+        return;
+    // 计算length
+    size_t length = distance(start, finish);
+    // 插入并平衡
+    for (auto i = 1; i < length; ++i) {
+        percolate_up(
+                start,
+                start + i); // start+i位置为当前插入元素，默认在树尾部，开始上溯平衡
+    }
+}
+
+// sort_heap
+
+// is_heap
+
+// is_heap_until
 
 //=============最大最小操作=============
 // min_element
-//寻找范围 [first, last) 中的最小元素。
-
+// 寻找范围 [first, last) 中的最小元素。
 
 template<class ForwardIt>
 ForwardIt min_element(ForwardIt first, ForwardIt last)
@@ -1321,7 +1468,7 @@ ForwardIt min_element(ForwardIt first, ForwardIt last, Compare comp)
 }
 
 // min
-//返回给定值中的较小者。
+// 返回给定值中的较小者。
 template<typename T>
 const T& min(const T& a, const T& b)
 {
@@ -1331,24 +1478,26 @@ const T& min(const T& a, const T& b)
 template<typename T, typename Compare>
 const T& min(const T& a, const T& b, Compare comp)
 {
-    return (comp(b,a)) ? b : a;
+    return (comp(b, a)) ? b : a;
 }
 
 template<typename T>
-T min(std::initializer_list<T> ilist){
+T min(std::initializer_list<T> ilist)
+{
     return *min_element(ilist.begin(), ilist.end());
 }
 
 template<typename T, class Compare>
-T min(std::initializer_list<T> ilist, Compare comp){
+T min(std::initializer_list<T> ilist, Compare comp)
+{
     return *min_element(ilist.begin(), ilist.end(), comp);
 }
 
-
 // max_element
-//寻找范围 [first, last) 中的最大元素。
+// 寻找范围 [first, last) 中的最大元素。
 template<class ForwardIt>
-ForwardIt max_element(ForwardIt first, ForwardIt last){
+ForwardIt max_element(ForwardIt first, ForwardIt last)
+{
     ForwardIt res = first;
     while (first != last) {
         if (*first > *res)
@@ -1359,7 +1508,8 @@ ForwardIt max_element(ForwardIt first, ForwardIt last){
 }
 
 template<class ForwardIt, class Compare>
-ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp){
+ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp)
+{
     ForwardIt res = first;
     while (first != last) {
         if (comp(*res, *first))
@@ -1370,24 +1520,28 @@ ForwardIt max_element(ForwardIt first, ForwardIt last, Compare comp){
 }
 
 // max
-//返回给定值中的较大者。
+// 返回给定值中的较大者。
 template<class T>
-const T& max(const T& a, const T& b){
+const T& max(const T& a, const T& b)
+{
     return (a < b) ? b : a;
 }
 
 template<class T, class Compare>
-const T& max(const T& a, const T& b, Compare comp){
+const T& max(const T& a, const T& b, Compare comp)
+{
     return (comp(a, b)) ? b : a;
 }
 
 template<class T>
-T max(std::initializer_list<T> ilist){
+T max(std::initializer_list<T> ilist)
+{
     return *max_element(ilist.begin(), ilist.end());
 }
 
 template<class T, class Compare>
-T max(std::initializer_list<T> ilist, Compare comp){
+T max(std::initializer_list<T> ilist, Compare comp)
+{
     return *max_element(ilist.begin(), ilist.end(), comp);
 }
 

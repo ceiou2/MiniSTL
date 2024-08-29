@@ -265,24 +265,115 @@ private:
 
     type_erase* funcPtr;
 
+    //========================辅助函数模块==================
+    //release
+    //释放占有的资源
+    void release(){
+        if (funcPtr)
+            delete funcPtr; //调用容器析构函数，而非原可调用对象析构函数
+        funcPtr = nullptr;
+    }
+
 public:
+    //构造函数
     template<typename functor>
     function(functor f)
     {
         funcPtr = (new Container<functor>(f));
     }
 
+    //析构函数
     ~function(){
         if(funcPtr)
             delete funcPtr;//调用容器析构函数，而非原可调用对象析构函数
         funcPtr = nullptr;
     }
 
-    R operator()(Args... args)
+    //重载operator()运算符
+    R operator()(Args... args)const
     {
         // return funcPtr->call(std::forward<Args>(args)...);
         return funcPtr->call(args...);
     }
+
+    //重载operator=运算符
+    function& operator=(const function& other)
+    {
+        funcPtr = new Container<functor>(other.funcPtr->f);
+    }
+
+    function& operator=(function&& other)
+    {
+        funcPtr = other.funcPtr;
+        other.funcPtr = nullptr;//置空防止析构时释放空间
+    }
+
+    function& operator=(std::nullptr_t) {
+        release();//释放占有的资源
+        funcPtr = nullptr;
+    }
+
+    template<typename functor>
+    function& operator=(functor other_f)
+    {
+        type_erase* tmpptr = funcPtr;
+        funcPtr = new Container<functor>(other_f);
+        delete tmpptr;//释放原对象
+    }
+
+    template<typename functor>
+    function& operator=(functor&& other_f)
+    {
+        type_erase* tmpptr = funcPtr;
+        funcPtr = new Container<functor>(std::move(other_f));
+        delete tmpptr; //释放原对象
+    }
+
+    // swap
+    //交换*this 与 other 存储的可调用对象。
+    void swap(function& other){
+        std::swap(funcPtr, other.funcPtr);
+    }
+
+    // operator bool
+    operator bool()const{
+        if(funcPtr){
+            return true;
+        }
+        return false;
+    }
+
+
 };
+
+//========非成员函数模块==========
+template<typename R, typename... Args>
+void swap(std::function<R(Args...)> lhs,std::function<R(Args...)> rhs){
+    lhs.swap(rhs);
+}
+
+template<typename R, typename... Args>
+bool operator==(const std::function<R(Args...)>&f, std::nullptr_t)
+{
+    return f;
+}
+
+template<typename R, typename... Args>
+bool operator==(std::nullptr_t, const std::function<R(Args...)>& f)
+{
+    return f;
+}
+
+template<typename R, typename... Args>
+bool operator!=(const std::function<R(Args...)>& f, std::nullptr_t)
+{
+    return !f;
+}
+
+template<typename R, typename... Args>
+bool operator!=(std::nullptr_t, const std::function<R(Args...)>& f)
+{
+    return !f;
+}
 
 #endif

@@ -145,9 +145,9 @@ public:
     }
 };
 
-TEST(testFunction, function)
+TEST(testFunction, constructor)
 {
-    function<int(int, int)> func_add = add;
+    function<int(int, int)> func_add (add);
     EXPECT_EQ(func_add(2, 3), 5);
     function<int(int)> func_print = [](int a) -> int {
          return a;
@@ -156,7 +156,50 @@ TEST(testFunction, function)
     EXPECT_EQ(func_print(4), 4);
 
     EXPECT_EQ(func_mul(2, 5), 10);
-    //+++++++++++++++++++++++++++++++++++++++lambda还有问题here
+}
+
+TEST(testFunction, oper){
+    function<int(int, int)> func_add = add;
+    function<int(int, int)> func_add2 = std::move(func_add);
+    EXPECT_EQ(func_add2(2, 3), 5);
+    function<int(int, int)> func_add3 =func_add2;
+    EXPECT_EQ(func_add3(2, 3), 5);
+    EXPECT_TRUE(func_add);
+    function<int(int)> func;
+    EXPECT_FALSE(func);
+}
+
+TEST(testFunction, swap){
+    function<int(int, int)> func1 = add;
+    function<int(int, int)> func2 = [](int a, int b) -> int {
+        return a * b;
+    };
+    func1.swap(func2);
+    EXPECT_EQ(func1(2, 3), 6);
+    EXPECT_EQ(func2(2, 3), 5);
+}
+
+TEST(testFunctionNo_memberFunctions, swap){
+    function<int(int, int)> func1 = add;
+    function<int(int, int)> func2 = [](int a, int b) -> int {
+        return a * b;
+    };
+    swap(func1,func2);
+    EXPECT_EQ(func1(2, 3), 6);
+    EXPECT_EQ(func2(2, 3), 5);
+}
+
+TEST(testFunctionNo_memberFunctions, oper)
+{
+    function<int(int, int)> func1 = add;
+    function<int(int, int)> func2 = [](int a, int b) -> int {
+        return a * b;
+    };
+    function<int(int)> func;
+    EXPECT_TRUE(func1 != nullptr);
+    EXPECT_FALSE(func != nullptr);
+    EXPECT_TRUE(func == nullptr);
+    EXPECT_FALSE(func1 == nullptr);
 }
 
 int main(int argc, char** argv)

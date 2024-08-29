@@ -220,104 +220,11 @@ struct bit_xor
 //     }
 // };
 
-//++++++++++here function + bind，function还没有完全实现
-
-//类模板声明
-// template<typename>
-// class function;
-
-// template<typename R, typename... Args>
-// class function<R(Args...)>//函数签名
-// {
-//     private:
-//         using result_type = R;
-//         using FuncPtr = R (*)(Args...);
-
-//         FuncPtr functionPtr;
-
-//     public:
-//         // 默认构造函数
-//         function() = default;
-
-//         //构造函数接受一个函数指针
-//         function(FuncPtr ptr):functionPtr(ptr){}
-
-//         //重载调用操作符
-//         result_type operator()(Args... args){
-//             return (*functionPtr)(std::forward<Args>(args)...);
-//         }
-// };
-
-// //=================function===============
-// // function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
-// //主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
-// //已解决：// 这里是function的声明，也就是泛化版本，下面的是模板特化，要现有泛化版本，才能特化，当然了。
-// template<typename>
-// class function;
-
-// template<typename R, typename... Args>
-// class function<R(Args...)>
-// {
-// private:
-//     //接口类：其指针储存在function类中，利用虚基类的动态联编特性为function提供类型擦除模块
-//     class type_erase
-//     {
-//     public:
-//         virtual ~type_erase() {}
-//         virtual R call(
-//                 Args...) = 0; //用于调用容器类中的可调用对象，由容器类实现
-//     };
-
-//     //容器类：继承接口类，将实际的对象储存，为function提供真正的调用内容
-//     template<typename functor>
-//     class Container: public type_erase
-//     {
-//     private:
-//         functor RealPtr; //函数指针或者函数对象!!!!!!
-
-//     public:
-//         //构造函数，用于储存指向可调用对象的指针
-//         Container(functor funcptr)
-//         {
-//             RealPtr = std::move(funcptr);
-//         }
-
-//         R call(Args... args) override
-//         {
-//             // return (*RealPtr)(std::forward(args)...);
-//             return RealPtr(args...);
-//         }
-
-//         //析构函数
-//         ~Container() {}
-//     };
-
-//     type_erase funcPtr;
-
-// public:
-//     template<typename functor>
-//     function(functor f)
-//     {
-//         funcPtr = (new Container<functor>(std::move(f)));
-//     }
-
-//     // ~function(){
-//     //     if(funcPtr)
-//     //         delete funcPtr;//调用容器析构函数，而非原可调用对象析构函数
-//     //     funcPtr = nullptr;
-//     // }
-
-//     R operator()(Args... args)
-//     {
-//         // return funcPtr->call(std::forward<Args>(args)...);
-//         return funcPtr->call(args...);
-//     }
-// };
+//++++++++++here function + bind还没有完全实现
 
 //=================function===============
 // function类：用户API，通过接口类(type_earse)的指针添加、删除、调用容器类(Container)中储存的可调用对象
-//主模板+++++++++++++++++++++++++here暂时没清楚其原理，不加这个会报错说主模板错误，按部就班抄csdn上的解决办法
-//已解决：//
+//主模板
 //这里是function的声明，也就是泛化版本，下面的是模板特化，要现有泛化版本，才能特化，当然了。
 template<typename>
 class function;
@@ -344,7 +251,7 @@ private:
 
     public:
         //构造函数，用于储存指向可调用对象的指针
-        Container(functor fu):f(fu){}
+        Container(functor fu): f(fu) {}
 
         R call(Args... args)
         {
@@ -357,24 +264,153 @@ private:
 
     type_erase* funcPtr;
 
+    //========================辅助函数模块==================
+    // release
+    //释放占有的资源
+    void release()
+    {
+        if (funcPtr)
+            delete funcPtr; //调用容器析构函数，而非原可调用对象析构函数
+        funcPtr = nullptr;
+    }
+
 public:
+    //构造函数
+    function()
+    {
+        funcPtr = nullptr;
+    }
+
+    function(std::nullptr_t)
+    {
+        funcPtr = nullptr;
+    }
+
+    template<typename functor>
+    function(functor&& f)
+    {
+        funcPtr = new Container<functor>(f);
+    }
+
     template<typename functor>
     function(functor f)
     {
-        funcPtr = (new Container<functor>(f));
+        funcPtr = new Container<functor>(f);
     }
 
-    // ~function(){
-    //     if(funcPtr)
-    //         delete funcPtr;//调用容器析构函数，而非原可调用对象析构函数
-    //     funcPtr = nullptr;
+    //复制构造函数：+++++++++++++++here目前是浅拷贝
+    // function(function other)
+    // {
+    //     funcPtr = other.ptr;
     // }
 
-    R operator()(Args... args)
+    //移动构造函数
+    function(function&& other)
+    {
+        funcPtr = other.funcPtr;
+        other.funcPtr = nullptr; //置空防止析构时释放空间
+    }
+
+    //析构函数
+    ~function()
+    {
+        if (funcPtr)
+            delete funcPtr; //调用容器析构函数，而非原可调用对象析构函数
+        funcPtr = nullptr;
+    }
+
+    //重载operator()运算符
+    R operator()(Args... args) const
     {
         // return funcPtr->call(std::forward<Args>(args)...);
         return funcPtr->call(args...);
     }
+
+    //重载operator=运算符+++++++++++++here目前是浅拷贝
+    // function& operator=(function other)
+    // {
+    //     release();
+    //     funcPtr = other.funcPtr;
+    //     return *this;
+    // }
+
+    function& operator=(function&& other)
+    {
+        release();
+        funcPtr = other.funcPtr;
+        other.funcPtr = nullptr; //置空防止析构时释放空间
+        return *this;
+    }
+
+    function& operator=(std::nullptr_t)
+    {
+        release(); //释放占有的资源
+        funcPtr = nullptr;
+        return *this;
+    }
+
+    template<typename functor>
+    function& operator=(const functor& other_f)
+    {
+        release();
+        funcPtr = new Container<functor>(other_f);
+        return *this;
+    }
+
+    template<typename functor>
+    function& operator=(functor&& other_f)
+    {
+        release();
+        funcPtr = new Container<functor>(std::move(other_f));
+        return *this;
+    }
+
+    // swap
+    //交换*this 与 other 存储的可调用对象。
+    void swap(function& other)
+    {
+        std::swap(funcPtr, other.funcPtr);
+    }
+
+    // operator bool
+    operator bool() const
+    {
+        if (funcPtr) {
+            return true;
+        }
+        return false;
+    }
 };
+
+//========非成员函数模块==========
+template<typename R, typename... Args>
+void swap(function<R(Args...)> lhs, function<R(Args...)> rhs)
+{
+    lhs.swap(rhs);
+}
+
+template<typename R, typename... Args>
+bool operator==(const function<R(Args...)>& f, nullptr_t)
+{
+    return f;
+}
+
+template<typename R, typename... Args>
+bool operator==(nullptr_t, const function<R(Args...)>& f)
+{
+    return f;
+}
+
+template<typename R, typename... Args>
+bool operator!=(const function<R(Args...)>& f, nullptr_t)
+{
+    return !f;
+}
+
+template<typename R, typename... Args>
+bool operator!=(nullptr_t, const function<R(Args...)>& f)
+{
+    return !f;
+}
 
 #endif
