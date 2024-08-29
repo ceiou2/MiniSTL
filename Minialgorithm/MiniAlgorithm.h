@@ -114,10 +114,10 @@ void _sort(RandomIt first, RandomIt last, int depth, Compare comp)
 
 // percolate_up
 // 上溯平衡操作:[first,finish]
-template<typename iterator>
-void percolate_up(
-        iterator first,
-        iterator finish) // 其中first是根节点，finish是插入节点
+template<typename iterator, typename Compare>
+void percolate_up(iterator first,
+                  iterator finish,
+                  Compare comp;) // 其中first是根节点，finish是插入节点
 {
     auto cur_index =
             distance(first, finish) + 1; // 堆的序号由1开始数，所以是distance+1
@@ -132,6 +132,36 @@ void percolate_up(
     }
 }
 
+// percolate_down
+//  下滤平衡操作:[first, finish]
+template<typename iterator, typename Compare>
+void percolate_down(iterator first, iterator finish, Compare comp)
+{
+    auto cur_index = 1;
+    auto length = distance(first, finish) + 1;
+    auto left_child_index = cur_index * 2;
+    auto right_child_index = left_child_index + 1;
+    while (left_child_index <= length || right_child_index <= length) {
+        auto left_child_index = cur_index * 2;
+        auto right_child_index = left_child_index + 1;
+        auto max_child_index = left_child_index;
+        if (left_child_index > length) {
+            max_child_index = right_child_index;
+            if (!comp(*(first), *())) {
+                swap()
+            }
+        }
+        if (right_child_index > length) {
+            max_child_index = left_child_index;
+        }
+        if (comp(*(first + left_child_index - 1),
+                 *(first + right_child_index - 1))) {
+            max_child_index = right_child_index;
+        } else {
+            max_child_index = left_child_index;
+        }
+    }
+}
 // less
 // less函数对象
 struct less
@@ -1398,10 +1428,10 @@ public:
 // push_heap
 // 将last-1插入到[first,last-1)当中
 template<typename RandomIt, typename Compare>
-void push_heap(RandomIt first, RandomIt last)
+void push_heap(RandomIt first, RandomIt last, Compare comp)
 {
     last = get_prev(first, last);
-    percolate_up(first, last);
+    percolate_up(first, last, comp);
 }
 
 // pop_heap
@@ -1409,6 +1439,16 @@ void push_heap(RandomIt first, RandomIt last)
 template<typename RandomIt>
 void pop_heap(RandomIt first, RandomIt last)
 {
+    pop_heap(first, last, less());
+}
+
+template<typename RandomIt, typename Compare>
+void pop_heap(RandomIt first, RandomIt last, Compare comp)
+{
+    last = get_prev(first, last);
+    // 交换首位元素并下滤
+    swap(*first, *last);
+    percolate_down(first, --last);
 }
 
 // make_heap
@@ -1428,8 +1468,8 @@ void make_heap(RandomIt start, RandomIt finish, Compare c)
     // 插入并平衡
     for (auto i = 1; i < length; ++i) {
         percolate_up(
-                start,
-                start + i); // start+i位置为当前插入元素，默认在树尾部，开始上溯平衡
+                start, start + i,
+                c); // start+i位置为当前插入元素，默认在树尾部，开始上溯平衡
     }
 }
 
